@@ -6,6 +6,7 @@ import {
   permessoSigaretta,
   sigarettaDaRiprendere,
   sigarettaInCorso,
+  spegnimentoDaAnimare,
   testoTimer,
 } from '../src/core/sigaretta';
 import { giornata, h } from './helpers';
@@ -59,6 +60,52 @@ describe('countdown', () => {
     const c = countdown(0, 0);
     expect(c.consumata).toBe(1);
     expect(testoTimer(countdown(2000, 0))).toBe('+00:02');
+  });
+});
+
+describe('fasi della schermata', () => {
+  const s = 1000;
+  const tolleranza = 11 * 60_000;
+
+  it('accesa finché mancano più di 30 secondi', () => {
+    expect(countdown(0, 11).fase).toBe('accesa');
+    expect(countdown(tolleranza - 30 * s - 1, 11).fase).toBe('accesa');
+  });
+
+  it('ultimi negli ultimi 30 secondi, compresa la tolleranza esatta', () => {
+    expect(countdown(tolleranza - 30 * s, 11).fase).toBe('ultimi');
+    expect(testoTimer(countdown(tolleranza - 30 * s, 11))).toBe('00:30');
+    expect(countdown(tolleranza, 11).fase).toBe('ultimi');
+  });
+
+  it('scaduta oltre la tolleranza, insieme all\'esito del rientro', () => {
+    const c = countdown(tolleranza + 1, 11);
+    expect(c.fase).toBe('scaduta');
+    expect(c.scaduta).toBe(true);
+  });
+
+  it('con tolleranza 1 min il lampeggio parte a metà', () => {
+    expect(countdown(29 * s, 1).fase).toBe('accesa');
+    expect(countdown(30 * s, 1).fase).toBe('ultimi');
+  });
+
+  it('con tolleranza 0 è scaduta da subito', () => {
+    expect(countdown(0, 0).fase).toBe('scaduta');
+    expect(countdown(2000, 0).fase).toBe('scaduta');
+  });
+});
+
+describe('sequenza di spegnimento', () => {
+  it('parte quando la pausa scade con la schermata aperta', () => {
+    expect(spegnimentoDaAnimare('accesa', 'scaduta')).toBe(true);
+    expect(spegnimentoDaAnimare('ultimi', 'scaduta')).toBe(true);
+  });
+
+  it('non parte aprendo la schermata già scaduta, né di nuovo ai secondi successivi', () => {
+    expect(spegnimentoDaAnimare(null, 'scaduta')).toBe(false);
+    expect(spegnimentoDaAnimare('scaduta', 'scaduta')).toBe(false);
+    expect(spegnimentoDaAnimare('accesa', 'ultimi')).toBe(false);
+    expect(spegnimentoDaAnimare(null, 'accesa')).toBe(false);
   });
 });
 
