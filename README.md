@@ -58,6 +58,11 @@ nuova versione, viene scaricata in background e applicata alla successiva apertu
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
   Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
   permesso a blocchi di 30 min.
+- **Permesso in uscita**: se sai già che uscirai prima, tocca *+ Permesso in uscita* e indica la
+  durata: l'uscita prevista si anticipa. Quando esci usa *Uscita*: conta il permesso che manca
+  davvero, a blocchi di 30 min.
+- **Pausa dimenticata**: passata la fascia pranzo senza pausa registrata, in *Oggi* compare un
+  riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
 - **Storico**: le giornate del mese con lavorate, permesso e saldo, più il riepilogo mensile
@@ -81,7 +86,9 @@ nuova versione, viene scaricata in background e applicata alla successiva apertu
 | Pausa pranzo | non conta come coperta |
 | Permesso a metà giornata | conta come coperto |
 | Pausa sigaretta | entro la tolleranza (11 min) viene cancellata; oltre vale permesso a blocchi di 30 min (15 min → 30 min, 42 min → 1h), le ore coperte non cambiano e non diventa mai pausa pranzo |
-| Uscita anticipata | le ore mancanti diventano permesso (saldo 0) |
+| Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
+| Permessi | ogni permesso vale un multiplo di 30 min (1h23 → 1h30); i minuti in più non contano come lavorate, il saldo non cambia |
+| Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
 | Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 60 min diventano pausa; al rientro l'app mostra la ripartizione proposta (es. "1h pausa + 1h30 permesso"), che puoi modificare prima di confermare |
 
 Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
@@ -92,7 +99,7 @@ e calcola i totali ignorando gli eventi incoerenti.
 
 Il CSV usa `;` come separatore e la virgola per i decimali, con BOM UTF-8: si apre
 direttamente con Excel in italiano. Contiene una riga per giorno (ore dovute, lavorate,
-permesso, saldo in ore decimali e l'elenco delle timbrature). Su iPhone e Android si apre il foglio
+permesso, saldo in ore decimali, i permessi a inizio giornata e in uscita e l'elenco delle timbrature). Su iPhone e Android si apre il foglio
 di condivisione (Mail, File, Drive, WhatsApp…); dove la condivisione non è disponibile il file
 viene scaricato. Lo stesso CSV si può reimportare: le giornate presenti vengono
 sovrascritte, le impostazioni restano invariate.
