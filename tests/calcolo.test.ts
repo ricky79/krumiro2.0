@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { anteprimaSigaretta, calcolaGiornata, propostaRientro } from '../src/core/calcolo';
 import { formattaOra } from '../src/core/tempo';
 import { giornata, h, impostazioni, SABATO } from './helpers';
-import type { Giornata } from '../src/core/tipi';
+import type { Giornata, TipoEvento } from '../src/core/tipi';
 
 const imp = impostazioni();
 const uscita = (r: { uscitaPrevista: number | null }) =>
@@ -656,6 +656,65 @@ describe('permessi a blocchi da 30 min', () => {
     ]);
     const r = calcolaGiornata(g, impostazioni({ minutiDovuti: { predefinito: 432, perGiorno: [0, null, null, null, null, null, 0] } }), null);
     expect(r.permessoUscita).toBe(432);
+    expect(r.saldo).toBe(0);
+  });
+});
+
+describe('permesso in uscita pianificato', () => {
+  const pausaFatta = (): [TipoEvento, string][] => [
+    ['ENTRATA', '08:30'],
+    ['INIZIO_PAUSA', '12:30'],
+    ['FINE_PAUSA', '13:30'],
+  ];
+
+  it('anticipa l\'uscita prevista', () => {
+    const r = calcolaGiornata(giornata(pausaFatta(), { permessoUscita: 30 }), imp, h('14:00'));
+    expect(uscita(r)).toBe('17:00');
+    expect(r.uscitaPrevistaConPermesso).toBe(true);
+    expect(r.permessoUscitaPianificato).toBe(30);
+  });
+
+  it('con la pausa ancora da fare la pausa si aggiunge dopo la sottrazione', () => {
+    const r = calcolaGiornata(giornata([['ENTRATA', '08:30']], { permessoUscita: 30 }), imp, h('10:00'));
+    expect(uscita(r)).toBe('17:00');
+    expect(r.uscitaPrevistaConPausa).toBe(true);
+  });
+
+  it('in pausa: uscita se rientri ora, meno il pianificato', () => {
+    const g = giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '12:30']], { permessoUscita: 30 });
+    expect(uscita(calcolaGiornata(g, imp, h('12:40')))).toBe('16:30');
+  });
+
+  it('uscendo con Uscita conta il permesso che manca davvero, a blocchi', () => {
+    const casi: [string, number, number][] = [
+      ['17:00', 30, 0],
+      ['16:45', 60, 0],
+      ['17:15', 30, 0],
+      ['17:45', 0, 15],
+    ];
+    for (const [ora, permesso, saldo] of casi) {
+      const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', ora]], { permessoUscita: 30 }), imp, null);
+      expect(r.permessoUscita, ora).toBe(permesso);
+      expect(r.saldo, ora).toBe(saldo);
+    }
+  });
+
+  it('senza permesso pianificato l\'uscita normale non genera permesso', () => {
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', '17:00']]), imp, null);
+    expect(r.permessoUscita).toBe(0);
+    expect(r.saldo).toBe(-30);
+    expect(r.uscitaPrevistaConPermesso).toBe(false);
+  });
+
+  it('con uscita anticipata il pianificato non conta', () => {
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA_ANTICIPATA', '16:45']], { permessoUscita: 30 }), imp, null);
+    expect(r.permessoUscita).toBe(60);
+  });
+
+  it('pianificato più lungo delle ore rimaste: uscita prevista già passata, all\'uscita conta il mancante reale', () => {
+    expect(uscita(calcolaGiornata(giornata(pausaFatta(), { permessoUscita: 240 }), imp, h('14:00')))).toBe('13:30');
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', '14:00']], { permessoUscita: 240 }), imp, null);
+    expect(r.permessoUscita).toBe(210);
     expect(r.saldo).toBe(0);
   });
 });

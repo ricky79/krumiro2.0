@@ -51,6 +51,7 @@ export function calcolaGiornata(
   const intervalli: Intervallo[] = [];
   let aperto: { tipo: TipoIntervallo; da: number; sigaretta?: boolean } | null = null;
   let anticipata = false;
+  let uscitaNormale = false;
   let pausaRegistrata = false;
 
   const chiudi = (a: number, extra: Partial<Intervallo> = {}) => {
@@ -85,6 +86,7 @@ export function calcolaGiornata(
         break;
       case 'USCITA':
         chiudi(t);
+        uscitaNormale = true;
         break;
       case 'USCITA_ANTICIPATA':
         chiudi(t);
@@ -202,11 +204,16 @@ export function calcolaGiornata(
   permessoInizio = riduci(permessoInizio);
   let lavorati = lavoroNetto - eccedenzaApplicata;
 
-  // 4. Totali. Uscita anticipata: il permesso in uscita è quello che manca davvero, a blocchi
-  //    (l'eccedenza esce dalle lavorate rimaste, le coperte arrivano alle dovute).
+  // 4. Totali. Uscita anticipata, o uscita normale con un permesso pianificato: il permesso in
+  //    uscita è quello che manca davvero, a blocchi (l'eccedenza esce dalle lavorate rimaste,
+  //    le coperte arrivano alle dovute).
   const dovuti = minutiDovuti(giornata.data, imp);
+  const pianificato =
+    Number.isFinite(giornata.permessoUscitaMinuti) && giornata.permessoUscitaMinuti > 0
+      ? giornata.permessoUscitaMinuti
+      : 0;
   let permessoUscita = 0;
-  if (anticipata) {
+  if (anticipata || (uscitaNormale && pianificato > 0)) {
     const mancante = Math.max(0, dovuti - (lavorati + permessoInizio + permessoIntermedio));
     const eccedenzaUscita = Math.min(permessoABlocchi(mancante) - mancante, lavorati);
     permessoUscita = mancante + eccedenzaUscita;
@@ -215,12 +222,12 @@ export function calcolaGiornata(
   const coperti = lavorati + permessoInizio + permessoIntermedio + permessoUscita;
   const pausaFatta = pausaRegistrata || pausaScalata > 0;
 
-  // 5. Uscita prevista.
+  // 5. Uscita prevista (anticipata dal permesso in uscita pianificato).
   let uscitaPrevista: number | null = null;
   let uscitaPrevistaConPausa = false;
   if (adesso !== null && analisi.stato === 'AL_LAVORO') {
     const ora = conta(adesso);
-    uscitaPrevista = ora + (dovuti - coperti);
+    uscitaPrevista = ora + (dovuti - coperti - pianificato);
     if (!pausaFatta && ora < imp.pranzo.fine && uscitaPrevista > imp.pranzo.fine) {
       uscitaPrevista += imp.pausaDaScalare;
       uscitaPrevistaConPausa = true;
@@ -229,8 +236,9 @@ export function calcolaGiornata(
     const pausaInCorso = intervalli.find((i) => i.tipo === 'pausa' && i.aperto);
     const ora = conta(adesso);
     const rientro = pausaInCorso ? Math.max(ora, pausaInCorso.da + imp.pausaMinima) : ora;
-    uscitaPrevista = rientro + (dovuti - coperti);
+    uscitaPrevista = rientro + (dovuti - coperti - pianificato);
   }
+  const uscitaPrevistaConPermesso = uscitaPrevista !== null && pianificato > 0;
 
   return {
     stato: analisi.stato,
@@ -248,6 +256,8 @@ export function calcolaGiornata(
     saldo: coperti - dovuti,
     uscitaPrevista,
     uscitaPrevistaConPausa,
+    uscitaPrevistaConPermesso,
+    permessoUscitaPianificato: pianificato,
     pausaFatta,
     ripartizioni,
     sigarette,

@@ -145,6 +145,10 @@ export interface RisultatoGiornata {
   uscitaPrevista: number | null;
   /** True se l'uscita prevista include la pausa pranzo non ancora fatta. */
   uscitaPrevistaConPausa: boolean;
+  /** True se l'uscita prevista è anticipata dal permesso in uscita pianificato. */
+  uscitaPrevistaConPermesso: boolean;
+  /** Minuti del permesso in uscita pianificato della giornata. */
+  permessoUscitaPianificato: number;
   pausaFatta: boolean;
   ripartizioni: Ripartizione[];
   sigarette: PermessoSigaretta[];
