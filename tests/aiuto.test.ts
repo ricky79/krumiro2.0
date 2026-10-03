@@ -43,6 +43,14 @@ describe('aiuto', () => {
     expect(testo('normale')).toContain('normale o elettronica');
   });
 
+  it('spiega permessi a blocchi, permesso in uscita e pausa dimenticata', () => {
+    const testo = (id: string) => voci.find((v) => v.id === id)!.testo.join(' ');
+    expect(voci.find((v) => v.id === 'permesso-uscita')).toBeDefined();
+    expect(testo('ore-coperte')).toContain('multiplo di 30 min');
+    expect(testo('pausa')).toContain('12:15');
+    expect(testo('uscita-prevista')).toContain('permesso in uscita');
+  });
+
   it('la ricerca ignora maiuscole e accenti e richiede tutte le parole', () => {
     expect(filtraAiuto(voci, 'USCITA anticipata').map((v) => v.id)).toContain('permesso-vs-anticipata');
     expect(filtraAiuto(voci, 'perche entrata').map((v) => v.id)).toContain('orario-minimo');

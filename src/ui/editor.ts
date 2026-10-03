@@ -1,5 +1,6 @@
 import { calcolaGiornata } from '../core/calcolo';
 import { nuovoId } from '../core/id';
+import { BLOCCO_PERMESSO, permessoABlocchi } from '../core/permessi';
 import { formattaDurata } from '../core/tempo';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type Evento, type Ripartizione, type TipoEvento } from '../core/tipi';
 import { store } from '../storage/store';
@@ -101,7 +102,7 @@ function trovaRipartizione(data: string, eventoId: string): Ripartizione | undef
 /** Imposta il permesso a inizio giornata; opzionalmente registra anche l'entrata. */
 export async function editorPermessoInizio(data: string, entrataAdesso: number | null): Promise<void> {
   const attuale = store.giornata(data).permessoInizioMinuti;
-  const durata = campoDurata('Durata del permesso', attuale || 60, { passo: 15, max: 12 * 60 });
+  const durata = campoDurata('Durata del permesso', attuale || 60, { passo: BLOCCO_PERMESSO, max: 12 * 60 });
   const preset = el(
     'div',
     { class: 'preset' },
@@ -141,6 +142,50 @@ export async function editorPermessoInizio(data: string, entrataAdesso: number |
   }
   pulsanti.push({ etichetta: 'Annulla' });
   await apriFoglio('Entro dopo', contenuto, pulsanti);
+}
+
+/** Imposta il permesso in uscita pianificato: anticipa l'uscita prevista. */
+export async function editorPermessoUscita(data: string): Promise<void> {
+  const attuale = store.giornata(data).permessoUscitaMinuti;
+  const durata = campoDurata('Durata del permesso', attuale || BLOCCO_PERMESSO, {
+    passo: BLOCCO_PERMESSO,
+    min: BLOCCO_PERMESSO,
+    max: 12 * 60,
+  });
+  const preset = el(
+    'div',
+    { class: 'preset' },
+    [30, 60, 90, 120].map((m) =>
+      el('button', { type: 'button', class: 'chip', onclick: () => durata.imposta(m) }, formattaDurata(m)),
+    ),
+  );
+  const contenuto = el(
+    'div',
+    { class: 'modulo' },
+    el(
+      'p',
+      { class: 'nota' },
+      'Ore di permesso per uscire prima: l\'uscita prevista si anticipa. All\'uscita conta il permesso che manca davvero, a blocchi di 30 min.',
+    ),
+    preset,
+    durata.elemento,
+  );
+  const pulsanti: PulsanteFoglio[] = [
+    {
+      etichetta: 'Salva',
+      stile: 'primario',
+      azione: () => store.modificaGiornata(data, (g) => void (g.permessoUscitaMinuti = permessoABlocchi(durata.leggi()))),
+    },
+  ];
+  if (attuale > 0) {
+    pulsanti.push({
+      etichetta: 'Rimuovi permesso',
+      stile: 'pericolo',
+      azione: () => store.modificaGiornata(data, (g) => void (g.permessoUscitaMinuti = 0)),
+    });
+  }
+  pulsanti.push({ etichetta: 'Annulla' });
+  await apriFoglio('Permesso in uscita', contenuto, pulsanti);
 }
 
 /**

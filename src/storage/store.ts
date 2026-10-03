@@ -66,14 +66,14 @@ class Store {
   }
 
   giornata(data: string): Giornata {
-    return this.dati.giornate[data] ?? { data, permessoInizioMinuti: 0, eventi: [] };
+    return this.dati.giornate[data] ?? { data, permessoInizioMinuti: 0, permessoUscitaMinuti: 0, eventi: [] };
   }
 
   /** Applica una modifica alla giornata (creandola se serve) e salva. */
   modificaGiornata(data: string, modifica: (g: Giornata) => void): void {
     const g = structuredClone(this.giornata(data));
     modifica(g);
-    if (g.eventi.length === 0 && g.permessoInizioMinuti === 0) delete this.dati.giornate[data];
+    if (g.eventi.length === 0 && g.permessoInizioMinuti === 0 && g.permessoUscitaMinuti === 0) delete this.dati.giornate[data];
     else this.dati.giornate[data] = g;
     this.salva();
   }

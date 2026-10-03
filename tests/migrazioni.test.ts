@@ -73,6 +73,17 @@ describe('migrazioni', () => {
     expect(tolleranza('11')).toBe(11);
   });
 
+  it('permesso in uscita pianificato: predefinito 0, valori non validi scartati', () => {
+    const permesso = (v: unknown) =>
+      migra({ version: 1, giornate: { '2026-10-01': { data: '2026-10-01', permessoInizioMinuti: 0, permessoUscitaMinuti: v, eventi: [] } } })
+        .giornate['2026-10-01']!.permessoUscitaMinuti;
+    expect(permesso(undefined)).toBe(0);
+    expect(permesso(60)).toBe(60);
+    expect(permesso(-30)).toBe(0);
+    expect(permesso(7.5)).toBe(0);
+    expect(permesso('30')).toBe(0);
+  });
+
   it('tipo di sigaretta: predefinito normale, valori sconosciuti scartati', () => {
     const tipo = (v: unknown) => migra({ version: 1, impostazioni: { tipoSigaretta: v } }).impostazioni.tipoSigaretta;
     expect(migra({}).impostazioni.tipoSigaretta).toBe('normale');

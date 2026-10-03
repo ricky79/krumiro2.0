@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { anteprimaSigaretta, calcolaGiornata, propostaRientro } from '../src/core/calcolo';
 import { formattaOra } from '../src/core/tempo';
 import { giornata, h, impostazioni, SABATO } from './helpers';
-import type { Giornata } from '../src/core/tipi';
+import type { Giornata, TipoEvento } from '../src/core/tipi';
 
 const imp = impostazioni();
 const uscita = (r: { uscitaPrevista: number | null }) =>
@@ -259,7 +259,8 @@ describe('permesso a ridosso del pranzo', () => {
     ]);
     const r = calcolaGiornata(g, imp, h('15:00'));
     expect(r.ripartizioni.map((x) => x.pausa)).toEqual([45, 15]);
-    expect(r.permessoIntermedio).toBe(0 + 45);
+    // Seconda uscita: 45 min di permesso reale → 1h (blocchi).
+    expect(r.permessoIntermedio).toBe(0 + 60);
   });
 
   it('propostaRientro simula il rientro prima di registrarlo', () => {
@@ -447,9 +448,11 @@ describe('pausa sigaretta', () => {
     const eventi: Parameters<typeof giornata>[0] = [['USCITA_PERMESSO', '15:00'], ['RIENTRO_PERMESSO', '15:15'], ['USCITA', '17:30']];
     const normale = calcolaGiornata(conPausa(eventi), imp, null);
     const r = calcolaGiornata(conSigaretta(conPausa(eventi)), imp, null);
-    expect(normale.permesso).toBe(15);
+    // Anche un permesso normale vale blocchi da 30 (#12): stesso conteggio della sigaretta.
+    expect(normale.permesso).toBe(30);
     expect(r.permesso).toBe(30);
-    expect(r.lavorati).toBe(normale.lavorati - 15);
+    // Lavoro reale 465 min (08:30–12:30, 13:30–15:00, 15:15–17:30), meno l'eccedenza di 15.
+    expect(r.lavorati).toBe(465 - 15);
     expect(r.coperti).toBe(normale.coperti);
     expect(r.saldo).toBe(0);
     expect(r.sigarette).toEqual([
@@ -538,5 +541,180 @@ describe('pausa sigaretta', () => {
     expect(anteprimaSigaretta(g, imp, h('10:20'))).toMatchObject({ durata: 20, permesso: 30 });
     expect(anteprimaSigaretta(g, imp, h('10:31'))).toMatchObject({ durata: 31, permesso: 60 });
     expect(anteprimaSigaretta(giornata([['ENTRATA', '08:30'], ['USCITA_PERMESSO', '10:00']]), imp, h('10:20'))).toBeNull();
+  });
+});
+
+describe('permessi a blocchi da 30 min', () => {
+  it('uscita anticipata con 1h23 mancanti → 1h30 di permesso, lavorate −7, saldo 0', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['INIZIO_PAUSA', '12:30'],
+      ['FINE_PAUSA', '13:30'],
+      ['USCITA_ANTICIPATA', '16:07'],
+    ]);
+    const r = calcolaGiornata(g, imp, null);
+    expect(r.permessoUscita).toBe(90);
+    expect(r.lavorati).toBe(397 - 7);
+    expect(r.coperti).toBe(480);
+    expect(r.saldo).toBe(0);
+  });
+
+  it('permesso intermedio di 40 min → 1h, lavorate −20, coperte invariate', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '10:00'],
+      ['RIENTRO_PERMESSO', '10:40'],
+      ['INIZIO_PAUSA', '12:30'],
+      ['FINE_PAUSA', '13:30'],
+      ['USCITA', '17:30'],
+    ]);
+    const r = calcolaGiornata(g, imp, null);
+    expect(r.permessoIntermedio).toBe(60);
+    expect(r.lavorati).toBe(440 - 20);
+    expect(r.coperti).toBe(480);
+    expect(r.saldo).toBe(0);
+    expect(r.permessiIntermedi).toEqual([
+      { eventoRientroId: g.eventi[2]!.id, da: h('10:00'), a: h('10:40'), durata: 40, permesso: 60 },
+    ]);
+  });
+
+  it('due permessi da 20 min valgono 30 + 30', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '10:00'],
+      ['RIENTRO_PERMESSO', '10:20'],
+      ['USCITA_PERMESSO', '11:00'],
+      ['RIENTRO_PERMESSO', '11:20'],
+    ]);
+    const r = calcolaGiornata(g, imp, h('12:00'));
+    expect(r.permessoIntermedio).toBe(60);
+    expect(r.permessiIntermedi.map((p) => p.permesso)).toEqual([30, 30]);
+    expect(r.lavorati).toBe(170 - 20);
+  });
+
+  it('permesso a inizio giornata di 40 min → 1h, lavorate −20, uscita invariata', () => {
+    const g = giornata(
+      [
+        ['ENTRATA', '09:10'],
+        ['INIZIO_PAUSA', '12:30'],
+        ['FINE_PAUSA', '13:30'],
+      ],
+      { permessoInizio: 40 },
+    );
+    const r = calcolaGiornata(g, imp, h('14:00'));
+    expect(r.permessoInizio).toBe(60);
+    expect(r.permessoInizioDichiarato).toBe(40);
+    expect(r.lavorati).toBe(230 - 20);
+    expect(uscita(r)).toBe('17:30');
+  });
+
+  it('permesso a inizio giornata con poco lavoro: le coperte non superano tempo + dichiarato', () => {
+    const g = giornata([['ENTRATA', '09:10']], { permessoInizio: 40 });
+    const r = calcolaGiornata(g, imp, h('09:15'));
+    expect(r.lavorati).toBe(0);
+    expect(r.coperti).toBe(45);
+  });
+
+  it('con la pausa pranzo di mezzo si arrotonda la sola parte di permesso', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '12:00'],
+      ['RIENTRO_PERMESSO', '14:10'],
+    ]);
+    const r = calcolaGiornata(g, imp, h('15:00'));
+    expect(r.ripartizioni[0]).toMatchObject({ pausa: 60, permesso: 70 });
+    expect(r.permessiIntermedi[0]).toMatchObject({ durata: 70, permesso: 90 });
+    expect(r.permessoIntermedio).toBe(90);
+    expect(r.lavorati).toBe(210 + 50 - 20);
+  });
+
+  it('un permesso in corso conta il tempo reale', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '10:00'],
+    ]);
+    const r = calcolaGiornata(g, imp, h('10:40'));
+    expect(r.permessoIntermedio).toBe(40);
+    expect(r.permessiIntermedi).toEqual([]);
+  });
+
+  it('se il lavoro non basta ad assorbire l\'eccedenza le coperte non superano il tempo trascorso', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '08:35'],
+      ['RIENTRO_PERMESSO', '08:45'],
+    ]);
+    const r = calcolaGiornata(g, imp, h('08:50'));
+    expect(r.lavorati).toBe(0);
+    expect(r.coperti).toBe(20);
+  });
+
+  it('con ore dovute non multiple di 30 l\'uscita anticipata non supera le dovute', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_ANTICIPATA', '08:30'],
+    ]);
+    const r = calcolaGiornata(g, impostazioni({ minutiDovuti: { predefinito: 432, perGiorno: [0, null, null, null, null, null, 0] } }), null);
+    expect(r.permessoUscita).toBe(432);
+    expect(r.saldo).toBe(0);
+  });
+});
+
+describe('permesso in uscita pianificato', () => {
+  const pausaFatta = (): [TipoEvento, string][] => [
+    ['ENTRATA', '08:30'],
+    ['INIZIO_PAUSA', '12:30'],
+    ['FINE_PAUSA', '13:30'],
+  ];
+
+  it('anticipa l\'uscita prevista', () => {
+    const r = calcolaGiornata(giornata(pausaFatta(), { permessoUscita: 30 }), imp, h('14:00'));
+    expect(uscita(r)).toBe('17:00');
+    expect(r.uscitaPrevistaConPermesso).toBe(true);
+    expect(r.permessoUscitaPianificato).toBe(30);
+  });
+
+  it('con la pausa ancora da fare la pausa si aggiunge dopo la sottrazione', () => {
+    const r = calcolaGiornata(giornata([['ENTRATA', '08:30']], { permessoUscita: 30 }), imp, h('10:00'));
+    expect(uscita(r)).toBe('17:00');
+    expect(r.uscitaPrevistaConPausa).toBe(true);
+  });
+
+  it('in pausa: uscita se rientri ora, meno il pianificato', () => {
+    const g = giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '12:30']], { permessoUscita: 30 });
+    expect(uscita(calcolaGiornata(g, imp, h('12:40')))).toBe('16:30');
+  });
+
+  it('uscendo con Uscita conta il permesso che manca davvero, a blocchi', () => {
+    const casi: [string, number, number][] = [
+      ['17:00', 30, 0],
+      ['16:45', 60, 0],
+      ['17:15', 30, 0],
+      ['17:45', 0, 15],
+    ];
+    for (const [ora, permesso, saldo] of casi) {
+      const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', ora]], { permessoUscita: 30 }), imp, null);
+      expect(r.permessoUscita, ora).toBe(permesso);
+      expect(r.saldo, ora).toBe(saldo);
+    }
+  });
+
+  it('senza permesso pianificato l\'uscita normale non genera permesso', () => {
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', '17:00']]), imp, null);
+    expect(r.permessoUscita).toBe(0);
+    expect(r.saldo).toBe(-30);
+    expect(r.uscitaPrevistaConPermesso).toBe(false);
+  });
+
+  it('con uscita anticipata il pianificato non conta', () => {
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA_ANTICIPATA', '16:45']], { permessoUscita: 30 }), imp, null);
+    expect(r.permessoUscita).toBe(60);
+  });
+
+  it('pianificato più lungo delle ore rimaste: uscita prevista già passata, all\'uscita conta il mancante reale', () => {
+    expect(uscita(calcolaGiornata(giornata(pausaFatta(), { permessoUscita: 240 }), imp, h('14:00')))).toBe('13:30');
+    const r = calcolaGiornata(giornata([...pausaFatta(), ['USCITA', '14:00']], { permessoUscita: 240 }), imp, null);
+    expect(r.permessoUscita).toBe(210);
+    expect(r.saldo).toBe(0);
   });
 });

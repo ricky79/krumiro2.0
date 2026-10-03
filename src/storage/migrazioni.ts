@@ -116,5 +116,10 @@ function normalizzaGiornata(g: unknown, chiave: string): Giornata | null {
       eventi.push(ev);
     }
   }
-  return { data, permessoInizioMinuti: intIn(g.permessoInizioMinuti, 0, 1440) ?? 0, eventi };
+  return {
+    data,
+    permessoInizioMinuti: intIn(g.permessoInizioMinuti, 0, 1440) ?? 0,
+    permessoUscitaMinuti: intIn(g.permessoUscitaMinuti, 0, 1440) ?? 0,
+    eventi,
+  };
 }

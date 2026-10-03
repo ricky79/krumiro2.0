@@ -1,3 +1,4 @@
+import { DURATA_PAUSA_PROPOSTA, OFFSET_PAUSA_PROPOSTA } from '../core/pausaPranzo';
 import type { Azione } from '../core/statoGiornata';
 import { formattaDurata, formattaOra } from '../core/tempo';
 import type { Impostazioni } from '../core/tipi';
@@ -33,6 +34,8 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
   const pausaMin = formattaDurata(imp.pausaMinima);
   const dovute = formattaDurata(imp.minutiDovuti.predefinito);
   const tolleranza = formattaDurata(imp.tolleranzaSigaretta);
+  const inizioProposta = imp.pranzo.inizio + OFFSET_PAUSA_PROPOSTA;
+  const pausaProposta = `${formattaOra(inizioProposta)}–${formattaOra(inizioProposta + DURATA_PAUSA_PROPOSTA)}`;
   const fineSigaretta =
     imp.tipoSigaretta === 'elettronica' ? 'il serbatoio si svuota, il LED lampeggia' : 'la sigaretta finisce nel posacenere';
 
@@ -55,6 +58,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         '• Lavorate: il tempo effettivamente passato al lavoro, escluse le pause.',
         '• Permesso: le ore di permesso (a inizio giornata, a metà giornata o per uscita anticipata).',
+        '• Ogni permesso vale un multiplo di 30 min: un\'uscita anticipata con 1h23 mancanti conta 1h30; i minuti in più non contano come lavorate.',
         '• Coperte: lavorate + permesso. È il numero che deve arrivare alle ore dovute.',
         '• Saldo: coperte − dovute. Positivo = straordinario, negativo = ore mancanti.',
         'Mentre la giornata è in corso, al posto di un saldo negativo vedi "Mancano", cioè quanto ti resta da coprire.',
@@ -78,6 +82,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'Servono per la pausa pranzo, che non conta come ore coperte.',
         `Se la pausa dura meno di ${pausaMin}, viene comunque conteggiata come ${pausaMin}.`,
         'Finché non hai fatto la pausa, l\'uscita prevista la include già (te lo segnala la scritta "inclusa pausa pranzo").',
+        `Se a fine fascia pranzo non hai registrato la pausa, in Oggi compare un riquadro che propone di aggiungerla (${pausaProposta}); con "No, l'ho saltata" non te lo chiede più quel giorno.`,
       ],
     },
     {
@@ -168,6 +173,16 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       ],
     },
     {
+      id: 'permesso-uscita',
+      sezione: 'I bottoni',
+      domanda: 'Permesso in uscita (uscire prima)',
+      testo: [
+        'Se sai già che uscirai prima, tocca "+ Permesso in uscita" sotto la timeline e indica la durata (multipli di 30 min): l\'uscita prevista si anticipa di quel tempo.',
+        'Quando esci usa il normale "Uscita": il permesso conteggiato è quello che manca davvero, a blocchi di 30 min.',
+        'Esempio: uscita prevista 17:55 e 30 min di permesso in uscita → uscita prevista 17:25. Esci alle 17:25 → 30 min di permesso; alle 17:10 → 1h; dopo le 17:55 → nessun permesso.',
+      ],
+    },
+    {
       id: 'riapri',
       sezione: 'I bottoni',
       azione: 'RIAPRI',
@@ -184,6 +199,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'Uscita prevista = adesso + (ore dovute − ore coperte).',
         `Se non hai ancora fatto la pausa e l'uscita cadrebbe dopo la fascia pranzo (${pranzo}), vengono aggiunti ${scalare} di pausa.`,
         'Quando l\'orario supera l\'uscita prevista compare "Ore completate alle…": da lì in poi è straordinario.',
+        'Se hai inserito un permesso in uscita, l\'uscita prevista si anticipa di quella durata.',
       ],
     },
     {

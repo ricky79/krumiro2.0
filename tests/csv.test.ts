@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { esportaCsv, importaCsv, parseCsv, ErroreImportazione } from '../src/core/csv';
-import { riepilogoMese } from '../src/core/riepilogo';
+import { haContenuto, riepilogoMese } from '../src/core/riepilogo';
 import { giornata, h, impostazioni } from './helpers';
 
 const imp = impostazioni();
@@ -34,10 +34,10 @@ describe('CSV', () => {
     expect(csv.startsWith('\uFEFF')).toBe(true);
     const righe = csv.slice(1).trimEnd().split('\r\n');
     expect(righe[0]).toBe(
-      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Eventi',
+      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Eventi',
     );
     expect(righe[1]).toBe(
-      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;10:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:45 Uscita',
+      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;10:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:45 Uscita',
     );
     expect(righe[2]).toContain('14:30 Rientro da permesso (pausa 45)');
   });
@@ -49,10 +49,25 @@ describe('CSV', () => {
     for (const [data, g] of Object.entries(originali)) {
       const i = importati[data]!;
       expect(i.permessoInizioMinuti).toBe(g.permessoInizioMinuti);
+      expect(i.permessoUscitaMinuti).toBe(g.permessoUscitaMinuti);
       expect(i.eventi.map(({ tipo, minuti, pausaConfermata }) => ({ tipo, minuti, pausaConfermata }))).toEqual(
         g.eventi.map(({ tipo, minuti, pausaConfermata }) => ({ tipo, minuti, pausaConfermata })),
       );
     }
+  });
+
+  it('giornata con solo il permesso in uscita: esportata e reimportata', () => {
+    const g = giornata([], { permessoUscita: 60, data: '2026-10-06' });
+    const csv = esportaCsv({ [g.data]: g }, imp, oggi);
+    expect(csv).toContain(';0;60;');
+    const i = importaCsv(csv)['2026-10-06']!;
+    expect(i.permessoUscitaMinuti).toBe(60);
+    expect(i.eventi).toEqual([]);
+  });
+
+  it('CSV senza la colonna del permesso in uscita: vale 0; valore non valido: errore', () => {
+    expect(importaCsv('Data;Eventi\r\n2026-10-02;08:30 Entrata\r\n')['2026-10-02']!.permessoUscitaMinuti).toBe(0);
+    expect(() => importaCsv('Data;Permesso in uscita (min);Eventi\r\n2026-10-02;-30;08:30 Entrata\r\n')).toThrow(/permesso in uscita/);
   });
 
   it('pausa sigaretta: suffisso nel CSV, permesso a blocchi e ritorno', () => {
@@ -95,10 +110,16 @@ describe('CSV', () => {
 });
 
 describe('riepilogo mensile', () => {
+  it('una giornata con solo il permesso in uscita ha contenuto', () => {
+    expect(haContenuto(giornata([], { permessoUscita: 30 }))).toBe(true);
+    expect(haContenuto(giornata([]))).toBe(false);
+  });
+
   it('somma lavorate, permessi e saldo del mese', () => {
     const r = riepilogoMese(dati(), imp, '2026-10', oggi);
     expect(r.giorni.map((g) => g.data)).toEqual(['2026-10-02', '2026-10-01']);
-    expect(r.permesso).toBe(120 + 105);
+    // 2026-10-02: permesso 12:00–14:30 con 45 di pausa → 105 reali → 2h a blocchi.
+    expect(r.permesso).toBe(120 + 120);
     expect(r.saldo).toBe(15 + 15);
     expect(r.giorniDaCorreggere).toBe(0);
   });

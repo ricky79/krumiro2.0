@@ -15,11 +15,12 @@ export const h = (ore: string): number => {
 let n = 0;
 export function giornata(
   eventi: [TipoEvento, string, number?][],
-  opz: { permessoInizio?: number; data?: string } = {},
+  opz: { permessoInizio?: number; permessoUscita?: number; data?: string } = {},
 ): Giornata {
   return {
     data: opz.data ?? GIOVEDI,
     permessoInizioMinuti: opz.permessoInizio ?? 0,
+    permessoUscitaMinuti: opz.permessoUscita ?? 0,
     eventi: eventi.map(([tipo, ora, pausaConfermata]): Evento => {
       const e: Evento = { id: `e${++n}`, tipo, minuti: h(ora) };
       if (pausaConfermata !== undefined) e.pausaConfermata = pausaConfermata;
