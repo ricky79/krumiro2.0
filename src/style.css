@@ -730,7 +730,10 @@ input:disabled {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  /* Anche gli pseudo-elementi: lo strato rosso della pausa sigaretta è un ::before. */
+  *,
+  *::before,
+  *::after {
     animation: none !important;
     transition: none !important;
   }
