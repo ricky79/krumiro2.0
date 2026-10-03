@@ -33,11 +33,15 @@ ripristino della schermata e calcolo restano come sono.
 
 - `SECONDI_AVVISO = 30` (costante).
 - `Countdown` riceve `fase: FaseSigaretta`, con `FaseSigaretta = 'accesa' | 'ultimi' | 'scaduta'`:
-  - `'scaduta'` se `scaduta` è true (confine invariato: oltre la tolleranza, al secondo);
+  - `'scaduta'` se `scaduta` è true (confine invariato: oltre la tolleranza, al secondo), e sempre
+    con tolleranza 0 (la sigaretta parte già consumata, come `consumata = 1`);
   - `'ultimi'` se non scaduta e `residuoMs ≤ SECONDI_AVVISO × 1000` (il timer mostra `00:30`
     quando comincia il lampeggio; alla tolleranza esatta è ancora `'ultimi'`);
   - `'accesa'` altrimenti.
 - `scaduta: boolean` resta per i chiamanti esistenti.
+- `spegnimentoDaAnimare(precedente: FaseSigaretta | null, attuale: FaseSigaretta)` → true solo
+  se `attuale` è `'scaduta'` e `precedente` è `'accesa'` o `'ultimi'` (vedi *Transizione allo
+  scadere*).
 
 ## Interfaccia
 
@@ -55,8 +59,8 @@ ripristino della schermata e calcolo restano come sono.
   sono raggiungibili). Sul dialog: classe `elettronica` se il tipo è elettronica.
 - A ogni `aggiorna()` il dialog ha la classe della fase: `ultimi` o `scaduta` (nessuna per
   `accesa`). La classe `consumata` esistente resta.
-- **Transizione allo scadere**: `aggiorna()` ricorda la fase precedente; se passa da `accesa` o
-  `ultimi` a `scaduta` con la schermata aperta, aggiunge la classe `spegnimento` che fa partire
+- **Transizione allo scadere**: `aggiorna()` ricorda la fase precedente; se
+  `spegnimentoDaAnimare(precedente, attuale)` è true, aggiunge la classe `spegnimento` che fa partire
   la sequenza animata. Se la schermata si apre già scaduta (app riaperta, tolleranza 0)
   la classe non viene aggiunta e si vede subito lo stato finale.
 - Vale per entrambi i tipi:
@@ -72,9 +76,9 @@ ripristino della schermata e calcolo restano come sono.
 - `creaDisegno(tipo: TipoSigaretta): { elemento: Element; aggiorna(consumata: number): void }`:
   crea l'SVG statico (markup costante, nessun dato dell'utente) e aggiorna le parti che
   dipendono dal consumo. `sigaretta.ts` non conosce la geometria.
-- `misureDisegno(tipo, consumata)` pura ed esportata, usata da `aggiorna` e dai test:
-  - normale → larghezza della cartina e spostamento della punta (come oggi);
-  - elettronica → altezza e posizione verticale del liquido nel serbatoio.
+- Funzioni pure esportate, usate da `aggiorna` e dai test (`consumata` limitata a 0–1):
+  - `misureNormale(consumata)` → `{ larghezzaCartina, spostamentoPunta }` (come oggi);
+  - `misureElettronica(consumata)` → `{ yLiquido, altezzaLiquido }` del liquido nel serbatoio.
 - Il riquadro (`viewBox`) diventa più alto per fare posto al posacenere sotto la sigaretta.
 - **Sigaretta normale**
   - In corso: invariata (cartina che si accorcia, brace che avanza, cenere, fumo).
@@ -101,7 +105,9 @@ ripristino della schermata e calcolo restano come sono.
 ### Aiuto e README
 
 - `src/ui/aiutoTesti.ts`, voce `pausa-sigaretta`: una frase sul lampeggio degli ultimi 30
-  secondi e sullo sfondo rosso oltre la tolleranza; "Tolleranza e tipo di sigaretta (normale
+  secondi e su cosa succede oltre la tolleranza secondo il tipo impostato (normale: la
+  sigaretta finisce nel posacenere; elettronica: il serbatoio si svuota e il LED lampeggia),
+  con lo sfondo che resta rosso fino al rientro; "Tolleranza e tipo di sigaretta (normale
   o elettronica) si cambiano in Impostazioni → Pausa sigaretta".
 - README: nella descrizione della pausa sigaretta e nell'elenco delle impostazioni, il tipo di
   sigaretta.
@@ -117,9 +123,13 @@ ripristino della schermata e calcolo restano come sono.
   - tolleranza 1 min: 29 s trascorsi → `accesa`, 30 s → `ultimi`.
 - `migrazioni.test.ts`: `tipoSigaretta` mancante o sconosciuto → `'normale'`;
   `'elettronica'` conservato.
-- `sigarettaDisegni.test.ts`: `misureDisegno` a 0, 0,5 e 1 per entrambi i tipi (cartina
-  piena/metà/zero e punta spostata; liquido pieno/metà/vuoto). Nessun ambiente DOM: la parte
-  SVG si verifica a mano.
+- `sigaretta.test.ts`, `spegnimentoDaAnimare`: da `accesa`/`ultimi` a `scaduta` → true;
+  da `null` o da `scaduta` → false.
+- `sigarettaDisegni.test.ts`: `misureNormale` e `misureElettronica` a 0, 0,5 e 1 (cartina
+  piena/metà/zero e punta spostata; liquido pieno/metà/vuoto) e fuori da 0–1. Nessun ambiente
+  DOM: la parte SVG si verifica a mano.
+- `aiuto.test.ts`: la voce `pausa-sigaretta` cita il posacenere con la sigaretta normale e il
+  LED con l'elettronica.
 - A mano nel browser (`npm run dev`, tolleranza 1 min): per entrambi i tipi fase accesa,
   lampeggio negli ultimi 30 s, sequenza del posacenere / LED che lampeggia, sfondo rosso,
   riapertura a pausa già scaduta (stato finale senza sequenza), riduci movimento emulato;
