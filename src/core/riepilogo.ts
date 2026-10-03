@@ -48,5 +48,5 @@ export function riepilogoMese(
 }
 
 export function haContenuto(g: Giornata): boolean {
-  return g.eventi.length > 0 || g.permessoInizioMinuti > 0;
+  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0;
 }

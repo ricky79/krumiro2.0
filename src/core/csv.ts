@@ -16,6 +16,7 @@ const INTESTAZIONE = [
   'Saldo',
   'Stato',
   'Permesso inizio giornata (min)',
+  'Permesso in uscita (min)',
   'Eventi',
 ];
 
@@ -57,6 +58,7 @@ export function esportaCsv(
         oreDecimali(r.saldo),
         statoLeggibile(r),
         String(g.permessoInizioMinuti),
+        String(g.permessoUscitaMinuti),
         eventiInTesto(g.eventi),
       ]
         .map(quota)
@@ -118,6 +120,7 @@ export function importaCsv(testo: string): Record<string, Giornata> {
   const iData = intest.indexOf('data');
   const iEventi = intest.indexOf('eventi');
   const iPermesso = intest.findIndex((c) => c.startsWith('permesso inizio giornata'));
+  const iPermessoUscita = intest.findIndex((c) => c.startsWith('permesso in uscita'));
   if (iData < 0 || iEventi < 0) {
     throw new ErroreImportazione('Intestazione non riconosciuta: servono almeno le colonne "Data" ed "Eventi".');
   }
@@ -128,6 +131,10 @@ export function importaCsv(testo: string): Record<string, Giornata> {
     const permesso = iPermesso >= 0 ? Number((r[iPermesso] ?? '0').trim() || '0') : 0;
     if (!Number.isFinite(permesso) || permesso < 0) {
       throw new ErroreImportazione(`Riga ${n + 2}: permesso a inizio giornata non valido.`);
+    }
+    const permessoUscita = iPermessoUscita >= 0 ? Number((r[iPermessoUscita] ?? '0').trim() || '0') : 0;
+    if (!Number.isFinite(permessoUscita) || permessoUscita < 0) {
+      throw new ErroreImportazione(`Riga ${n + 2}: permesso in uscita non valido.`);
     }
     const eventi: Evento[] = [];
     for (const pezzo of (r[iEventi] ?? '').split(',')) {
@@ -144,7 +151,7 @@ export function importaCsv(testo: string): Record<string, Giornata> {
       if (m[4] !== undefined && tipo === 'USCITA_PERMESSO') ev.sigaretta = true;
       eventi.push(ev);
     }
-    giornate[data] = { data, permessoInizioMinuti: permesso, eventi };
+    giornate[data] = { data, permessoInizioMinuti: permesso, permessoUscitaMinuti: permessoUscita, eventi };
   });
   return giornate;
 }

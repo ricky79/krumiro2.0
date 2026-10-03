@@ -47,6 +47,8 @@ export interface Giornata {
   data: string;
   /** Permesso a inizio giornata (ingresso posticipato), in minuti. */
   permessoInizioMinuti: number;
+  /** Permesso in uscita pianificato, in minuti: anticipa l'uscita prevista. */
+  permessoUscitaMinuti: number;
   eventi: Evento[];
 }
 
