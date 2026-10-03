@@ -8,6 +8,7 @@ import { conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { linkAiuto } from './aiuto';
 import { confermaRipartizione, editorEvento, editorPermessoInizio, editorPermessoUscita } from './editor';
+import { riquadroPausaSaltata } from './pausaSaltata';
 import { avviaPausaSigaretta } from './sigaretta';
 
 export interface Adesso {
@@ -35,6 +36,7 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
     schedaRiepilogo(r, giornata.eventi, oggi, adesso.minuti),
     r.daCorreggere ? boxProblemi(r.problemi) : null,
     oggi ? pulsantiAzione(data, r, adesso.minuti) : null,
+    oggi ? riquadroPausaSaltata(data, adesso.minuti) : null,
     timeline(data, giornata, analisi.idScartati, r, oggi ? adesso.minuti : 9 * 60),
   );
 }
