@@ -22,6 +22,9 @@
   --sicuro-sx: env(safe-area-inset-left, 0px);
   --sicuro-dx: env(safe-area-inset-right, 0px);
   --altezza-tab: 56px;
+  /* Barra delle schede a colori invertiti: testi e accento presi dal tema opposto. */
+  --tab-testo: #a1a1a6;
+  --tab-attiva: #2dd4bf;
 }
 
 /* data-tema è impostato da src/ui/tema.ts (e dallo script in index.html). */
@@ -43,6 +46,8 @@
   --pausa: #fbbf24;
   --permesso: #c4b5fd;
   --ombra: none;
+  --tab-testo: #6c6c70;
+  --tab-attiva: #0f766e;
 }
 
 *,
@@ -616,7 +621,7 @@ input:disabled {
   display: none;
 }
 
-/* Barra delle schede */
+/* Barra delle schede: colori invertiti rispetto al tema, per staccarla dal contenuto. */
 .tabbar {
   position: fixed;
   left: 0;
@@ -625,10 +630,7 @@ input:disabled {
   display: flex;
   justify-content: center;
   padding: 0 var(--sicuro-dx) var(--sicuro-basso) var(--sicuro-sx);
-  background: color-mix(in srgb, var(--superficie) 88%, transparent);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
-  border-top: 1px solid var(--bordo);
+  background: var(--testo);
   z-index: 10;
 }
 .tab {
@@ -642,7 +644,7 @@ input:disabled {
   gap: 2px;
   border: 0;
   background: none;
-  color: var(--testo-2);
+  color: var(--tab-testo);
   font-size: 11px;
   font-weight: 500;
 }
@@ -651,7 +653,7 @@ input:disabled {
   line-height: 1;
 }
 .tab.attiva {
-  color: var(--accento);
+  color: var(--tab-attiva);
 }
 
 /* Toast */
