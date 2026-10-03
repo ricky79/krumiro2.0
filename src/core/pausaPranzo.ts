@@ -19,7 +19,11 @@ export function pausaDaProporre(
   const inizio = imp.pranzo.inizio + OFFSET_PAUSA_PROPOSTA;
   const fine = inizio + DURATA_PAUSA_PROPOSTA;
   if (fine > imp.pranzo.fine) return null;
-  if (analizzaGiornata(giornata).idScartati.size > 0) return null;
+  const analisi = analizzaGiornata(giornata);
+  if (analisi.idScartati.size > 0) return null;
+  // Uscita entro la fine della fascia pranzo: come per l'uscita prevista, la pausa non era dovuta.
+  const ultimo = analisi.eventiValidi[analisi.eventiValidi.length - 1];
+  if (analisi.stato === 'CHIUSA' && ultimo && ultimo.minuti <= imp.pranzo.fine) return null;
   if (calcolaGiornata(giornata, imp, adesso).pausaFatta) return null;
   const conPausa: Giornata = {
     ...giornata,

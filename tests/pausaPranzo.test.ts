@@ -40,6 +40,15 @@ describe('pausa pranzo da proporre', () => {
     expect(pausaDaProporre(g, imp, h('17:30'))).toEqual({ inizio: h('12:15'), fine: h('12:45') });
   });
 
+  it('non propone se la giornata si è chiusa entro la fine della fascia pranzo', () => {
+    // Come l'uscita prevista: uscendo entro le 14:30 la pausa pranzo non era dovuta.
+    const uscita = (tipo: 'USCITA' | 'USCITA_ANTICIPATA', ora: string) => giornata([['ENTRATA', '08:30'], [tipo, ora]]);
+    expect(pausaDaProporre(uscita('USCITA', '13:00'), imp, h('15:00'))).toBeNull();
+    expect(pausaDaProporre(uscita('USCITA_ANTICIPATA', '14:00'), imp, h('15:00'))).toBeNull();
+    expect(pausaDaProporre(uscita('USCITA', '14:30'), imp, h('15:00'))).toBeNull();
+    expect(pausaDaProporre(uscita('USCITA', '14:31'), imp, h('15:00'))).toEqual({ inizio: h('12:15'), fine: h('12:45') });
+  });
+
   it('segue la fascia pranzo delle impostazioni', () => {
     const tardi = impostazioni({ pranzo: { inizio: h('13:00'), fine: h('15:00') } });
     expect(pausaDaProporre(mattina(), tardi, h('15:00'))).toEqual({ inizio: h('13:15'), fine: h('13:45') });
