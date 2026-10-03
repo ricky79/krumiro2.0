@@ -87,13 +87,16 @@ const SVG_ELETTRONICA = `
     <filter id="svapo-sfocatura" x="-1" y="-1" width="3" height="3">
       <feGaussianBlur stdDeviation="4"/>
     </filter>
+    <filter id="svapo-nebbia" x="-1" y="-1" width="3" height="3">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
   </defs>
-  <g class="svapo-vapore" fill="#e7e5e4">
-    <circle cx="10" cy="56" r="6"/>
-    <circle cx="6" cy="50" r="8"/>
-    <circle cx="12" cy="52" r="7"/>
+  <g class="svapo-vapore" fill="#e7e5e4" filter="url(#svapo-nebbia)">
+    <circle cx="30" cy="50" r="6"/>
+    <circle cx="24" cy="44" r="8"/>
+    <circle cx="34" cy="46" r="7"/>
   </g>
-  <rect x="12" y="61" width="36" height="14" rx="6" fill="#1c1917"/>
+  <rect x="12" y="61" width="36" height="14" rx="6" fill="#3f3a36" stroke="#78716c" stroke-width="1"/>
   <rect x="46" y="56" width="80" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
   <rect class="svapo-liquido" x="48" y="${LIQUIDO_Y}" width="76" height="${LIQUIDO_ALTEZZA}" rx="2" fill="#f59e0b" opacity="0.85"/>
   <rect x="46" y="56" width="80" height="24" rx="4" fill="none" stroke="#a8a29e" stroke-width="1.5"/>

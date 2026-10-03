@@ -761,6 +761,29 @@ input:disabled {
 .sigaretta::backdrop {
   background: #0c0a09;
 }
+/* Ultimi 30 secondi: uno strato rosso pulsa sotto i contenuti (con riduci movimento resta fisso). */
+.sigaretta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, #dc2626, #7f1d1d 75%);
+  opacity: 0;
+  pointer-events: none;
+}
+.sigaretta > * {
+  position: relative;
+}
+.sigaretta.ultimi::before {
+  opacity: 0.35;
+  animation: allarme 1s ease-in-out infinite;
+}
+/* Fuori orario: sfondo rosso scuro fisso fino al rientro. */
+.sigaretta.scaduta {
+  background: radial-gradient(circle at 50% 40%, #4a0d0d, #1a0404 70%);
+}
+.sigaretta.scaduta::backdrop {
+  background: #1a0404;
+}
 .sigaretta h2 {
   margin: 0;
   font-size: 24px;
@@ -784,6 +807,7 @@ input:disabled {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* #ff6b81 su #4a0d0d: contrasto ≈ 5,7:1. */
 .sigaretta.scaduta .sigaretta-timer {
   color: #ff6b81;
 }
@@ -813,6 +837,75 @@ input:disabled {
 }
 .sigaretta.consumata .sigaretta-punta {
   display: none;
+}
+/* Allo scadere la sigaretta finisce nel posacenere: lo stato finale è negli stili di base,
+   la sequenza (.spegnimento, ≈1,5 s) parte solo se la pausa scade a schermata aperta. */
+.posacenere,
+.posacenere-mozzicone,
+.sigaretta-residuo {
+  opacity: 0;
+}
+.sigaretta-residuo {
+  fill: #ff5a1f;
+}
+.sigaretta.consumata .sigaretta-residuo,
+.sigaretta.scaduta .posacenere,
+.sigaretta.scaduta .posacenere-mozzicone {
+  opacity: 1;
+}
+.sigaretta.scaduta .sigaretta-mozzicone {
+  opacity: 0;
+}
+.posacenere,
+.sigaretta-mozzicone {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.posacenere-fumo path {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.sigaretta.spegnimento .posacenere {
+  animation: posacenere-entra 0.4s ease-out both;
+}
+.sigaretta.spegnimento .sigaretta-mozzicone {
+  animation: mozzicone-cade 1.5s ease-in-out both;
+}
+.sigaretta.spegnimento .sigaretta-residuo {
+  animation: residuo-spento 1.5s linear both;
+}
+.sigaretta.spegnimento .posacenere-mozzicone {
+  animation: mozzicone-schiacciato 1.5s linear both;
+}
+.sigaretta.spegnimento .posacenere-fumo path {
+  animation: sbuffo 1.5s ease-out both;
+}
+/* Sigaretta elettronica: il LED pulsa come la brace, il vapore esce dal bocchino. */
+.svapo-alone {
+  animation: brace 1.6s ease-in-out infinite;
+}
+.svapo-vapore circle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vapore 3s ease-out infinite;
+}
+.svapo-vapore circle:nth-child(2) {
+  animation-delay: 1s;
+}
+.svapo-vapore circle:nth-child(3) {
+  animation-delay: 2s;
+}
+.sigaretta.scaduta .svapo-vapore {
+  display: none;
+}
+/* Serbatoio vuoto: il LED lampeggia a scatti (con riduci movimento resta acceso). */
+.sigaretta.scaduta .svapo-led {
+  animation: led-vuoto 1s steps(1, end) infinite;
+}
+.sigaretta.scaduta .svapo-alone {
+  animation: none;
 }
 .sigaretta-bagliore {
   animation: brace 1.6s ease-in-out infinite;
@@ -846,6 +939,95 @@ input:disabled {
   100% {
     opacity: 0;
     transform: translateY(-14px) scaleX(1.4);
+  }
+}
+@keyframes allarme {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes posacenere-entra {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mozzicone-cade {
+  0%,
+  27% {
+    opacity: 1;
+    transform: none;
+  }
+  67% {
+    opacity: 1;
+    transform: translate(97px, 44px) rotate(-12deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(97px, 48px) rotate(-12deg) scale(0.9, 0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(97px, 48px) rotate(-12deg) scale(0.9, 0.55);
+  }
+}
+@keyframes residuo-spento {
+  0%,
+  67% {
+    fill: #ff5a1f;
+  }
+  80%,
+  100% {
+    fill: #57534e;
+  }
+}
+@keyframes mozzicone-schiacciato {
+  0%,
+  78% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes sbuffo {
+  0%,
+  75% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.6);
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.3);
+  }
+}
+@keyframes vapore {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  30% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-8px, -22px) scale(1.6);
+  }
+}
+@keyframes led-vuoto {
+  50% {
+    opacity: 0.15;
   }
 }
 
