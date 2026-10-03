@@ -72,4 +72,14 @@ describe('migrazioni', () => {
     expect(tolleranza(7.5)).toBe(11);
     expect(tolleranza('11')).toBe(11);
   });
+
+  it('tipo di sigaretta: predefinito normale, valori sconosciuti scartati', () => {
+    const tipo = (v: unknown) => migra({ version: 1, impostazioni: { tipoSigaretta: v } }).impostazioni.tipoSigaretta;
+    expect(migra({}).impostazioni.tipoSigaretta).toBe('normale');
+    expect(tipo('elettronica')).toBe('elettronica');
+    expect(tipo('normale')).toBe('normale');
+    expect(tipo('svapo')).toBe('normale');
+    expect(tipo(1)).toBe('normale');
+    expect(tipo(undefined)).toBe('normale');
+  });
 });

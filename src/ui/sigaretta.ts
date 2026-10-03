@@ -4,8 +4,10 @@ import {
   BLOCCO_PERMESSO_SIGARETTA,
   countdown,
   esitoRientroSigaretta,
+  type FaseSigaretta,
   istanteDaMinuti,
   sigarettaDaRiprendere,
+  spegnimentoDaAnimare,
   testoTimer,
 } from '../core/sigaretta';
 import { adessoRoma, formattaDataLunga, formattaDurata, formattaOra } from '../core/tempo';
@@ -13,6 +15,7 @@ import type { Evento } from '../core/tipi';
 import { store } from '../storage/store';
 import { avviso, conferma, toast } from './dialoghi';
 import { el } from './dom';
+import { creaDisegno } from './sigarettaDisegni';
 
 /** Istante preciso di inizio: è uno stato del dispositivo, non dei dati (come tema e banner). */
 const CHIAVE = 'timbrature-sigaretta';
@@ -49,40 +52,6 @@ function cancellaInizio(): void {
   }
 }
 
-/** Lunghezza della cartina nel disegno (unità SVG): si accorcia fino a 0. */
-const CARTINA = 200;
-
-const DISEGNO = `
-<svg class="sigaretta-disegno" viewBox="0 0 300 100" aria-hidden="true">
-  <defs>
-    <linearGradient id="sig-brace" x1="0" x2="1">
-      <stop offset="0" stop-color="#ffd27a"/>
-      <stop offset="0.5" stop-color="#ff5a1f"/>
-      <stop offset="1" stop-color="#7a1600"/>
-    </linearGradient>
-    <filter id="sig-bagliore" x="-1" y="-1" width="3" height="3">
-      <feGaussianBlur stdDeviation="4"/>
-    </filter>
-  </defs>
-  <rect x="10" y="60" width="60" height="16" rx="3" fill="#d9822b"/>
-  <g fill="#b8641c">
-    <circle cx="22" cy="65" r="1.4"/><circle cx="35" cy="71" r="1.2"/>
-    <circle cx="48" cy="64" r="1.3"/><circle cx="60" cy="70" r="1.1"/>
-  </g>
-  <rect x="68" y="60" width="4" height="16" fill="#c9a227"/>
-  <rect class="sigaretta-cartina" x="72" y="60" width="${CARTINA}" height="16" fill="#f4f1ea"/>
-  <g class="sigaretta-punta">
-    <ellipse class="sigaretta-bagliore" cx="272" cy="68" rx="9" ry="11" fill="#ff5a1f" filter="url(#sig-bagliore)"/>
-    <rect x="268" y="60" width="6" height="16" rx="2" fill="url(#sig-brace)"/>
-    <rect x="273" y="61" width="11" height="14" rx="5" fill="#8a8580"/>
-    <g class="sigaretta-fumo" fill="none" stroke="#d8d4cf" stroke-width="3" stroke-linecap="round">
-      <path d="M279 56 c-8 -8 8 -14 0 -22 c-7 -7 6 -12 0 -20"/>
-      <path d="M279 56 c7 -9 -7 -15 1 -24 c6 -7 -5 -12 1 -18"/>
-      <path d="M279 56 c-5 -7 9 -13 2 -21 c-6 -8 7 -12 0 -19"/>
-    </g>
-  </g>
-</svg>`;
-
 let aperta = false;
 
 /** Registra l'uscita della pausa sigaretta e apre la schermata. */
@@ -106,10 +75,10 @@ function apriSchermata(data: string, uscita: Evento): void {
   const tolleranza = store.impostazioni.tolleranzaSigaretta;
   const entro = formattaOra(adessoRoma(new Date(inizio + tolleranza * 60_000)).minuti);
 
-  const scena = el('div', { class: 'sigaretta-scena' });
-  scena.innerHTML = DISEGNO; // markup statico, nessun dato dell'utente
-  const cartina = scena.querySelector('.sigaretta-cartina')!;
-  const punta = scena.querySelector('.sigaretta-punta')!;
+  // Il tipo si legge all'apertura: con la schermata aperta le impostazioni non sono raggiungibili.
+  const tipo = store.impostazioni.tipoSigaretta;
+  const disegno = creaDisegno(tipo);
+  const scena = el('div', { class: 'sigaretta-scena' }, disegno.elemento);
   const timer = el('p', { class: 'sigaretta-timer', role: 'timer' });
   const nota = el('p', { class: 'sigaretta-nota' });
 
@@ -133,7 +102,7 @@ function apriSchermata(data: string, uscita: Evento): void {
 
   const dlg = el(
     'dialog',
-    { class: 'sigaretta', 'aria-label': 'Pausa sigaretta' },
+    { class: tipo === 'elettronica' ? 'sigaretta elettronica' : 'sigaretta', 'aria-label': 'Pausa sigaretta' },
     el('header', {}, el('h2', {}, 'Pausa sigaretta'), el('p', { class: 'sigaretta-uscita' }, `uscita alle ${formattaOra(uscita.minuti)}`)),
     scena,
     timer,
@@ -179,15 +148,19 @@ function apriSchermata(data: string, uscita: Evento): void {
     ),
   );
 
+  let fasePrecedente: FaseSigaretta | null = null;
   const aggiorna = () => {
     if (giornoCambiato()) return;
     const c = countdown(Date.now() - inizio, tolleranza);
-    cartina.setAttribute('width', String(CARTINA * (1 - c.consumata)));
-    punta.setAttribute('transform', `translate(${-CARTINA * c.consumata} 0)`);
+    disegno.aggiorna(c.consumata);
     dlg.classList.toggle('consumata', c.consumata >= 1);
-    dlg.classList.toggle('scaduta', c.scaduta);
+    dlg.classList.toggle('ultimi', c.fase === 'ultimi');
+    dlg.classList.toggle('scaduta', c.fase === 'scaduta');
+    // Sequenza del posacenere solo se la pausa scade mentre la schermata è aperta.
+    if (spegnimentoDaAnimare(fasePrecedente, c.fase)) dlg.classList.add('spegnimento');
+    fasePrecedente = c.fase;
     timer.textContent = testoTimer(c);
-    if (c.scaduta) {
+    if (c.fase === 'scaduta') {
       const p = anteprimaSigaretta(store.giornata(data), store.impostazioni, adessoRoma().minuti);
       nota.textContent = `Al rientro: ${formattaDurata(p?.permesso ?? BLOCCO_PERMESSO_SIGARETTA)} di permesso`;
     } else {

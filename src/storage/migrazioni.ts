@@ -93,6 +93,8 @@ export function normalizzaImpostazioni(v: unknown): Impostazioni {
   imp.orarioMinimoConteggio = intIn(v.orarioMinimoConteggio, 0, 1439) ?? p.orarioMinimoConteggio;
   imp.pausaMinima = intIn(v.pausaMinima, 0, 600) ?? p.pausaMinima;
   imp.tolleranzaSigaretta = intIn(v.tolleranzaSigaretta, 0, 60) ?? p.tolleranzaSigaretta;
+  const tipo = v.tipoSigaretta;
+  imp.tipoSigaretta = tipo === 'normale' || tipo === 'elettronica' ? tipo : p.tipoSigaretta;
   return imp;
 }
 
