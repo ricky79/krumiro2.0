@@ -1,9 +1,10 @@
+import { BLOCCO_PERMESSO, permessoABlocchi } from './permessi';
 import { analizzaGiornata } from './statoGiornata';
 import { adessoRoma } from './tempo';
 import type { Evento, Giornata } from './tipi';
 
 /** Oltre la tolleranza la pausa sigaretta diventa permesso a blocchi di questa durata (minuti). */
-export const BLOCCO_PERMESSO_SIGARETTA = 30;
+export const BLOCCO_PERMESSO_SIGARETTA = BLOCCO_PERMESSO;
 
 /** Negli ultimi secondi prima dello scadere la schermata lampeggia di rosso. */
 export const SECONDI_AVVISO = 30;
@@ -13,7 +14,7 @@ export type FaseSigaretta = 'accesa' | 'ultimi' | 'scaduta';
 
 /** Permesso conteggiato per una pausa sigaretta di `durata` minuti: blocchi da 30, almeno uno. */
 export function permessoSigaretta(durata: number): number {
-  return Math.max(1, Math.ceil(durata / BLOCCO_PERMESSO_SIGARETTA)) * BLOCCO_PERMESSO_SIGARETTA;
+  return Math.max(BLOCCO_PERMESSO, permessoABlocchi(durata));
 }
 
 export type EsitoRientroSigaretta = 'annulla' | 'permesso';
