@@ -33,6 +33,16 @@ describe('aiuto', () => {
     expect(voce.testo.join(' ')).toContain('7 min');
   });
 
+  it('la pausa sigaretta descrive il disegno scelto', () => {
+    const testo = (tipoSigaretta: 'normale' | 'elettronica') =>
+      vociAiuto(impostazioni({ tipoSigaretta })).find((x) => x.id === 'pausa-sigaretta')!.testo.join(' ');
+    expect(testo('normale')).toContain('posacenere');
+    expect(testo('elettronica')).toContain('LED');
+    expect(testo('elettronica')).not.toContain('posacenere');
+    expect(testo('normale')).toContain('ultimi 30 secondi');
+    expect(testo('normale')).toContain('normale o elettronica');
+  });
+
   it('la ricerca ignora maiuscole e accenti e richiede tutte le parole', () => {
     expect(filtraAiuto(voci, 'USCITA anticipata').map((v) => v.id)).toContain('permesso-vs-anticipata');
     expect(filtraAiuto(voci, 'perche entrata').map((v) => v.id)).toContain('orario-minimo');
