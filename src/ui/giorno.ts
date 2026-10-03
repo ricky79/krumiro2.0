@@ -2,12 +2,12 @@ import { calcolaGiornata, propostaRientro } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import { analizzaGiornata, azioniDisponibili, ETICHETTE_AZIONE, type Azione } from '../core/statoGiornata';
 import { formattaDataLunga, formattaDurata, formattaOra, formattaSaldo } from '../core/tempo';
-import { ETICHETTE_EVENTO, type Evento, type RisultatoGiornata } from '../core/tipi';
+import { ETICHETTE_EVENTO, type Evento, type Giornata, type RisultatoGiornata } from '../core/tipi';
 import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { linkAiuto } from './aiuto';
-import { confermaRipartizione, editorEvento, editorPermessoInizio } from './editor';
+import { confermaRipartizione, editorEvento, editorPermessoInizio, editorPermessoUscita } from './editor';
 import { avviaPausaSigaretta } from './sigaretta';
 
 export interface Adesso {
@@ -35,7 +35,7 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
     schedaRiepilogo(r, giornata.eventi, oggi, adesso.minuti),
     r.daCorreggere ? boxProblemi(r.problemi) : null,
     oggi ? pulsantiAzione(data, r, adesso.minuti) : null,
-    timeline(data, giornata.eventi, giornata.permessoInizioMinuti, analisi.idScartati, r, oggi ? adesso.minuti : 9 * 60),
+    timeline(data, giornata, analisi.idScartati, r, oggi ? adesso.minuti : 9 * 60),
   );
 }
 
@@ -49,9 +49,7 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
     const passata = r.uscitaPrevista <= adesso;
     etichetta = passata ? 'Ore completate alle' : 'Uscita prevista';
     valore = formattaOra(r.uscitaPrevista);
-    if (r.stato === 'IN_PAUSA') nota = 'se rientri ora (pausa minima inclusa)';
-    else if (r.uscitaPrevistaConPausa) nota = `inclusa pausa pranzo di ${formattaDurata(store.impostazioni.pausaDaScalare)}`;
-    else if (passata) nota = 'stai facendo straordinario';
+    nota = notaUscitaPrevista(r, passata);
   } else if (r.stato === 'CHIUSA') {
     etichetta = 'Saldo della giornata';
     valore = formattaSaldo(r.saldo);
@@ -84,6 +82,20 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
       stat('Permesso', formattaDurata(r.permesso)),
     ),
   );
+}
+
+/** Nota sotto l'uscita prevista: pausa minima, permesso in uscita, pausa pranzo inclusa, straordinario. */
+function notaUscitaPrevista(r: RisultatoGiornata, passata: boolean): string | null {
+  const permesso = r.uscitaPrevistaConPermesso
+    ? `con ${formattaDurata(r.permessoUscitaPianificato)} di permesso in uscita`
+    : null;
+  const unisci = (...parti: (string | null)[]) => parti.filter((p) => p !== null).join(', ');
+  if (r.stato === 'IN_PAUSA') return unisci('se rientri ora (pausa minima inclusa)', permesso);
+  if (r.uscitaPrevistaConPausa) {
+    return unisci(permesso, `inclusa pausa pranzo di ${formattaDurata(store.impostazioni.pausaDaScalare)}`);
+  }
+  if (permesso) return permesso;
+  return passata ? 'stai facendo straordinario' : null;
 }
 
 /** Saldo a fine giornata; mentre è in corso mostra quanto manca. */
@@ -174,18 +186,31 @@ async function eseguiAzione(azione: Azione, data: string): Promise<void> {
     }
     case 'USCITA_ANTICIPATA': {
       const g = store.giornata(data);
+      const mancante = Math.max(0, -calcolaGiornata(g, store.impostazioni, minuti).saldo);
       const prova = calcolaGiornata(
         { ...g, eventi: [...g.eventi, { id: 'prova', tipo: 'USCITA_ANTICIPATA', minuti }] },
         store.impostazioni,
         minuti,
       );
+      const dettaglio = mancante !== prova.permessoUscita ? ` (mancano ${formattaDurata(mancante)})` : '';
       const ok = await conferma(
         'Uscita anticipata',
-        `Esci alle ${formattaOra(minuti)}: ${formattaDurata(prova.permessoUscita)} di permesso per completare la giornata.`,
+        `Esci alle ${formattaOra(minuti)}: ${formattaDurata(prova.permessoUscita)} di permesso${dettaglio} per completare la giornata.`,
         'Conferma uscita',
       );
       if (!ok) return;
       aggiungi('USCITA_ANTICIPATA');
+      break;
+    }
+    case 'USCITA': {
+      aggiungi('USCITA');
+      const g = store.giornata(data);
+      if (g.permessoUscitaMinuti > 0) {
+        const r = calcolaGiornata(g, store.impostazioni, minuti);
+        const permesso = r.permessoUscita > 0 ? `${formattaDurata(r.permessoUscita)} di permesso` : 'nessun permesso';
+        toast(`Uscita alle ${formattaOra(minuti)} · ${permesso}`);
+        return;
+      }
       break;
     }
     case 'NON_RIENTRO': {
@@ -223,41 +248,47 @@ async function eseguiAzione(azione: Azione, data: string): Promise<void> {
 
 function timeline(
   data: string,
-  eventi: Evento[],
-  permessoInizio: number,
+  giornata: Giornata,
   scartati: Set<string>,
   r: RisultatoGiornata,
   minutiProposti: number,
 ): HTMLElement {
-  const ordinati = [...eventi].sort((a, b) => a.minuti - b.minuti);
+  const ordinati = [...giornata.eventi].sort((a, b) => a.minuti - b.minuti);
   const voci: HTMLElement[] = [];
-  if (permessoInizio > 0) {
-    voci.push(
+  const vocePermesso = (testo: string, dettaglio: string, onclick: () => void) =>
+    el(
+      'li',
+      {},
       el(
-        'li',
-        {},
-        el(
-          'button',
-          { type: 'button', class: 'voce voce-permesso', onclick: () => void editorPermessoInizio(data, null) },
-          el('span', { class: 'voce-ora' }, '—'),
-          el('span', { class: 'voce-testo' }, 'Permesso a inizio giornata', el('small', {}, formattaDurata(permessoInizio))),
-          el('span', { class: 'voce-freccia', 'aria-hidden': 'true' }, '›'),
-        ),
+        'button',
+        { type: 'button', class: 'voce voce-permesso', onclick },
+        el('span', { class: 'voce-ora' }, '—'),
+        el('span', { class: 'voce-testo' }, testo, el('small', {}, dettaglio)),
+        el('span', { class: 'voce-freccia', 'aria-hidden': 'true' }, '›'),
       ),
+    );
+  if (giornata.permessoInizioMinuti > 0) {
+    const dichiarati =
+      r.permessoInizioDichiarato !== r.permessoInizio ? ` (dichiarati ${formattaDurata(r.permessoInizioDichiarato)})` : '';
+    voci.push(
+      vocePermesso('Permesso a inizio giornata', `${formattaDurata(r.permessoInizio)}${dichiarati}`, () => void editorPermessoInizio(data, null)),
     );
   }
   for (const e of ordinati) {
     const rip = r.ripartizioni.find((x) => x.eventoRientroId === e.id);
     const sig = r.sigarette.find((x) => x.eventoRientroId === e.id);
+    const pi = r.permessiIntermedi.find((x) => x.eventoRientroId === e.id);
     const dettaglio = rip
-      ? `${formattaDurata(rip.pausa)} pausa + ${formattaDurata(rip.permesso)} permesso${rip.confermata ? '' : ' (proposta)'}`
+      ? `${formattaDurata(rip.pausa)} pausa + ${formattaDurata(pi?.permesso ?? rip.permesso)} permesso${rip.confermata ? '' : ' (proposta)'}`
       : sig
         ? `${formattaDurata(sig.permesso)} di permesso (pausa sigaretta di ${formattaDurata(sig.durata)})`
-        : scartati.has(e.id)
-          ? 'non coerente: da correggere'
-          : e.tipo === 'USCITA_PERMESSO' && e.sigaretta
-            ? '🚬 pausa sigaretta'
-            : null;
+        : pi
+          ? `${formattaDurata(pi.permesso)} di permesso${pi.permesso !== pi.durata ? ` (assenza di ${formattaDurata(pi.durata)})` : ''}`
+          : scartati.has(e.id)
+            ? 'non coerente: da correggere'
+            : e.tipo === 'USCITA_PERMESSO' && e.sigaretta
+              ? '🚬 pausa sigaretta'
+              : null;
     voci.push(
       el(
         'li',
@@ -276,6 +307,14 @@ function timeline(
       ),
     );
   }
+  const pianificato = giornata.permessoUscitaMinuti;
+  if (pianificato > 0) {
+    const dettaglio =
+      r.stato === 'CHIUSA'
+        ? `${formattaDurata(r.permessoUscita)}${r.permessoUscita !== pianificato ? ` (pianificati ${formattaDurata(pianificato)})` : ''}`
+        : formattaDurata(pianificato);
+    voci.push(vocePermesso('Permesso in uscita', dettaglio, () => void editorPermessoUscita(data)));
+  }
   return el(
     'div',
     { class: 'scheda' },
@@ -285,8 +324,11 @@ function timeline(
       'div',
       { class: 'riga-pulsanti' },
       el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void editorEvento(data, null, minutiProposti) }, '+ Aggiungi timbratura'),
-      permessoInizio === 0
+      giornata.permessoInizioMinuti === 0
         ? el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void editorPermessoInizio(data, null) }, '+ Permesso inizio giornata')
+        : null,
+      pianificato === 0 && r.stato !== 'CHIUSA'
+        ? el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void editorPermessoUscita(data) }, '+ Permesso in uscita')
         : null,
     ),
   );
