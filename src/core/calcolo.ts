@@ -1,7 +1,8 @@
+import { permessoABlocchi } from './permessi';
 import { permessoSigaretta } from './sigaretta';
 import { analizzaGiornata } from './statoGiornata';
 import { giornoSettimana } from './tempo';
-import type { Giornata, Impostazioni, PermessoSigaretta, Ripartizione, RisultatoGiornata } from './tipi';
+import type { Giornata, Impostazioni, PermessoABlocchi, PermessoSigaretta, Ripartizione, RisultatoGiornata } from './tipi';
 
 type TipoIntervallo = 'lavoro' | 'pausa' | 'permesso';
 
@@ -124,19 +125,21 @@ export function calcolaGiornata(
     }
   }
 
-  // 3. Permessi intermedi, con eventuale quota di pausa se coprono il pranzo.
+  // 3. Permessi intermedi, con eventuale quota di pausa se coprono il pranzo. Ogni permesso
+  //    concluso vale blocchi da 30 min: l'eccedenza sul tempo reale passa dalle lavorate al
+  //    permesso (ore coperte invariate).
   const ripartizioni: Ripartizione[] = [];
   const sigarette: PermessoSigaretta[] = [];
+  const permessiIntermedi: PermessoABlocchi[] = [];
   let permessoIntermedio = 0;
   let pausaScalata = 0;
   let residuoDaScalare = imp.pausaDaScalare;
-  let eccedenzaSigarette = 0;
+  let eccedenza = 0;
   for (const i of intervalli) {
     if (i.tipo !== 'permesso') continue;
     const d = i.a - i.da;
     if (i.sigaretta) {
-      // Mai pausa pranzo. Conclusa vale blocchi da 30 min: l'eccedenza sul tempo
-      // reale passa dalle lavorate al permesso (ore coperte invariate).
+      // Mai pausa pranzo; conclusa vale almeno un blocco.
       if (i.aperto) {
         permessoIntermedio += d;
       } else {
@@ -144,19 +147,19 @@ export function calcolaGiornata(
         const primaDelConteggio = i.rientroReale !== undefined && i.rientroReale <= minimo;
         const permesso = primaDelConteggio ? 0 : permessoSigaretta(d);
         permessoIntermedio += permesso;
-        eccedenzaSigarette += permesso - d;
+        eccedenza += permesso - d;
         sigarette.push({ eventoRientroId: i.rientroId, da: i.da, a: i.a, durata: d, permesso });
       }
       continue;
     }
+    let pausa = 0;
     const overlap = pausaRegistrata ? 0 : sovrapposizione(i.da, i.a, imp.pranzo.inizio, imp.pranzo.fine);
     if (overlap > 0) {
       const proposta = Math.min(residuoDaScalare, overlap);
       const confermata = i.pausaConfermata !== undefined;
-      const pausa = Math.min(d, Math.max(0, confermata ? i.pausaConfermata! : proposta));
+      pausa = Math.min(d, Math.max(0, confermata ? i.pausaConfermata! : proposta));
       residuoDaScalare = Math.max(0, residuoDaScalare - pausa);
       pausaScalata += pausa;
-      permessoIntermedio += d - pausa;
       ripartizioni.push({
         eventoRientroId: i.rientroId,
         da: i.da,
@@ -166,26 +169,50 @@ export function calcolaGiornata(
         permesso: d - pausa,
         confermata,
       });
+    }
+    const parte = d - pausa;
+    if (i.aperto) {
+      permessoIntermedio += parte;
     } else {
-      permessoIntermedio += d;
+      const permesso = permessoABlocchi(parte);
+      permessoIntermedio += permesso;
+      eccedenza += permesso - parte;
+      permessiIntermedi.push({ eventoRientroId: i.rientroId, da: i.da, a: i.a, durata: parte, permesso });
     }
   }
 
-  // L'eccedenza si toglie solo dal lavoro che c'è: le coperte non superano mai il tempo trascorso.
-  const lavoroNetto = Math.max(0, lavoroLordo - penalitaPausa);
-  const eccedenzaApplicata = Math.min(eccedenzaSigarette, lavoroNetto);
-  permessoIntermedio -= eccedenzaSigarette - eccedenzaApplicata;
-  const lavorati = lavoroNetto - eccedenzaApplicata;
-
-  // 4. Totali.
-  const dovuti = minutiDovuti(giornata.data, imp);
-  const permessoInizio =
+  // Permesso a inizio giornata, anch'esso a blocchi.
+  const permessoInizioDichiarato =
     Number.isFinite(giornata.permessoInizioMinuti) && giornata.permessoInizioMinuti > 0
       ? giornata.permessoInizioMinuti
       : 0;
-  const copertiPrimaUscita = lavorati + permessoInizio + permessoIntermedio;
-  const permessoUscita = anticipata ? Math.max(0, dovuti - copertiPrimaUscita) : 0;
-  const coperti = copertiPrimaUscita + permessoUscita;
+  let permessoInizio = permessoABlocchi(permessoInizioDichiarato);
+  eccedenza += permessoInizio - permessoInizioDichiarato;
+
+  // L'eccedenza si toglie solo dal lavoro che c'è: le coperte non superano mai il tempo trascorso.
+  const lavoroNetto = Math.max(0, lavoroLordo - penalitaPausa);
+  const eccedenzaApplicata = Math.min(eccedenza, lavoroNetto);
+  let nonAssorbita = eccedenza - eccedenzaApplicata;
+  const riduci = (v: number) => {
+    const t = Math.min(v, nonAssorbita);
+    nonAssorbita -= t;
+    return v - t;
+  };
+  permessoIntermedio = riduci(permessoIntermedio);
+  permessoInizio = riduci(permessoInizio);
+  let lavorati = lavoroNetto - eccedenzaApplicata;
+
+  // 4. Totali. Uscita anticipata: il permesso in uscita è quello che manca davvero, a blocchi
+  //    (l'eccedenza esce dalle lavorate rimaste, le coperte arrivano alle dovute).
+  const dovuti = minutiDovuti(giornata.data, imp);
+  let permessoUscita = 0;
+  if (anticipata) {
+    const mancante = Math.max(0, dovuti - (lavorati + permessoInizio + permessoIntermedio));
+    const eccedenzaUscita = Math.min(permessoABlocchi(mancante) - mancante, lavorati);
+    permessoUscita = mancante + eccedenzaUscita;
+    lavorati -= eccedenzaUscita;
+  }
+  const coperti = lavorati + permessoInizio + permessoIntermedio + permessoUscita;
   const pausaFatta = pausaRegistrata || pausaScalata > 0;
 
   // 5. Uscita prevista.
@@ -213,6 +240,7 @@ export function calcolaGiornata(
     lavorati,
     pausa: pausaRegistrataMin + pausaScalata,
     permessoInizio,
+    permessoInizioDichiarato,
     permessoIntermedio,
     permessoUscita,
     permesso: permessoInizio + permessoIntermedio + permessoUscita,
@@ -223,6 +251,7 @@ export function calcolaGiornata(
     pausaFatta,
     ripartizioni,
     sigarette,
+    permessiIntermedi,
   };
 }
 

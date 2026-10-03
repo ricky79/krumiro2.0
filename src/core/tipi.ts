@@ -111,6 +111,18 @@ export interface PermessoSigaretta {
   permesso: number;
 }
 
+/** Permesso intermedio concluso (non sigaretta): parte di permesso reale e valore a blocchi. */
+export interface PermessoABlocchi {
+  /** Id dell'evento RIENTRO_PERMESSO che l'ha chiuso. */
+  eventoRientroId?: string;
+  da: number;
+  a: number;
+  /** Parte di permesso reale in minuti (esclusa l'eventuale quota di pausa pranzo). */
+  durata: number;
+  /** Permesso conteggiato (blocchi da 30 min). */
+  permesso: number;
+}
+
 export interface RisultatoGiornata {
   stato: StatoGiornata;
   daCorreggere: boolean;
@@ -120,6 +132,8 @@ export interface RisultatoGiornata {
   /** Pausa effettivamente conteggiata (registrata, con il minimo applicato, + scalata). */
   pausa: number;
   permessoInizio: number;
+  /** Permesso a inizio giornata inserito; `permessoInizio` è il valore a blocchi. */
+  permessoInizioDichiarato: number;
   permessoIntermedio: number;
   permessoUscita: number;
   permesso: number;
@@ -132,4 +146,5 @@ export interface RisultatoGiornata {
   pausaFatta: boolean;
   ripartizioni: Ripartizione[];
   sigarette: PermessoSigaretta[];
+  permessiIntermedi: PermessoABlocchi[];
 }

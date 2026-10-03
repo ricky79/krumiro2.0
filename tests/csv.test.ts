@@ -98,7 +98,8 @@ describe('riepilogo mensile', () => {
   it('somma lavorate, permessi e saldo del mese', () => {
     const r = riepilogoMese(dati(), imp, '2026-10', oggi);
     expect(r.giorni.map((g) => g.data)).toEqual(['2026-10-02', '2026-10-01']);
-    expect(r.permesso).toBe(120 + 105);
+    // 2026-10-02: permesso 12:00–14:30 con 45 di pausa → 105 reali → 2h a blocchi.
+    expect(r.permesso).toBe(120 + 120);
     expect(r.saldo).toBe(15 + 15);
     expect(r.giorniDaCorreggere).toBe(0);
   });
