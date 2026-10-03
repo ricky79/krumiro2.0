@@ -607,6 +607,12 @@ input:disabled {
   background: var(--accento);
   color: var(--accento-testo);
 }
+.riga-impostazione .preset {
+  flex: none;
+}
+.riga-impostazione .chip {
+  padding: 0 14px;
+}
 .ripartizione {
   margin: 0;
   font-size: 22px;

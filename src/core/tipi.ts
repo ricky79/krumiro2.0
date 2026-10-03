@@ -50,6 +50,9 @@ export interface Giornata {
   eventi: Evento[];
 }
 
+/** Disegno della schermata della pausa sigaretta. */
+export type TipoSigaretta = 'normale' | 'elettronica';
+
 export interface Impostazioni {
   minutiDovuti: {
     predefinito: number;
@@ -65,6 +68,8 @@ export interface Impostazioni {
   pausaMinima: number;
   /** Una pausa sigaretta che non supera questi minuti viene cancellata al rientro. */
   tolleranzaSigaretta: number;
+  /** Disegno della schermata della pausa: sigaretta normale o elettronica. */
+  tipoSigaretta: TipoSigaretta;
 }
 
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
@@ -74,6 +79,7 @@ export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   orarioMinimoConteggio: 510,
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
+  tipoSigaretta: 'normale',
 };
 
 export type StatoGiornata = 'NON_INIZIATA' | 'AL_LAVORO' | 'IN_PAUSA' | 'IN_PERMESSO' | 'CHIUSA';

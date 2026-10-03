@@ -1,6 +1,6 @@
 import { NOMI_GIORNI } from '../core/tempo';
 import { selettoreOra } from './campi';
-import { IMPOSTAZIONI_PREDEFINITE } from '../core/tipi';
+import { IMPOSTAZIONI_PREDEFINITE, type TipoSigaretta } from '../core/tipi';
 import { clonaImpostazioni } from '../storage/migrazioni';
 import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
@@ -67,6 +67,35 @@ function selettoreTema(): HTMLElement {
     ),
   );
   return el('div', { class: 'preset', role: 'group', 'aria-label': 'Tema' }, pulsanti);
+}
+
+const OPZIONI_SIGARETTA: [TipoSigaretta, string][] = [
+  ['normale', 'Normale'],
+  ['elettronica', 'Elettronica'],
+];
+
+/** Pulsanti Normale / Elettronica: cambiano solo il disegno della schermata della pausa. */
+function selettoreSigaretta(attuale: TipoSigaretta): HTMLElement {
+  return el(
+    'div',
+    { class: 'preset', role: 'group', 'aria-label': 'Tipo di sigaretta' },
+    OPZIONI_SIGARETTA.map(([valore, testo]) =>
+      el(
+        'button',
+        {
+          type: 'button',
+          class: 'chip',
+          'aria-pressed': String(attuale === valore),
+          onclick: () => {
+            // Il salvataggio ridisegna la vista: i pulsanti si aggiornano da soli.
+            store.modificaImpostazioni((i) => void (i.tipoSigaretta = valore));
+            salvato();
+          },
+        },
+        testo,
+      ),
+    ),
+  );
 }
 
 export function vistaImpostazioni(adesso: Adesso): HTMLElement {
@@ -151,6 +180,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
       'div',
       { class: 'scheda' },
       el('h2', { class: 'titolo-sezione' }, 'Pausa sigaretta'),
+      riga('Tipo', selettoreSigaretta(imp.tipoSigaretta)),
       riga('Tolleranza (min)', inputMinuti(imp.tolleranzaSigaretta, (v) => {
         store.modificaImpostazioni((i) => void (i.tolleranzaSigaretta = v));
         salvato();
@@ -171,7 +201,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
           type: 'button',
           class: 'btn btn-secondario',
           onclick: async () => {
-            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 60 min da scalare, tolleranza sigaretta 11 min). Le timbrature non vengono toccate.', 'Ripristina', true)) {
+            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 60 min da scalare, tolleranza sigaretta 11 min, sigaretta normale). Le timbrature non vengono toccate.', 'Ripristina', true)) {
               store.modificaImpostazioni((i) => Object.assign(i, clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE)));
               salvato();
             }
