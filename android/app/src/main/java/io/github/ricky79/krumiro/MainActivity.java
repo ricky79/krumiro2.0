@@ -1,4 +1,4 @@
-package io.github.ricky79.timbrature;
+package io.github.ricky79.krumiro;
 
 import com.getcapacitor.BridgeActivity;
 

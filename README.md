@@ -175,7 +175,7 @@ Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web es
 tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla release e lo salva anche
 come artefatto del workflow. L'APK è firmato con la chiave di debug: va bene per l'installazione
 diretta; per il Play Store serve un bundle firmato con una chiave tua. Il numero di versione viene da
-`package.json`. L'`appId` (`io.github.ricky79.timbrature`) non si può più cambiare dopo la
+`package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
 pubblicazione. L'icona è quella predefinita di Capacitor: da sostituire con quella dell'app.
 
 ### Schema dei dati
