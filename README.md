@@ -1,4 +1,4 @@
-# Timbrature
+# Krumiro
 
 Web app installabile (PWA) per registrare le timbrature di lavoro da iPhone o Android e sapere
 a che ora si può uscire. Funziona offline, non ha backend: **i dati restano sul telefono**
@@ -17,7 +17,7 @@ Apri `https://ricky79.github.io/krumiro2.0/` dal telefono e segui le istruzioni 
 2. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto).
 3. Scorri e scegli **Aggiungi alla schermata Home**.
    Su iOS 18 e successivi verifica che **Apri come app web** sia attivo.
-4. Conferma il nome "Timbrature" e tocca **Aggiungi**.
+4. Conferma il nome "Krumiro" e tocca **Aggiungi**.
 5. Apri l'app dall'icona sulla schermata Home: parte a tutto schermo, senza la barra di Safari.
 
 ### Android (Chrome)
@@ -25,7 +25,7 @@ Apri `https://ricky79.github.io/krumiro2.0/` dal telefono e segui le istruzioni 
 1. Apri **Chrome** e vai su `https://ricky79.github.io/krumiro2.0/`.
 2. Tocca il menu **⋮** (in alto a destra).
 3. Scegli **Installa app** (su alcune versioni la voce è **Aggiungi a schermata Home**,
-   poi **Installa**). Se compare in basso il banner "Installa Timbrature", puoi usare quello.
+   poi **Installa**). Se compare in basso il banner "Installa Krumiro", puoi usare quello.
 4. Conferma con **Installa**: l'icona compare nel cassetto delle app e, se vuoi,
    sulla schermata Home.
 5. Apri l'app dall'icona: parte a tutto schermo, senza la barra di Chrome.
@@ -36,6 +36,23 @@ usa **⋮ → Installa**. Se la voce non compare, ricarica la pagina e riprova.
 
 Dopo la prima apertura l'app funziona anche **senza connessione**. Quando viene pubblicata una
 nuova versione, viene scaricata in background e applicata alla successiva apertura.
+
+### App Android con gli avvisi
+
+Oltre alla PWA esiste un'app Android vera (costruita con [Capacitor](https://capacitorjs.com)
+dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiusa:
+- **uscita prevista**: quando puoi andare via;
+- **rientro dal pranzo**: 30 minuti dopo l'inizio della pausa (durata configurabile);
+- **rientro dalla pausa sigaretta**: 1 minuto prima della fine della tolleranza (anticipo configurabile, 0 = allo scadere).
+
+Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
+telefono: nessun server, nessun dato fuori dal dispositivo. Nella PWA gli avvisi non esistono.
+
+Per installarla scarica l'APK dalla pagina delle *Release* del repository, aprilo e consenti
+l'installazione da questa fonte. Alla prima apertura autorizza le notifiche e, su Android 12+,
+anche "Sveglie e promemoria" (altrimenti gli avvisi possono ritardare di qualche minuto).
+I dati dell'app sono separati da quelli della PWA: per spostarli usa il backup JSON.
+Gli aggiornamenti si installano scaricando il nuovo APK.
 
 ### Attenzione ai dati
 
@@ -117,7 +134,7 @@ npm run dev        # server di sviluppo
 npm test           # test Vitest del modulo di calcolo
 npm run build      # typecheck + build statica in dist/
 npm run preview    # anteprima della build
-npm run icone      # rigenera le icone PNG (script senza dipendenze)
+npm run icone      # rigenera le icone PNG di PWA e app Android (script senza dipendenze)
 ```
 
 Struttura:
@@ -139,6 +156,61 @@ e pubblica `dist/` su GitHub Pages. Va configurato una volta sola:
 2. In **Build and deployment → Source** scegli **GitHub Actions**.
 
 Il `base` in `vite.config.ts` è `/krumiro2.0/`. Se rinomini il repository, aggiornalo.
+
+### App Android
+
+L'app (cartella `android/`) racchiude la build web in un contenitore Android. Il codice è lo stesso
+della PWA: la parte nativa è solo `src/native/` (notifiche) e `capacitor.config.ts`.
+
+```bash
+npm run build:android   # build web per Android (base './', senza service worker) + cap sync
+npm run android:apri    # come sopra e apre Android Studio
+```
+
+Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web esegui di nuovo
+`npm run build:android`. Gli avvisi si calcolano in `src/core/avvisi.ts` (funzione pura, con test);
+`src/native/avvisi.ts` li programma con il plugin `@capacitor/local-notifications`.
+
+**APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK a ogni push di un
+tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla release e lo salva anche
+come artefatto del workflow.
+
+**Firma dell'APK:** perché ogni versione si installi sopra la precedente, l'APK va firmato sempre con
+la stessa chiave. La chiave non sta nel repository ma in due *secret* (Settings → Secrets and
+variables → Actions): `KRUMIRO_KEYSTORE_BASE64` (il keystore `.jks` codificato in base64) e
+`KRUMIRO_KEYSTORE_PASSWORD`; l'alias è `krumiro`. Con i secret il workflow costruisce e firma la
+release; senza, ripiega su una chiave di debug che cambia a ogni esecuzione (avviso nel log), e quegli
+APK non si aggiornano uno sopra l'altro. Per creare una chiave nuova:
+
+```bash
+keytool -genkeypair -keystore krumiro-firma.jks -storetype PKCS12 -alias krumiro \
+  -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Krumiro, C=IT"
+base64 -w0 krumiro-firma.jks   # valore del secret KRUMIRO_KEYSTORE_BASE64
+```
+
+Conserva keystore e password fuori dal repository (sono già esclusi da `.gitignore`): se li perdi,
+le nuove versioni non si installano sopra quelle esistenti. La stessa chiave serve anche per il
+Play Store. Il numero di versione viene da
+`package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
+pubblicazione. Icone e schermata di avvio sono le stesse della PWA: `npm run icone` le rigenera tutte
+(PWA e Android) da `scripts/genera-icone.mjs`.
+
+### Tag NFC (wave 2, non ancora implementato)
+
+Un tag NFC appoggiato al telefono registrerà l'**azione successiva** (il bottone principale della
+schermata Oggi), senza backend: il tag contiene solo un indirizzo, Android apre l'app e l'app
+registra. Decisioni già prese, perché i tag fisici già scritti non si possono più cambiare:
+
+1. **Contenuto del tag:** un record URI `krumiro://timbra` (schema `krumiro`, solo app Android).
+2. **Casi ambigui:** l'app non indovina. Se il bottone principale non corrisponde a ciò che si vuole
+   (uscita senza pausa registrata, rientro da un permesso che copre il pranzo) apre la schermata di
+   conferma invece di registrare.
+3. **Protezione dagli errori:** dopo la registrazione compare un avviso con **Annulla** per qualche
+   secondo, e un secondo tocco entro circa un minuto viene ignorato.
+
+Android legge i tag solo con schermo acceso e telefono sbloccato. Da fare nella wave 2: lettura
+dell'indirizzo di avvio (`@capacitor/app`), filtro per lo schema nel manifest, funzione pura che decide
+cosa registrare (con test), avviso con Annulla, istruzioni per scrivere e bloccare il tag.
 
 ### Schema dei dati
 

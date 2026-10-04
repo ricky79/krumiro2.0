@@ -1173,3 +1173,11 @@ input:disabled {
 .foglio:focus {
   outline: none;
 }
+
+/* Avvisi */
+.interruttore {
+  width: 28px;
+  height: 28px;
+  accent-color: var(--accento);
+  flex: none;
+}

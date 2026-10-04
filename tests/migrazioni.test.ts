@@ -94,3 +94,38 @@ describe('migrazioni', () => {
     expect(tipo(undefined)).toBe('normale');
   });
 });
+
+describe('avvisi nelle impostazioni', () => {
+  const avvisi = (v: unknown) => migra({ version: 1, impostazioni: { avvisi: v } }).impostazioni.avvisi;
+
+  it('predefiniti: attivi, pranzo 30 minuti', () => {
+    expect(migra({}).impostazioni.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
+  });
+
+  it('conserva i valori validi', () => {
+    expect(avvisi({ uscita: false, sigaretta: true, sigarettaAnticipo: 3, pranzo: false, pranzoMinuti: 45 })).toEqual({
+      uscita: false,
+      sigaretta: true,
+      sigarettaAnticipo: 3,
+      pranzo: false,
+      pranzoMinuti: 45,
+    });
+  });
+
+  it('scarta i valori non validi campo per campo', () => {
+    expect(avvisi({ uscita: 'no', pranzoMinuti: 0 })).toMatchObject({ uscita: true, pranzoMinuti: 30 });
+    expect(avvisi({ pranzoMinuti: 241 }).pranzoMinuti).toBe(30);
+    expect(avvisi({ pranzoMinuti: 7.5 }).pranzoMinuti).toBe(30);
+    expect(avvisi({ pranzoMinuti: 1 }).pranzoMinuti).toBe(1);
+    expect(avvisi({ sigarettaAnticipo: 0 }).sigarettaAnticipo).toBe(0);
+    expect(avvisi({ sigarettaAnticipo: 31 }).sigarettaAnticipo).toBe(1);
+    expect(avvisi({ sigarettaAnticipo: -1 }).sigarettaAnticipo).toBe(1);
+    expect(avvisi('boh')).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
+  });
+
+  it('le impostazioni predefinite non vengono mutate', () => {
+    const d = migra({});
+    d.impostazioni.avvisi.pranzoMinuti = 99;
+    expect(IMPOSTAZIONI_PREDEFINITE.avvisi.pranzoMinuti).toBe(30);
+  });
+});

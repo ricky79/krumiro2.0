@@ -37,11 +37,11 @@ export async function esportaCsvCondividi(adesso: Adesso): Promise<void> {
     await avviso('Niente da esportare', 'Non ci sono ancora giornate registrate.');
     return;
   }
-  await condividiFile(`timbrature-${adesso.data}.csv`, esportaCsv(store.giornate, store.impostazioni, adesso), 'text/csv');
+  await condividiFile(`krumiro-${adesso.data}.csv`, esportaCsv(store.giornate, store.impostazioni, adesso), 'text/csv');
 }
 
 export async function esportaBackupJson(adesso: Adesso): Promise<void> {
-  await condividiFile(`timbrature-backup-${adesso.data}.json`, JSON.stringify(store.tutto, null, 2), 'application/json');
+  await condividiFile(`krumiro-backup-${adesso.data}.json`, JSON.stringify(store.tutto, null, 2), 'application/json');
 }
 
 /** Importa un CSV (unisce le giornate) o un backup JSON (sostituisce tutto). */
