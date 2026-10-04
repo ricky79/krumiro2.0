@@ -8,7 +8,7 @@ App pubblicata: **https://ricky79.github.io/krumiro2.0/**
 
 ## Installare l'app
 
-Apri `https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk` dal telefono e segui le istruzioni per il tuo sistema.
+Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk** dal telefono e segui le istruzioni per il tuo sistema.
 
 ### iPhone (Safari)
 
