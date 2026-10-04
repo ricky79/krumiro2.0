@@ -48,11 +48,28 @@ dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiu
 Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
 telefono: nessun server, nessun dato fuori dal dispositivo. Nella PWA gli avvisi non esistono.
 
-Per installarla scarica l'APK dalla pagina delle *Release* del repository, aprilo e consenti
-l'installazione da questa fonte. Alla prima apertura autorizza le notifiche e, su Android 12+,
-anche "Sveglie e promemoria" (altrimenti gli avvisi possono ritardare di qualche minuto).
-I dati dell'app sono separati da quelli della PWA: per spostarli usa il backup JSON.
-Gli aggiornamenti si installano scaricando il nuovo APK.
+#### Scaricare e installare l'APK
+
+**Link diretto all'ultima versione:** [https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk](https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk)
+(oppure la pagina [Release](https://github.com/ricky79/krumiro2.0/releases/latest), file `krumiro-<versione>.apk`).
+
+1. Apri il link dal telefono Android: il browser scarica `krumiro.apk`.
+2. Apri il file scaricato (dalla notifica del download o dall'app *File*).
+3. Android chiede di consentire l'installazione da quella fonte (Chrome, File…): tocca
+   **Impostazioni**, attiva **Consenti da questa fonte** e torna indietro.
+4. Tocca **Installa**. Se compare un avviso di *Play Protect* ("app sconosciuta"), scegli
+   **Installa comunque**: l'app non viene dal Play Store, ma è firmata sempre con la stessa chiave.
+5. Apri **Krumiro** → *Impostazioni → Avvisi* → **Autorizza gli avvisi**: concedi le notifiche e,
+   su Android 12+, anche "Sveglie e promemoria" (senza, gli avvisi possono ritardare di qualche minuto).
+
+**Aggiornamenti:** scarica di nuovo dallo stesso link e installa sopra: i dati restano. Il numero
+di versione installato è in fondo alle *Impostazioni*.
+
+**Dalla PWA all'app:** i dati sono separati. Nella PWA fai *Impostazioni → Esporta backup completo
+(JSON)*, poi nell'app *Impostazioni → Importa CSV o backup JSON…*.
+
+**Se l'installazione fallisce** ("App non installata"): di solito c'è già una versione firmata con
+un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstalla Krumiro e reinstalla.
 
 ### Attenzione ai dati
 
@@ -172,8 +189,10 @@ Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web es
 `src/native/avvisi.ts` li programma con il plugin `@capacitor/local-notifications`.
 
 **APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK a ogni push di un
-tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla release e lo salva anche
-come artefatto del workflow.
+tag di versione, nello stesso formato dei tag del progetto (`git tag 1.8.0 && git push origin 1.8.0`;
+va bene anche `v1.8.0`). Lo allega alla release come `krumiro-<versione>.apk` e come `krumiro.apk`,
+il nome fisso usato dal link di download permanente, e lo salva anche come artefatto del workflow.
+Il tag va creato su un commit che contiene già questo workflow.
 
 **Firma dell'APK:** perché ogni versione si installi sopra la precedente, l'APK va firmato sempre con
 la stessa chiave. La chiave non sta nel repository ma in due *secret* (Settings → Secrets and

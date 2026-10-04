@@ -364,10 +364,11 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Installazione',
       domanda: 'C\'è un\'app per Android con gli avvisi?',
       testo: [
-        '• Scarica il file APK dalla pagina delle release del progetto su GitHub.',
+        '• Dal telefono apri https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk : il browser scarica l\'app (krumiro.apk).',
         '• Aprilo: Android chiede di consentire l\'installazione da questa fonte. Conferma e installa.',
         '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
-        'L\'app ha dati separati dalla PWA: per portarli con te esporta il backup JSON dalla PWA e importalo nell\'app. Gli aggiornamenti si installano scaricando il nuovo APK.',
+        'L\'app ha dati separati dalla PWA: per portarli con te esporta il backup JSON dalla PWA e importalo nell\'app.',
+        'Per aggiornarla scarica di nuovo dallo stesso indirizzo e installa sopra: i dati restano.',
       ],
     },
     {
