@@ -406,34 +406,47 @@ button {
   border-top: 1px solid var(--bordo);
 }
 .giorno {
-  display: flex;
+  display: grid;
+  grid-template-columns: 62px repeat(3, minmax(0, 1fr));
   align-items: center;
-  gap: 12px;
+  gap: 4px 8px;
   width: 100%;
   min-height: 56px;
-  padding: 8px 0;
+  padding: 10px 0;
   background: none;
   border: 0;
   text-align: left;
 }
 .giorno-data {
-  width: 64px;
-  flex: none;
   font-weight: 600;
 }
 .giorno-data::first-letter {
   text-transform: uppercase;
 }
-.giorno-dettagli {
-  flex: 1;
+.giorno-cella {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 600;
+}
+.giorno-cella-nome {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--testo-2);
+}
+.giorno-cella .zero {
+  color: var(--testo-2);
+  font-weight: 400;
+}
+.giorno-note {
+  grid-column: 2 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 2px 10px;
   font-size: 14px;
-  color: var(--testo-2);
 }
-.giorno-saldo {
-  font-weight: 600;
+.statistiche.tre {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .giorno-errato .giorno-data {
   color: var(--negativo);
