@@ -1,4 +1,4 @@
-// Genera le icone PNG dell'app (orologio bianco su sfondo verde petrolio)
+// Genera le icone PNG della PWA e dell'app Android (orologio bianco su sfondo verde petrolio)
 // senza dipendenze: rasterizzazione con supersampling + encoder PNG minimale.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
@@ -25,20 +25,23 @@ function chunk(tipo, dati) {
   return Buffer.concat([len, td, crc]);
 }
 
-function png(size, pixel) {
-  const raw = Buffer.alloc((size * 3 + 1) * size);
-  for (let y = 0; y < size; y++) {
-    raw[y * (size * 3 + 1)] = 0;
-    for (let x = 0; x < size; x++) {
-      const [r, g, b] = pixel(x, y);
-      const o = y * (size * 3 + 1) + 1 + x * 3;
-      raw[o] = r; raw[o + 1] = g; raw[o + 2] = b;
+/** PNG `w`×`h`; `pixel` restituisce [r, g, b] oppure, con `alfa`, [r, g, b, a]. */
+function png(w, h, pixel, alfa = false) {
+  const canali = alfa ? 4 : 3;
+  const riga = w * canali + 1;
+  const raw = Buffer.alloc(riga * h);
+  for (let y = 0; y < h; y++) {
+    raw[y * riga] = 0;
+    for (let x = 0; x < w; x++) {
+      const px = pixel(x, y);
+      const o = y * riga + 1 + x * canali;
+      for (let c = 0; c < canali; c++) raw[o + c] = px[c];
     }
   }
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; ihdr[9] = 2; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  ihdr.writeUInt32BE(w, 0);
+  ihdr.writeUInt32BE(h, 4);
+  ihdr[8] = 8; ihdr[9] = alfa ? 6 : 2; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', ihdr),
@@ -68,15 +71,43 @@ function dentro(u, v, scala) {
   return false;
 }
 
+const SS = 4;
+const mescola = (a) => SFONDO.map((c, i) => Math.round(c + (PRIMO_PIANO[i] - c) * a));
+
+/** Frazione di un pixel coperta da `test(u, v)`, con u e v normalizzati nel quadrato di lato `dim` in (ox, oy). */
+function copertura(x, y, ox, oy, dim, test) {
+  let n = 0;
+  for (let sy = 0; sy < SS; sy++)
+    for (let sx = 0; sx < SS; sx++)
+      if (test((x + (sx + 0.5) / SS - ox) / dim, (y + (sy + 0.5) / SS - oy) / dim)) n++;
+  return n / (SS * SS);
+}
+
+/** Icona quadrata piena: orologio bianco su verde petrolio. */
 function icona(size, scala) {
-  const SS = 4;
-  return png(size, (x, y) => {
-    let n = 0;
-    for (let sy = 0; sy < SS; sy++)
-      for (let sx = 0; sx < SS; sx++)
-        if (dentro((x + (sx + 0.5) / SS) / size, (y + (sy + 0.5) / SS) / size, scala)) n++;
-    const a = n / (SS * SS);
-    return SFONDO.map((c, i) => Math.round(c + (PRIMO_PIANO[i] - c) * a));
+  return png(size, size, (x, y) => mescola(copertura(x, y, 0, 0, size, (u, v) => dentro(u, v, scala))));
+}
+
+/** Icona rotonda (Android legacy): fuori dal cerchio è trasparente. */
+function iconaRotonda(size) {
+  return png(size, size, (x, y) => {
+    const cerchio = copertura(x, y, 0, 0, size, (u, v) => Math.hypot(u - 0.5, v - 0.5) <= 0.5);
+    return [...mescola(copertura(x, y, 0, 0, size, (u, v) => dentro(u, v, 1))), Math.round(cerchio * 255)];
+  }, true);
+}
+
+/** Primo piano dell'icona adattiva (Android 8+): solo l'orologio, su fondo trasparente. */
+function primoPiano(size, scala) {
+  return png(size, size, (x, y) => [...PRIMO_PIANO, Math.round(copertura(x, y, 0, 0, size, (u, v) => dentro(u, v, scala)) * 255)], true);
+}
+
+/** Schermata di avvio (Android < 12): fondo verde petrolio, orologio al centro. */
+function splash(w, h) {
+  const dim = Math.round(Math.min(w, h) * 0.45);
+  const ox = (w - dim) / 2, oy = (h - dim) / 2;
+  return png(w, h, (x, y) => {
+    if (x < ox - 1 || x > ox + dim + 1 || y < oy - 1 || y > oy + dim + 1) return SFONDO;
+    return mescola(copertura(x, y, ox, oy, dim, (u, v) => dentro(u, v, 1)));
   });
 }
 
@@ -86,3 +117,22 @@ writeFileSync('public/icons/icon-192.png', icona(192, 1));
 writeFileSync('public/icons/icon-512.png', icona(512, 1));
 writeFileSync('public/icons/icon-maskable-512.png', icona(512, 0.78));
 console.log('Icone generate in public/icons/');
+
+// App Android: stesse icone della PWA in tutte le densità.
+const RES = 'android/app/src/main/res';
+const DENSITA = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
+for (const [nome, k] of Object.entries(DENSITA)) {
+  const dir = `${RES}/mipmap-${nome}`;
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(`${dir}/ic_launcher.png`, icona(48 * k, 1));
+  writeFileSync(`${dir}/ic_launcher_round.png`, iconaRotonda(48 * k));
+  // Tela adattiva di 108dp: come l'icona maskable della PWA, l'orologio resta nella zona sicura.
+  writeFileSync(`${dir}/ic_launcher_foreground.png`, primoPiano(108 * k, 0.78));
+}
+const SPLASH = { mdpi: [320, 480], hdpi: [480, 800], xhdpi: [720, 1280], xxhdpi: [960, 1600], xxxhdpi: [1280, 1920] };
+for (const [nome, [w, h]] of Object.entries(SPLASH)) {
+  writeFileSync(`${RES}/drawable-port-${nome}/splash.png`, splash(w, h));
+  writeFileSync(`${RES}/drawable-land-${nome}/splash.png`, splash(h, w));
+}
+writeFileSync(`${RES}/drawable/splash.png`, splash(480, 320));
+console.log(`Icone e schermate di avvio generate in ${RES}/`);

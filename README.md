@@ -134,7 +134,7 @@ npm run dev        # server di sviluppo
 npm test           # test Vitest del modulo di calcolo
 npm run build      # typecheck + build statica in dist/
 npm run preview    # anteprima della build
-npm run icone      # rigenera le icone PNG (script senza dipendenze)
+npm run icone      # rigenera le icone PNG di PWA e app Android (script senza dipendenze)
 ```
 
 Struttura:
@@ -176,7 +176,8 @@ tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla relea
 come artefatto del workflow. L'APK è firmato con la chiave di debug: va bene per l'installazione
 diretta; per il Play Store serve un bundle firmato con una chiave tua. Il numero di versione viene da
 `package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
-pubblicazione. L'icona è quella predefinita di Capacitor: da sostituire con quella dell'app.
+pubblicazione. Icone e schermata di avvio sono le stesse della PWA: `npm run icone` le rigenera tutte
+(PWA e Android) da `scripts/genera-icone.mjs`.
 
 ### Tag NFC (wave 2, non ancora implementato)
 
