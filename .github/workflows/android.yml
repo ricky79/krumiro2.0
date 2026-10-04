@@ -30,6 +30,10 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: android-actions/setup-android@v3
+        with:
+          # Il predefinito include il pacchetto `tools`, che non esiste più nell'SDK recente.
+          # Piattaforma e build-tools li scarica Gradle quando servono.
+          packages: platform-tools
       - uses: gradle/actions/setup-gradle@v4
       - run: npm ci
       - run: npm test
