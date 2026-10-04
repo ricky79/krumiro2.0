@@ -81,6 +81,20 @@ describe('avviso di rientro dalla pausa sigaretta', () => {
     expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 5 }))).toEqual(['sigaretta 10:04']);
   });
 
+  it('anticipo configurabile', () => {
+    expect(piano(sigaretta(), '10:00', conAvvisi({ sigarettaAnticipo: 3 }))).toEqual(['sigaretta 10:08']);
+  });
+
+  it('anticipo 0: allo scadere della tolleranza', () => {
+    const [a] = pianificaAvvisi(sigaretta(), conAvvisi({ sigarettaAnticipo: 0 }), { data: GIOVEDI, minuti: h('10:00') });
+    expect(a).toMatchObject({ minuti: h('10:11'), titolo: 'Pausa sigaretta finita' });
+  });
+
+  it('anticipo pari o superiore alla tolleranza: niente avviso', () => {
+    expect(piano(sigaretta(), '10:00', conAvvisi({ sigarettaAnticipo: 11 }))).toEqual([]);
+    expect(piano(sigaretta(), '10:00', conAvvisi({ sigarettaAnticipo: 15 }))).toEqual([]);
+  });
+
   it('con tolleranza di 1 minuto o meno non c\'è tempo per avvisare', () => {
     expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 1 }))).toEqual([]);
     expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 0 }))).toEqual([]);
@@ -152,6 +166,6 @@ describe('quando non programmare avvisi', () => {
 
 describe('impostazioni degli avvisi', () => {
   it('predefiniti: tutti attivi, pausa pranzo 30 minuti', () => {
-    expect(imp.avvisi).toEqual({ uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 30 });
+    expect(imp.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
   });
 });

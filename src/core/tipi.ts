@@ -56,8 +56,10 @@ export interface Giornata {
 export interface Avvisi {
   /** Avviso all'ora di uscita prevista. */
   uscita: boolean;
-  /** Avviso di rientro dalla pausa sigaretta, 1 minuto prima della fine della tolleranza. */
+  /** Avviso di rientro dalla pausa sigaretta, `sigarettaAnticipo` minuti prima della fine della tolleranza. */
   sigaretta: boolean;
+  /** Minuti di anticipo dell'avviso della sigaretta rispetto alla fine della tolleranza (0 = alla fine). */
+  sigarettaAnticipo: number;
   /** Avviso di rientro dalla pausa pranzo. */
   pranzo: boolean;
   /** Durata della pausa pranzo dopo la quale avvisare (minuti). */
@@ -95,7 +97,7 @@ export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
   tipoSigaretta: 'normale',
-  avvisi: { uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 30 },
+  avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 },
 };
 
 export type StatoGiornata = 'NON_INIZIATA' | 'AL_LAVORO' | 'IN_PAUSA' | 'IN_PERMESSO' | 'CHIUSA';

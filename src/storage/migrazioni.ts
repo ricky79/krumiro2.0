@@ -101,6 +101,7 @@ export function normalizzaImpostazioni(v: unknown): Impostazioni {
     imp.avvisi = {
       uscita: typeof a.uscita === 'boolean' ? a.uscita : p.avvisi.uscita,
       sigaretta: typeof a.sigaretta === 'boolean' ? a.sigaretta : p.avvisi.sigaretta,
+      sigarettaAnticipo: intIn(a.sigarettaAnticipo, 0, 30) ?? p.avvisi.sigarettaAnticipo,
       pranzo: typeof a.pranzo === 'boolean' ? a.pranzo : p.avvisi.pranzo,
       pranzoMinuti: intIn(a.pranzoMinuti, 1, 240) ?? p.avvisi.pranzoMinuti,
     };

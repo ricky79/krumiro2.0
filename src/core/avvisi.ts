@@ -19,9 +19,6 @@ export interface Avviso {
   testo: string;
 }
 
-/** L'avviso della pausa sigaretta suona questi minuti prima della fine della tolleranza. */
-export const ANTICIPO_SIGARETTA = 1;
-
 export interface OpzioniAvvisi {
   /** Ora attuale (epoch ms): serve per gli avvisi al secondo. */
   ora?: number;
@@ -37,7 +34,8 @@ export interface OpzioniAvvisi {
  *   ancora fatta, la include già). In pausa o in permesso l'uscita prevista non è affidabile,
  *   quindi si riprogramma al rientro.
  * - In pausa pranzo: avviso dopo `avvisi.pranzoMinuti` dall'inizio della pausa.
- * - In pausa sigaretta: avviso `ANTICIPO_SIGARETTA` minuti prima della fine della tolleranza.
+ * - In pausa sigaretta: avviso `avvisi.sigarettaAnticipo` minuti prima della fine della tolleranza
+ *   (0 = alla fine). Se l'anticipo non è minore della tolleranza non c'è nulla da avvisare.
  *   Con l'istante preciso di inizio (salvato dalla schermata della sigaretta) l'avviso è al
  *   secondo; senza, parte dal minuto della timbratura e arriva fino a 59 secondi prima.
  *
@@ -77,13 +75,17 @@ export function pianificaAvvisi(
     });
   } else if (r.stato === 'IN_PERMESSO' && imp.avvisi.sigaretta) {
     const uscita = sigarettaInCorso(giornata);
-    const dopo = imp.tolleranzaSigaretta - ANTICIPO_SIGARETTA; // minuti dall'inizio della pausa
+    const anticipo = imp.avvisi.sigarettaAnticipo;
+    const dopo = imp.tolleranzaSigaretta - anticipo; // minuti dall'inizio della pausa
     if (uscita && dopo > 0) {
       const avviso: Avviso = {
         tipo: 'sigaretta',
         minuti: uscita.minuti + dopo,
-        titolo: 'Pausa sigaretta quasi finita',
-        testo: `Manca ${formattaDurata(ANTICIPO_SIGARETTA)}: oltre la tolleranza la pausa diventa permesso.`,
+        titolo: anticipo > 0 ? 'Pausa sigaretta quasi finita' : 'Pausa sigaretta finita',
+        testo:
+          anticipo > 0
+            ? `Mancano ${formattaDurata(anticipo)}: oltre la tolleranza la pausa diventa permesso.`
+            : 'Rientra ora: oltre la tolleranza la pausa diventa permesso.',
       };
       const inizio = opz.inizioSigaretta?.(uscita.id) ?? null;
       if (inizio !== null && opz.ora !== undefined) {

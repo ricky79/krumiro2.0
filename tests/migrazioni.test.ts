@@ -99,13 +99,14 @@ describe('avvisi nelle impostazioni', () => {
   const avvisi = (v: unknown) => migra({ version: 1, impostazioni: { avvisi: v } }).impostazioni.avvisi;
 
   it('predefiniti: attivi, pranzo 30 minuti', () => {
-    expect(migra({}).impostazioni.avvisi).toEqual({ uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 30 });
+    expect(migra({}).impostazioni.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
   });
 
   it('conserva i valori validi', () => {
-    expect(avvisi({ uscita: false, sigaretta: true, pranzo: false, pranzoMinuti: 45 })).toEqual({
+    expect(avvisi({ uscita: false, sigaretta: true, sigarettaAnticipo: 3, pranzo: false, pranzoMinuti: 45 })).toEqual({
       uscita: false,
       sigaretta: true,
+      sigarettaAnticipo: 3,
       pranzo: false,
       pranzoMinuti: 45,
     });
@@ -116,7 +117,10 @@ describe('avvisi nelle impostazioni', () => {
     expect(avvisi({ pranzoMinuti: 241 }).pranzoMinuti).toBe(30);
     expect(avvisi({ pranzoMinuti: 7.5 }).pranzoMinuti).toBe(30);
     expect(avvisi({ pranzoMinuti: 1 }).pranzoMinuti).toBe(1);
-    expect(avvisi('boh')).toEqual({ uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 30 });
+    expect(avvisi({ sigarettaAnticipo: 0 }).sigarettaAnticipo).toBe(0);
+    expect(avvisi({ sigarettaAnticipo: 31 }).sigarettaAnticipo).toBe(1);
+    expect(avvisi({ sigarettaAnticipo: -1 }).sigarettaAnticipo).toBe(1);
+    expect(avvisi('boh')).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
   });
 
   it('le impostazioni predefinite non vengono mutate', () => {

@@ -43,7 +43,7 @@ Oltre alla PWA esiste un'app Android vera (costruita con [Capacitor](https://cap
 dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiusa:
 - **uscita prevista**: quando puoi andare via;
 - **rientro dal pranzo**: 30 minuti dopo l'inizio della pausa (durata configurabile);
-- **rientro dalla pausa sigaretta**: 1 minuto prima della fine della tolleranza.
+- **rientro dalla pausa sigaretta**: 1 minuto prima della fine della tolleranza (anticipo configurabile, 0 = allo scadere).
 
 Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
 telefono: nessun server, nessun dato fuori dal dispositivo. Nella PWA gli avvisi non esistono.

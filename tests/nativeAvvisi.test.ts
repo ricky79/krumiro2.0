@@ -94,7 +94,7 @@ describe('programmazione delle notifiche', () => {
     ln.schedule.mockClear();
     ln.cancel.mockClear();
     dati.giornata = giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '09:50']]);
-    dati.impostazioni = impostazioni({ avvisi: { uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 45 } });
+    dati.impostazioni = impostazioni({ avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 45 } });
     await sincronizzaAvvisi();
     expect(ln.cancel).toHaveBeenCalledOnce();
     const { notifications } = ln.schedule.mock.calls[0]![0] as { notifications: Record<string, unknown>[] };
