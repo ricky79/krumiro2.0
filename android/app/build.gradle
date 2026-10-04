@@ -19,10 +19,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Firma fissa delle release: la CI ricava il keystore dai secret del repository e passa
+    // percorso e password come variabili d'ambiente. Il keystore non sta mai nel repository.
+    def keystoreRelease = System.getenv('KRUMIRO_KEYSTORE')
+    signingConfigs {
+        release {
+            if (keystoreRelease) {
+                storeFile = file(keystoreRelease)
+                storePassword = System.getenv('KRUMIRO_KEYSTORE_PASSWORD')
+                keyAlias = System.getenv('KRUMIRO_KEY_ALIAS') ?: 'krumiro'
+                keyPassword = System.getenv('KRUMIRO_KEYSTORE_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystoreRelease) {
+                signingConfig = signingConfigs.release
+            }
         }
     }
 }

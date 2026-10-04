@@ -2,3 +2,6 @@ node_modules
 dist
 *.local
 .DS_Store
+# Chiavi di firma Android: solo nei secret del repository, mai nel codice
+*.jks
+*.keystore

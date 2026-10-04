@@ -41,11 +41,36 @@ jobs:
       - name: Versione dell'app
         id: versione
         run: echo "numero=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      # Con i secret KRUMIRO_KEYSTORE_BASE64 e KRUMIRO_KEYSTORE_PASSWORD l'APK è firmato sempre con
+      # la stessa chiave, quindi ogni versione si installa sopra la precedente. Senza, si ripiega su
+      # una chiave di debug che cambia a ogni esecuzione.
+      - name: Prepara la chiave di firma
+        id: firma
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KRUMIRO_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/krumiro.jks"
+            echo "KRUMIRO_KEYSTORE=$RUNNER_TEMP/krumiro.jks" >> "$GITHUB_ENV"
+            echo "tipo=release" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Secret KRUMIRO_KEYSTORE_BASE64 assente: APK firmato con una chiave di debug temporanea, non si installa sopra le versioni precedenti."
+            echo "tipo=debug" >> "$GITHUB_OUTPUT"
+          fi
       - name: Costruisci l'APK
         working-directory: android
-        run: ./gradlew assembleDebug -PversionName=${{ steps.versione.outputs.numero }} -PversionCode=${{ github.run_number }}
-      - name: Rinomina l'APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk krumiro-${{ steps.versione.outputs.numero }}.apk
+        env:
+          KRUMIRO_KEYSTORE_PASSWORD: ${{ secrets.KRUMIRO_KEYSTORE_PASSWORD }}
+          TIPO: ${{ steps.firma.outputs.tipo }}
+          VERSIONE: ${{ steps.versione.outputs.numero }}
+        run: |
+          if [ "$TIPO" = release ]; then
+            ./gradlew assembleRelease -PversionName="$VERSIONE" -PversionCode=${{ github.run_number }}
+            cp app/build/outputs/apk/release/app-release.apk "../krumiro-$VERSIONE.apk"
+          else
+            ./gradlew assembleDebug -PversionName="$VERSIONE" -PversionCode=${{ github.run_number }}
+            cp app/build/outputs/apk/debug/app-debug.apk "../krumiro-$VERSIONE.apk"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: krumiro-apk

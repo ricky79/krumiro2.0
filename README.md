@@ -173,8 +173,24 @@ Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web es
 
 **APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK a ogni push di un
 tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla release e lo salva anche
-come artefatto del workflow. L'APK è firmato con la chiave di debug: va bene per l'installazione
-diretta; per il Play Store serve un bundle firmato con una chiave tua. Il numero di versione viene da
+come artefatto del workflow.
+
+**Firma dell'APK:** perché ogni versione si installi sopra la precedente, l'APK va firmato sempre con
+la stessa chiave. La chiave non sta nel repository ma in due *secret* (Settings → Secrets and
+variables → Actions): `KRUMIRO_KEYSTORE_BASE64` (il keystore `.jks` codificato in base64) e
+`KRUMIRO_KEYSTORE_PASSWORD`; l'alias è `krumiro`. Con i secret il workflow costruisce e firma la
+release; senza, ripiega su una chiave di debug che cambia a ogni esecuzione (avviso nel log), e quegli
+APK non si aggiornano uno sopra l'altro. Per creare una chiave nuova:
+
+```bash
+keytool -genkeypair -keystore krumiro-firma.jks -storetype PKCS12 -alias krumiro \
+  -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Krumiro, C=IT"
+base64 -w0 krumiro-firma.jks   # valore del secret KRUMIRO_KEYSTORE_BASE64
+```
+
+Conserva keystore e password fuori dal repository (sono già esclusi da `.gitignore`): se li perdi,
+le nuove versioni non si installano sopra quelle esistenti. La stessa chiave serve anche per il
+Play Store. Il numero di versione viene da
 `package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
 pubblicazione. Icone e schermata di avvio sono le stesse della PWA: `npm run icone` le rigenera tutte
 (PWA e Android) da `scripts/genera-icone.mjs`.
