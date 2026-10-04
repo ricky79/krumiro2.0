@@ -11,6 +11,8 @@ import { apriAiuto, EVENTO_APRI_AIUTO, vistaAiuto } from './ui/aiuto';
 import { registraServiceWorker } from './pwa';
 import { avviaTema } from './ui/tema';
 import { avviaBannerInstallazione } from './ui/installa';
+import { inApp } from './native/app';
+import { avviaAvvisi } from './native/avvisi';
 
 type Scheda = 'oggi' | 'storico' | 'impostazioni' | 'aiuto';
 
@@ -107,6 +109,11 @@ document.addEventListener('visibilitychange', () => {
 });
 
 void richiediPersistenza();
-registraServiceWorker();
-avviaBannerInstallazione(() => apriAiuto('installazione'));
+if (inApp()) {
+  // App Android: niente service worker né invito a installare; le notifiche sono locali.
+  avviaAvvisi();
+} else {
+  registraServiceWorker();
+  avviaBannerInstallazione(() => apriAiuto('installazione'));
+}
 if (store.erroreCaricamento) void avviso('Attenzione', store.erroreCaricamento);

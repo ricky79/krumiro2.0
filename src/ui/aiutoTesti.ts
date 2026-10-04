@@ -24,6 +24,7 @@ export const SEZIONI_AIUTO = [
   'Correggere gli errori',
   'Storico e riepilogo',
   'Dati e backup',
+  'Avvisi',
   'Installazione',
 ] as const;
 
@@ -34,6 +35,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
   const pausaMin = formattaDurata(imp.pausaMinima);
   const dovute = formattaDurata(imp.minutiDovuti.predefinito);
   const tolleranza = formattaDurata(imp.tolleranzaSigaretta);
+  const pranzoAvviso = formattaDurata(imp.avvisi.pranzoMinuti);
   const inizioProposta = imp.pranzo.inizio + OFFSET_PAUSA_PROPOSTA;
   const pausaProposta = `${formattaOra(inizioProposta)}–${formattaOra(inizioProposta + DURATA_PAUSA_PROPOSTA)}`;
   const fineSigaretta =
@@ -305,6 +307,32 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       ],
     },
 
+    // --- Avvisi
+    {
+      id: 'avvisi',
+      sezione: 'Avvisi',
+      domanda: 'Come funzionano gli avvisi?',
+      testo: [
+        'Nell\'app per Android ricevi una notifica, anche ad app chiusa, in tre momenti:',
+        '• Uscita prevista: quando puoi andare via. Si programma mentre sei al lavoro e si aggiorna se modifichi le timbrature.',
+        `• Rientro dal pranzo: ${pranzoAvviso} dopo l'inizio della pausa. La durata si cambia in Impostazioni → Avvisi.`,
+        `• Pausa sigaretta: allo scadere della tolleranza (${tolleranza}), per rientrare prima che diventi permesso.`,
+        'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato.',
+        'Gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo. Nella PWA (Safari o Chrome) non sono disponibili.',
+      ],
+    },
+    {
+      id: 'avvisi-non-arrivano',
+      sezione: 'Avvisi',
+      domanda: 'Gli avvisi non arrivano o arrivano in ritardo',
+      testo: [
+        '• Controlla in Impostazioni → Avvisi che le notifiche siano autorizzate; se serve tocca "Autorizza gli avvisi".',
+        '• Su Android 12 e successivi concedi anche "Sveglie e promemoria" all\'app: senza, gli avvisi possono ritardare di qualche minuto.',
+        '• Nelle impostazioni di Android (App → Timbrature) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
+        '• Se hai attivato "Non disturbare" o una modalità Focus, le notifiche vengono silenziate.',
+      ],
+    },
+
     // --- Installazione
     {
       id: 'installazione',
@@ -327,6 +355,17 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Scegli "Installa app" (su alcune versioni "Aggiungi a schermata Home", poi "Installa") e conferma.',
         'Apri l\'app dall\'icona: parte a tutto schermo e funziona anche offline.',
         'Con Samsung Internet usa il menu ☰ → "Aggiungi pagina a" → "Schermata Home"; con Firefox ⋮ → "Installa". Se la voce non compare, ricarica la pagina e riprova.',
+      ],
+    },
+    {
+      id: 'installazione-app',
+      sezione: 'Installazione',
+      domanda: 'C\'è un\'app per Android con gli avvisi?',
+      testo: [
+        '• Scarica il file APK dalla pagina delle release del progetto su GitHub.',
+        '• Aprilo: Android chiede di consentire l\'installazione da questa fonte. Conferma e installa.',
+        '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
+        'L\'app ha dati separati dalla PWA: per portarli con te esporta il backup JSON dalla PWA e importalo nell\'app. Gli aggiornamenti si installano scaricando il nuovo APK.',
       ],
     },
     {

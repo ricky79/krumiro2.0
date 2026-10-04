@@ -26,6 +26,7 @@ export function clonaImpostazioni(i: Impostazioni): Impostazioni {
     ...i,
     minutiDovuti: { predefinito: i.minutiDovuti.predefinito, perGiorno: [...i.minutiDovuti.perGiorno] },
     pranzo: { ...i.pranzo },
+    avvisi: { ...i.avvisi },
   };
 }
 
@@ -95,6 +96,15 @@ export function normalizzaImpostazioni(v: unknown): Impostazioni {
   imp.tolleranzaSigaretta = intIn(v.tolleranzaSigaretta, 0, 60) ?? p.tolleranzaSigaretta;
   const tipo = v.tipoSigaretta;
   imp.tipoSigaretta = tipo === 'normale' || tipo === 'elettronica' ? tipo : p.tipoSigaretta;
+  if (isObj(v.avvisi)) {
+    const a = v.avvisi;
+    imp.avvisi = {
+      uscita: typeof a.uscita === 'boolean' ? a.uscita : p.avvisi.uscita,
+      sigaretta: typeof a.sigaretta === 'boolean' ? a.sigaretta : p.avvisi.sigaretta,
+      pranzo: typeof a.pranzo === 'boolean' ? a.pranzo : p.avvisi.pranzo,
+      pranzoMinuti: intIn(a.pranzoMinuti, 1, 240) ?? p.avvisi.pranzoMinuti,
+    };
+  }
   return imp;
 }
 

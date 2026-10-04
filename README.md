@@ -37,6 +37,23 @@ usa **⋮ → Installa**. Se la voce non compare, ricarica la pagina e riprova.
 Dopo la prima apertura l'app funziona anche **senza connessione**. Quando viene pubblicata una
 nuova versione, viene scaricata in background e applicata alla successiva apertura.
 
+### App Android con gli avvisi
+
+Oltre alla PWA esiste un'app Android vera (costruita con [Capacitor](https://capacitorjs.com)
+dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiusa:
+- **uscita prevista**: quando puoi andare via;
+- **rientro dal pranzo**: 30 minuti dopo l'inizio della pausa (durata configurabile);
+- **rientro dalla pausa sigaretta**: allo scadere della tolleranza.
+
+Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
+telefono: nessun server, nessun dato fuori dal dispositivo. Nella PWA gli avvisi non esistono.
+
+Per installarla scarica l'APK dalla pagina delle *Release* del repository, aprilo e consenti
+l'installazione da questa fonte. Alla prima apertura autorizza le notifiche e, su Android 12+,
+anche "Sveglie e promemoria" (altrimenti gli avvisi possono ritardare di qualche minuto).
+I dati dell'app sono separati da quelli della PWA: per spostarli usa il backup JSON.
+Gli aggiornamenti si installano scaricando il nuovo APK.
+
 ### Attenzione ai dati
 
 - **iPhone**: i dati dell'app installata sono separati da quelli di Safari, quindi usa sempre
@@ -139,6 +156,27 @@ e pubblica `dist/` su GitHub Pages. Va configurato una volta sola:
 2. In **Build and deployment → Source** scegli **GitHub Actions**.
 
 Il `base` in `vite.config.ts` è `/krumiro2.0/`. Se rinomini il repository, aggiornalo.
+
+### App Android
+
+L'app (cartella `android/`) racchiude la build web in un contenitore Android. Il codice è lo stesso
+della PWA: la parte nativa è solo `src/native/` (notifiche) e `capacitor.config.ts`.
+
+```bash
+npm run build:android   # build web per Android (base './', senza service worker) + cap sync
+npm run android:apri    # come sopra e apre Android Studio
+```
+
+Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web esegui di nuovo
+`npm run build:android`. Gli avvisi si calcolano in `src/core/avvisi.ts` (funzione pura, con test);
+`src/native/avvisi.ts` li programma con il plugin `@capacitor/local-notifications`.
+
+**APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK a ogni push di un
+tag `v*` (per esempio `git tag v1.8.0 && git push --tags`), lo allega alla release e lo salva anche
+come artefatto del workflow. L'APK è firmato con la chiave di debug: va bene per l'installazione
+diretta; per il Play Store serve un bundle firmato con una chiave tua. Il numero di versione viene da
+`package.json`. L'`appId` (`io.github.ricky79.timbrature`) non si può più cambiare dopo la
+pubblicazione. L'icona è quella predefinita di Capacitor: da sostituire con quella dell'app.
 
 ### Schema dei dati
 

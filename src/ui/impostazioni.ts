@@ -9,6 +9,8 @@ import { linkAiuto } from './aiuto';
 import { esportaBackupJson, esportaCsvCondividi, importaFile } from './dati';
 import type { Adesso } from './giorno';
 import { impostaPreferenza, preferenzaTema, type PreferenzaTema } from './tema';
+import { inApp } from '../native/app';
+import { richiediPermessi, statoPermessi, type StatoPermessi } from '../native/avvisi';
 
 /** Lunedì → domenica, come in un calendario italiano. */
 const ORDINE_GIORNI = [1, 2, 3, 4, 5, 6, 0];
@@ -18,11 +20,11 @@ function inputHHMM(minuti: number, onCambio: (v: number) => void, aria: string):
   return selettoreOra(minuti, { aria, onChange: onCambio }).elemento;
 }
 
-function inputMinuti(valore: number, onCambio: (v: number) => void, aria: string, max = 600, step = 5): HTMLInputElement {
-  const i = el('input', { type: 'number', inputmode: 'numeric', min: 0, max, step, value: String(valore), 'aria-label': aria });
+function inputMinuti(valore: number, onCambio: (v: number) => void, aria: string, max = 600, step = 5, min = 0): HTMLInputElement {
+  const i = el('input', { type: 'number', inputmode: 'numeric', min, max, step, value: String(valore), 'aria-label': aria });
   i.addEventListener('change', () => {
     const v = Math.round(Number(i.value));
-    if (!Number.isFinite(v) || v < 0 || v > max) {
+    if (!Number.isFinite(v) || v < min || v > max) {
       i.value = String(valore);
       return;
     }
@@ -42,6 +44,52 @@ function riga(etichetta: string, controllo: HTMLElement, nota?: string): HTMLEle
 }
 
 const salvato = () => toast('Impostazioni salvate');
+
+/** Casella di spunta delle impostazioni. */
+function interruttore(valore: boolean, onCambio: (v: boolean) => void, aria: string): HTMLInputElement {
+  const i = el('input', { type: 'checkbox', checked: valore, 'aria-label': aria, class: 'interruttore' });
+  i.addEventListener('change', () => onCambio(i.checked));
+  return i;
+}
+
+const TESTO_PERMESSI: Record<StatoPermessi, string> = {
+  concessi: 'Notifiche autorizzate.',
+  negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Timbrature → Notifiche).',
+  'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
+  'non-disponibili': 'Gli avvisi funzionano solo nell\'app per Android: nel browser e nella PWA non sono disponibili.',
+};
+
+/** Sezione Avvisi: scelta degli avvisi, durata del pranzo e stato dei permessi del telefono. */
+function sezioneAvvisi(): HTMLElement {
+  const avvisi = store.impostazioni.avvisi;
+  const nativa = inApp();
+  const stato = el('small', { class: 'nota' }, nativa ? 'Controllo dei permessi…' : TESTO_PERMESSI['non-disponibili']);
+  const pulsante = el('button', { type: 'button', class: 'btn btn-secondario', hidden: true }, 'Autorizza gli avvisi');
+  const mostra = (s: StatoPermessi) => {
+    stato.textContent = TESTO_PERMESSI[s];
+    pulsante.hidden = s === 'concessi' || s === 'non-disponibili';
+  };
+  if (nativa) {
+    void statoPermessi().then(mostra);
+    pulsante.addEventListener('click', () => void richiediPermessi().then(mostra));
+  }
+  const cambia = (modifica: (a: typeof avvisi) => void) => {
+    store.modificaImpostazioni((i) => modifica(i.avvisi));
+    salvato();
+  };
+  return el(
+    'div',
+    { class: 'scheda' },
+    el('h2', { class: 'titolo-sezione' }, 'Avvisi'),
+    stato,
+    pulsante,
+    riga('Uscita prevista', interruttore(avvisi.uscita, (v) => cambia((a) => void (a.uscita = v)), 'Avviso di uscita prevista'), 'quando puoi andare via'),
+    riga('Rientro dal pranzo', interruttore(avvisi.pranzo, (v) => cambia((a) => void (a.pranzo = v)), 'Avviso di rientro dalla pausa pranzo'), 'dopo la durata qui sotto'),
+    riga('Durata del pranzo (min)', inputMinuti(avvisi.pranzoMinuti, (v) => cambia((a) => void (a.pranzoMinuti = v)), 'Durata della pausa pranzo in minuti', 240, 5, 1), 'di quanto avvisare dopo l\'inizio della pausa'),
+    riga('Rientro dalla sigaretta', interruttore(avvisi.sigaretta, (v) => cambia((a) => void (a.sigaretta = v)), 'Avviso di rientro dalla pausa sigaretta'), 'allo scadere della tolleranza'),
+    linkAiuto('Come funzionano gli avvisi?', 'avvisi'),
+  );
+}
 
 const OPZIONI_TEMA: [PreferenzaTema, string][] = [
   ['auto', 'Automatico'],
@@ -187,6 +235,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
       }, 'Tolleranza della pausa sigaretta in minuti', 60, 1), 'entro questo tempo la pausa non viene conteggiata'),
       linkAiuto('Come funziona la pausa sigaretta?', 'pausa-sigaretta'),
     ),
+    sezioneAvvisi(),
     el(
       'div',
       { class: 'scheda' },
@@ -201,7 +250,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
           type: 'button',
           class: 'btn btn-secondario',
           onclick: async () => {
-            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 60 min da scalare, tolleranza sigaretta 11 min, sigaretta normale). Le timbrature non vengono toccate.', 'Ripristina', true)) {
+            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 60 min da scalare, tolleranza sigaretta 11 min, sigaretta normale, avvisi attivi con pranzo da 30 min). Le timbrature non vengono toccate.', 'Ripristina', true)) {
               store.modificaImpostazioni((i) => Object.assign(i, clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE)));
               salvato();
             }

@@ -1,0 +1,56 @@
+name: App Android
+
+# Costruisce l'APK dell'app (Capacitor). Con un tag `v*` lo allega alla release di GitHub.
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'capacitor.config.ts'
+      - 'src/native/**'
+      - 'package.json'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write # serve solo per allegare l'APK alla release
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:android
+      - name: Versione dell'app
+        id: versione
+        run: echo "numero=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Costruisci l'APK
+        working-directory: android
+        run: ./gradlew assembleDebug -PversionName=${{ steps.versione.outputs.numero }} -PversionCode=${{ github.run_number }}
+      - name: Rinomina l'APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk timbrature-${{ steps.versione.outputs.numero }}.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: timbrature-apk
+          path: timbrature-${{ steps.versione.outputs.numero }}.apk
+      - name: Allega l'APK alla release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes
+          gh release upload "$TAG" timbrature-${{ steps.versione.outputs.numero }}.apk --clobber

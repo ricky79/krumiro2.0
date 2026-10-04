@@ -52,6 +52,18 @@ export interface Giornata {
   eventi: Evento[];
 }
 
+/** Avvisi (notifiche) dell'app Android: quali ricevere e dopo quanto avvisare del rientro dal pranzo. */
+export interface Avvisi {
+  /** Avviso all'ora di uscita prevista. */
+  uscita: boolean;
+  /** Avviso di rientro dalla pausa sigaretta, allo scadere della tolleranza. */
+  sigaretta: boolean;
+  /** Avviso di rientro dalla pausa pranzo. */
+  pranzo: boolean;
+  /** Durata della pausa pranzo dopo la quale avvisare (minuti). */
+  pranzoMinuti: number;
+}
+
 /** Disegno della schermata della pausa sigaretta. */
 export type TipoSigaretta = 'normale' | 'elettronica';
 
@@ -72,6 +84,7 @@ export interface Impostazioni {
   tolleranzaSigaretta: number;
   /** Disegno della schermata della pausa: sigaretta normale o elettronica. */
   tipoSigaretta: TipoSigaretta;
+  avvisi: Avvisi;
 }
 
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
@@ -82,6 +95,7 @@ export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
   tipoSigaretta: 'normale',
+  avvisi: { uscita: true, sigaretta: true, pranzo: true, pranzoMinuti: 30 },
 };
 
 export type StatoGiornata = 'NON_INIZIATA' | 'AL_LAVORO' | 'IN_PAUSA' | 'IN_PERMESSO' | 'CHIUSA';
