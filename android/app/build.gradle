@@ -8,8 +8,10 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // La CI passa la versione di package.json e il numero della build: -PversionName=1.8.0 -PversionCode=42
-        versionCode (project.findProperty('versionCode') ?: '1').toInteger()
-        versionName (project.findProperty('versionName') ?: '1.0')
+        // Assegnazione con "=": senza, Groovy leggerebbe `versionCode (x).toInteger()` come
+        // `versionCode(x).toInteger()` e passerebbe una stringa.
+        versionCode = (project.findProperty('versionCode') ?: '1') as Integer
+        versionName = (project.findProperty('versionName') ?: '1.0') as String
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
