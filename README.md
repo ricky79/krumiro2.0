@@ -178,6 +178,23 @@ diretta; per il Play Store serve un bundle firmato con una chiave tua. Il numero
 `package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
 pubblicazione. L'icona è quella predefinita di Capacitor: da sostituire con quella dell'app.
 
+### Tag NFC (wave 2, non ancora implementato)
+
+Un tag NFC appoggiato al telefono registrerà l'**azione successiva** (il bottone principale della
+schermata Oggi), senza backend: il tag contiene solo un indirizzo, Android apre l'app e l'app
+registra. Decisioni già prese, perché i tag fisici già scritti non si possono più cambiare:
+
+1. **Contenuto del tag:** un record URI `krumiro://timbra` (schema `krumiro`, solo app Android).
+2. **Casi ambigui:** l'app non indovina. Se il bottone principale non corrisponde a ciò che si vuole
+   (uscita senza pausa registrata, rientro da un permesso che copre il pranzo) apre la schermata di
+   conferma invece di registrare.
+3. **Protezione dagli errori:** dopo la registrazione compare un avviso con **Annulla** per qualche
+   secondo, e un secondo tocco entro circa un minuto viene ignorato.
+
+Android legge i tag solo con schermo acceso e telefono sbloccato. Da fare nella wave 2: lettura
+dell'indirizzo di avvio (`@capacitor/app`), filtro per lo schema nel manifest, funzione pura che decide
+cosa registrare (con test), avviso con Annulla, istruzioni per scrivere e bloccare il tag.
+
 ### Schema dei dati
 
 I dati sono salvati nella chiave `timbrature` di localStorage, con un campo `version`.
