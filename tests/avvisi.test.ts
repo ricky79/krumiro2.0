@@ -73,20 +73,44 @@ describe('avviso di rientro dalla pausa sigaretta', () => {
     return g;
   };
 
-  it('alla scadenza della tolleranza (11 minuti di default)', () => {
-    expect(piano(sigaretta(), '10:00')).toEqual(['sigaretta 10:11']);
+  it('1 minuto prima della fine della tolleranza (11 minuti di default)', () => {
+    expect(piano(sigaretta(), '10:00')).toEqual(['sigaretta 10:10']);
   });
 
   it('segue la tolleranza configurata', () => {
-    expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 5 }))).toEqual(['sigaretta 10:05']);
+    expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 5 }))).toEqual(['sigaretta 10:04']);
   });
 
-  it('con tolleranza 0 non c\'è niente da avvisare', () => {
+  it('con tolleranza di 1 minuto o meno non c\'è tempo per avvisare', () => {
+    expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 1 }))).toEqual([]);
     expect(piano(sigaretta(), '10:00', impostazioni({ tolleranzaSigaretta: 0 }))).toEqual([]);
   });
 
-  it('nessun avviso a tolleranza scaduta', () => {
+  it('nessun avviso se il minuto prima della fine è già passato', () => {
+    expect(piano(sigaretta(), '10:10')).toEqual([]);
     expect(piano(sigaretta(), '10:20')).toEqual([]);
+  });
+
+  describe('con l\'istante preciso di inizio', () => {
+    // 10:00:40 a Roma (UTC+2): la pausa è iniziata 40 secondi dopo il minuto della timbratura.
+    const inizio = Date.parse('2026-10-01T08:00:40Z');
+    const opz = (ora: string) => ({ ora: Date.parse(ora), inizioSigaretta: (id: string) => (id === g.eventi[1]!.id ? inizio : null) });
+    const g = sigaretta();
+
+    it('suona esattamente 1 minuto prima della fine, al secondo', () => {
+      const [a] = pianificaAvvisi(g, imp, { data: GIOVEDI, minuti: h('10:01') }, opz('2026-10-01T08:01:00Z'));
+      expect(a).toMatchObject({ tipo: 'sigaretta', istante: inizio + 10 * 60_000 }); // 10:10:40
+    });
+
+    it('nessun avviso se quell\'istante è già passato, anche nello stesso minuto', () => {
+      expect(pianificaAvvisi(g, imp, { data: GIOVEDI, minuti: h('10:10') }, opz('2026-10-01T08:10:50Z'))).toEqual([]);
+    });
+
+    it('istante di un\'altra pausa: si torna al minuto della timbratura', () => {
+      const [a] = pianificaAvvisi(g, imp, { data: GIOVEDI, minuti: h('10:01') }, { ora: Date.parse('2026-10-01T08:01:00Z'), inizioSigaretta: () => null });
+      expect(a).toMatchObject({ tipo: 'sigaretta', minuti: h('10:10') });
+      expect(a!.istante).toBeUndefined();
+    });
   });
 
   it('un permesso normale non genera avvisi', () => {

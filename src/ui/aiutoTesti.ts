@@ -316,7 +316,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'Nell\'app per Android ricevi una notifica, anche ad app chiusa, in tre momenti:',
         '• Uscita prevista: quando puoi andare via. Si programma mentre sei al lavoro e si aggiorna se modifichi le timbrature.',
         `• Rientro dal pranzo: ${pranzoAvviso} dopo l'inizio della pausa. La durata si cambia in Impostazioni → Avvisi.`,
-        `• Pausa sigaretta: allo scadere della tolleranza (${tolleranza}), per rientrare prima che diventi permesso.`,
+        `• Pausa sigaretta: 1 minuto prima della fine della tolleranza (${tolleranza}), per rientrare prima che diventi permesso.`,
         'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato.',
         'Gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo. Nella PWA (Safari o Chrome) non sono disponibili.',
       ],

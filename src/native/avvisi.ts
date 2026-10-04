@@ -2,6 +2,7 @@ import { ID_AVVISO, pianificaAvvisi, type Avviso } from '../core/avvisi';
 import { istanteDaMinuti } from '../core/sigaretta';
 import { adessoRoma } from '../core/tempo';
 import { store } from '../storage/store';
+import { inizioSigarettaSalvato } from '../ui/inizioSigaretta';
 import { inApp } from './app';
 
 /** Notifiche locali dell'app Android: programmate sul telefono, suonano anche ad app chiusa. */
@@ -59,7 +60,10 @@ let coda: Promise<void> = Promise.resolve();
 async function esegui(): Promise<void> {
   const ora = new Date();
   const { data, minuti } = adessoRoma(ora);
-  const piano: Avviso[] = pianificaAvvisi(store.giornata(data), store.impostazioni, { data, minuti });
+  const piano: Avviso[] = pianificaAvvisi(store.giornata(data), store.impostazioni, { data, minuti }, {
+    ora: ora.getTime(),
+    inizioSigaretta: (eventoId) => inizioSigarettaSalvato(data, eventoId),
+  });
   const firma = JSON.stringify(piano);
   if (firma === ultimaFirma) return;
 
@@ -90,7 +94,7 @@ async function esegui(): Promise<void> {
         title: a.titolo,
         body: a.testo,
         channelId: CANALE,
-        schedule: { at: new Date(istanteDaMinuti(a.minuti, ora)), allowWhileIdle: true },
+        schedule: { at: new Date(a.istante ?? istanteDaMinuti(a.minuti, ora)), allowWhileIdle: true },
         isExactNotification: esatti,
       })),
     });

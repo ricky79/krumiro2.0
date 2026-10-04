@@ -56,7 +56,7 @@ export interface Giornata {
 export interface Avvisi {
   /** Avviso all'ora di uscita prevista. */
   uscita: boolean;
-  /** Avviso di rientro dalla pausa sigaretta, allo scadere della tolleranza. */
+  /** Avviso di rientro dalla pausa sigaretta, 1 minuto prima della fine della tolleranza. */
   sigaretta: boolean;
   /** Avviso di rientro dalla pausa pranzo. */
   pranzo: boolean;

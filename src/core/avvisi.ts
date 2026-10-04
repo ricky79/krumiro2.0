@@ -13,8 +13,20 @@ export interface Avviso {
   tipo: TipoAvviso;
   /** Minuti dalla mezzanotte di oggi (Europe/Rome) in cui l'avviso deve suonare. */
   minuti: number;
+  /** Istante esatto (epoch ms), quando è noto al secondo: prevale su `minuti`. */
+  istante?: number;
   titolo: string;
   testo: string;
+}
+
+/** L'avviso della pausa sigaretta suona questi minuti prima della fine della tolleranza. */
+export const ANTICIPO_SIGARETTA = 1;
+
+export interface OpzioniAvvisi {
+  /** Ora attuale (epoch ms): serve per gli avvisi al secondo. */
+  ora?: number;
+  /** Istante preciso di inizio della pausa sigaretta aperta dall'evento indicato, se salvato. */
+  inizioSigaretta?: (eventoId: string) => number | null;
 }
 
 /**
@@ -25,8 +37,9 @@ export interface Avviso {
  *   ancora fatta, la include già). In pausa o in permesso l'uscita prevista non è affidabile,
  *   quindi si riprogramma al rientro.
  * - In pausa pranzo: avviso dopo `avvisi.pranzoMinuti` dall'inizio della pausa.
- * - In pausa sigaretta: avviso allo scadere della tolleranza. L'avviso parte dal minuto in cui
- *   si è timbrata l'uscita, quindi arriva al più 59 secondi prima della scadenza esatta.
+ * - In pausa sigaretta: avviso `ANTICIPO_SIGARETTA` minuti prima della fine della tolleranza.
+ *   Con l'istante preciso di inizio (salvato dalla schermata della sigaretta) l'avviso è al
+ *   secondo; senza, parte dal minuto della timbratura e arriva fino a 59 secondi prima.
  *
  * Niente avvisi per giornate di altri giorni, da correggere, chiuse o non iniziate, né per
  * orari già passati.
@@ -35,6 +48,7 @@ export function pianificaAvvisi(
   giornata: Giornata,
   imp: Impostazioni,
   adesso: { data: string; minuti: number },
+  opz: OpzioniAvvisi = {},
 ): Avviso[] {
   if (giornata.data !== adesso.data) return [];
   const r = calcolaGiornata(giornata, imp, adesso.minuti);
@@ -63,13 +77,21 @@ export function pianificaAvvisi(
     });
   } else if (r.stato === 'IN_PERMESSO' && imp.avvisi.sigaretta) {
     const uscita = sigarettaInCorso(giornata);
-    if (uscita) {
-      aggiungi({
+    const dopo = imp.tolleranzaSigaretta - ANTICIPO_SIGARETTA; // minuti dall'inizio della pausa
+    if (uscita && dopo > 0) {
+      const avviso: Avviso = {
         tipo: 'sigaretta',
-        minuti: uscita.minuti + imp.tolleranzaSigaretta,
-        titolo: 'Pausa sigaretta finita',
-        testo: 'Rientra ora: oltre la tolleranza la pausa diventa permesso.',
-      });
+        minuti: uscita.minuti + dopo,
+        titolo: 'Pausa sigaretta quasi finita',
+        testo: `Manca ${formattaDurata(ANTICIPO_SIGARETTA)}: oltre la tolleranza la pausa diventa permesso.`,
+      };
+      const inizio = opz.inizioSigaretta?.(uscita.id) ?? null;
+      if (inizio !== null && opz.ora !== undefined) {
+        const istante = inizio + dopo * 60_000;
+        if (istante > opz.ora) avvisi.push({ ...avviso, istante });
+      } else {
+        aggiungi(avviso);
+      }
     }
   }
   return avvisi;

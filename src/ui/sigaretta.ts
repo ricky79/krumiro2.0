@@ -16,40 +16,10 @@ import { store } from '../storage/store';
 import { avviso, conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { creaDisegno } from './sigarettaDisegni';
-
-/** Istante preciso di inizio: è uno stato del dispositivo, non dei dati (come tema e banner). */
-const CHIAVE = 'timbrature-sigaretta';
-
-interface InizioSalvato {
-  data: string;
-  eventoId: string;
-  inizio: number;
-}
-
-function salvaInizio(v: InizioSalvato): void {
-  try {
-    localStorage.setItem(CHIAVE, JSON.stringify(v));
-  } catch {
-    /* si userà l'orario della timbratura */
-  }
-}
+import { cancellaInizioSigaretta, inizioSigarettaSalvato, salvaInizioSigaretta } from './inizioSigaretta';
 
 function leggiInizio(data: string, uscita: Evento): number {
-  try {
-    const v = JSON.parse(localStorage.getItem(CHIAVE) ?? 'null') as Partial<InizioSalvato> | null;
-    if (v && v.data === data && v.eventoId === uscita.id && typeof v.inizio === 'number') return v.inizio;
-  } catch {
-    /* chiave illeggibile */
-  }
-  return istanteDaMinuti(uscita.minuti, new Date());
-}
-
-function cancellaInizio(): void {
-  try {
-    localStorage.removeItem(CHIAVE);
-  } catch {
-    /* ignora */
-  }
+  return inizioSigarettaSalvato(data, uscita.id) ?? istanteDaMinuti(uscita.minuti, new Date());
 }
 
 let aperta = false;
@@ -57,7 +27,7 @@ let aperta = false;
 /** Registra l'uscita della pausa sigaretta e apre la schermata. */
 export function avviaPausaSigaretta(data: string, minuti: number): void {
   const uscita: Evento = { id: nuovoId(), tipo: 'USCITA_PERMESSO', minuti, sigaretta: true };
-  salvaInizio({ data, eventoId: uscita.id, inizio: Date.now() });
+  salvaInizioSigaretta({ data, eventoId: uscita.id, inizio: Date.now() });
   store.modificaGiornata(data, (g) => void g.eventi.push({ ...uscita }));
   if (!aperta) apriSchermata(data, uscita);
 }
@@ -92,7 +62,7 @@ function apriSchermata(data: string, uscita: Evento): void {
     if (chiusaDaNoi) return true;
     if (adessoRoma().data === data) return false;
     termina();
-    cancellaInizio();
+    cancellaInizioSigaretta();
     void avviso(
       'Pausa sigaretta non chiusa',
       `Il rientro di ${formattaDataLunga(data)} non è stato registrato: correggi la giornata dallo Storico.`,
@@ -138,7 +108,7 @@ function apriSchermata(data: string, uscita: Evento): void {
             );
             if (!ok || giornoCambiato()) return;
             termina();
-            cancellaInizio();
+            cancellaInizioSigaretta();
             store.modificaGiornata(data, (g) => void (g.eventi = g.eventi.filter((e) => e.id !== uscita.id)));
             toast('Pausa sigaretta annullata');
           },
@@ -186,7 +156,7 @@ function apriSchermata(data: string, uscita: Evento): void {
 function rientra(data: string, uscita: Evento, inizio: number): void {
   const trascorsi = Date.now() - inizio;
   const { minuti } = adessoRoma();
-  cancellaInizio();
+  cancellaInizioSigaretta();
   if (esitoRientroSigaretta(trascorsi, store.impostazioni.tolleranzaSigaretta) === 'annulla') {
     store.modificaGiornata(data, (g) => void (g.eventi = g.eventi.filter((e) => e.id !== uscita.id)));
     toast(`Pausa sigaretta di ${formattaDurata(Math.max(1, Math.round(trascorsi / 60_000)))}: non conteggiata`);

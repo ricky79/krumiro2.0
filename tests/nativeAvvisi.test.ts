@@ -15,6 +15,8 @@ const dati = vi.hoisted(() => ({ giornata: null as unknown, impostazioni: null a
 
 vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: ln }));
 vi.mock('../src/native/app', () => ({ inApp: () => true }));
+const inizi = vi.hoisted(() => ({ sigaretta: null as number | null }));
+vi.mock('../src/ui/inizioSigaretta', () => ({ inizioSigarettaSalvato: () => inizi.sigaretta }));
 vi.mock('../src/storage/store', () => ({
   store: {
     giornata: () => dati.giornata,
@@ -108,6 +110,18 @@ describe('programmazione delle notifiche', () => {
     await sincronizzaAvvisi();
     expect(ln.cancel).toHaveBeenCalledTimes(2);
     expect(ln.schedule).not.toHaveBeenCalled();
+  });
+
+  it('pausa sigaretta: usa l\'istante preciso salvato, 1 minuto prima della fine', async () => {
+    const g = giornata([['ENTRATA', '08:30'], ['USCITA_PERMESSO', '09:59']]);
+    g.eventi[1]!.sigaretta = true;
+    dati.giornata = g;
+    inizi.sigaretta = Date.parse('2026-10-01T07:59:20Z'); // 09:59:20 a Roma
+    const { sincronizzaAvvisi } = await carica();
+    await sincronizzaAvvisi();
+    const { notifications } = ln.schedule.mock.calls[0]![0] as { notifications: Record<string, unknown>[] };
+    expect(notifications[0]).toMatchObject({ id: 3, schedule: { at: new Date('2026-10-01T08:09:20Z') } }); // 10:09:20
+    inizi.sigaretta = null;
   });
 
   it('un errore del plugin non blocca le sincronizzazioni successive', async () => {
