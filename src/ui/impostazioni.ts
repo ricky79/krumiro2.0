@@ -54,7 +54,7 @@ function interruttore(valore: boolean, onCambio: (v: boolean) => void, aria: str
 
 const TESTO_PERMESSI: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate.',
-  negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Timbrature → Notifiche).',
+  negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Krumiro → Notifiche).',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
   'non-disponibili': 'Gli avvisi funzionano solo nell\'app per Android: nel browser e nella PWA non sono disponibili.',
 };
@@ -280,6 +280,6 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
         fileInput,
       ),
     ),
-    el('p', { class: 'versione' }, `Timbrature v${__VERSIONE_APP__}`),
+    el('p', { class: 'versione' }, `Krumiro v${__VERSIONE_APP__}`),
   );
 }

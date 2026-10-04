@@ -328,7 +328,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         '• Controlla in Impostazioni → Avvisi che le notifiche siano autorizzate; se serve tocca "Autorizza gli avvisi".',
         '• Su Android 12 e successivi concedi anche "Sveglie e promemoria" all\'app: senza, gli avvisi possono ritardare di qualche minuto.',
-        '• Nelle impostazioni di Android (App → Timbrature) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
+        '• Nelle impostazioni di Android (App → Krumiro) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
         '• Se hai attivato "Non disturbare" o una modalità Focus, le notifiche vengono silenziate.',
       ],
     },

@@ -1,4 +1,4 @@
-# Timbrature
+# Krumiro
 
 Web app installabile (PWA) per registrare le timbrature di lavoro da iPhone o Android e sapere
 a che ora si può uscire. Funziona offline, non ha backend: **i dati restano sul telefono**
@@ -17,7 +17,7 @@ Apri `https://ricky79.github.io/krumiro2.0/` dal telefono e segui le istruzioni 
 2. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto).
 3. Scorri e scegli **Aggiungi alla schermata Home**.
    Su iOS 18 e successivi verifica che **Apri come app web** sia attivo.
-4. Conferma il nome "Timbrature" e tocca **Aggiungi**.
+4. Conferma il nome "Krumiro" e tocca **Aggiungi**.
 5. Apri l'app dall'icona sulla schermata Home: parte a tutto schermo, senza la barra di Safari.
 
 ### Android (Chrome)
@@ -25,7 +25,7 @@ Apri `https://ricky79.github.io/krumiro2.0/` dal telefono e segui le istruzioni 
 1. Apri **Chrome** e vai su `https://ricky79.github.io/krumiro2.0/`.
 2. Tocca il menu **⋮** (in alto a destra).
 3. Scegli **Installa app** (su alcune versioni la voce è **Aggiungi a schermata Home**,
-   poi **Installa**). Se compare in basso il banner "Installa Timbrature", puoi usare quello.
+   poi **Installa**). Se compare in basso il banner "Installa Krumiro", puoi usare quello.
 4. Conferma con **Installa**: l'icona compare nel cassetto delle app e, se vuoi,
    sulla schermata Home.
 5. Apri l'app dall'icona: parte a tutto schermo, senza la barra di Chrome.
