@@ -65,8 +65,11 @@ nuova versione, viene scaricata in background e applicata alla successiva apertu
   riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
-- **Storico**: le giornate del mese con lavorate, permesso e saldo, più il riepilogo mensile
-  (permesso usato e saldo del mese). Con *+ Giornata dimenticata* inserisci un giorno passato.
+- **Storico**: per ogni giorno del mese, tre voci ben separate: **Lavoro**, **Straordinario** e
+  **Permesso** (un trattino significa zero). Lo straordinario e il permesso sono a blocchi da
+  30 minuti: 20 minuti di extra non contano, 50 minuti valgono 30. Se mancano ore compare
+  "Mancano …". In alto il riepilogo del mese somma le tre voci e mostra il saldo esatto, senza
+  arrotondamenti. Con *+ Giornata dimenticata* inserisci un giorno passato.
 - **Impostazioni**: ore dovute (anche diverse per giorno della settimana), fascia pranzo,
   pausa da scalare, pausa minima, orario di inizio conteggio, tolleranza e tipo della pausa sigaretta, export e import dei dati.
 - **Aiuto**: risposte ai dubbi più comuni (per esempio la differenza tra *Esco in permesso*

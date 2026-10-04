@@ -264,8 +264,21 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Storico e riepilogo',
       domanda: 'Cosa mostra lo Storico?',
       testo: [
-        'Le giornate del mese con ore lavorate, permesso e saldo. In alto il riepilogo: saldo del mese, permesso usato, ore lavorate e giorni registrati.',
+        'Per ogni giorno vedi tre voci: Lavoro, Straordinario e Permesso. Un trattino (–) significa zero.',
+        '• Lavoro: le ore lavorate fino alle ore dovute, al netto del permesso.',
+        '• Straordinario: il lavoro oltre le ore dovute, contato a blocchi da 30 minuti. 20 minuti in più non contano, 50 minuti valgono 30.',
+        '• Permesso: le ore di permesso usate, sempre a blocchi da 30 minuti.',
+        'Se in un giorno mancano ore, sotto compare "Mancano …". In alto il riepilogo del mese somma le tre voci; sotto trovi il saldo esatto, che non è arrotondato.',
         'La giornata di oggi non entra nel saldo del mese finché non è chiusa. Tocca un giorno per vederlo e correggerlo.',
+      ],
+    },
+    {
+      id: 'straordinario-blocchi',
+      sezione: 'Storico e riepilogo',
+      domanda: 'Perché 20 minuti di lavoro in più non compaiono?',
+      testo: [
+        'Lo straordinario viene contato solo a blocchi interi da 30 minuti, sempre per difetto: 20 minuti non contano, 50 minuti valgono 30, 1h10 vale 1h.',
+        'Il saldo esatto del mese (sotto le tre voci) conserva invece tutti i minuti, senza arrotondare.',
       ],
     },
 

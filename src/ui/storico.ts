@@ -32,11 +32,16 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
       el('h2', { class: 'titolo-sezione' }, 'Riepilogo del mese'),
       el(
         'dl',
-        { class: 'statistiche' },
-        stat('Saldo del mese', formattaSaldo(rm.saldo), rm.saldo > 0 ? 'positivo' : rm.saldo < 0 ? 'negativo' : ''),
-        stat('Permesso usato', formattaDurata(rm.permesso)),
-        stat('Ore lavorate', formattaDurata(rm.lavorati)),
-        stat('Giorni registrati', String(rm.giorni.length)),
+        { class: 'statistiche tre' },
+        stat('Lavoro', formattaDurata(rm.lavoro)),
+        stat('Straordinario', formattaDurata(rm.straordinario), rm.straordinario > 0 ? 'positivo' : ''),
+        stat('Permesso', formattaDurata(rm.permesso)),
+      ),
+      el(
+        'p',
+        { class: 'nota' },
+        `${rm.giorni.length} ${rm.giorni.length === 1 ? 'giorno registrato' : 'giorni registrati'} · saldo esatto del mese `,
+        el('strong', { class: rm.saldo > 0 ? 'positivo' : rm.saldo < 0 ? 'negativo' : '' }, formattaSaldo(rm.saldo)),
       ),
       rm.giorniDaCorreggere > 0
         ? el('p', { class: 'nota negativo' }, `⚠︎ ${rm.giorniDaCorreggere} ${rm.giorniDaCorreggere === 1 ? 'giornata da correggere' : 'giornate da correggere'}`)
@@ -50,27 +55,31 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
         : el(
             'ul',
             { class: 'elenco-giorni' },
-            rm.giorni.map(({ data, risultato: r }) =>
-              el(
+            rm.giorni.map(({ data, risultato: r, ore }) => {
+              const inCorso = data === adesso.data && r.stato !== 'CHIUSA';
+              const mancano = !inCorso && !r.daCorreggere && r.saldo < 0 ? -r.saldo : 0;
+              const nota = r.daCorreggere ? 'Da correggere' : inCorso ? 'In corso' : r.stato !== 'CHIUSA' ? statoLeggibile(r) : null;
+              return el(
                 'li',
                 {},
                 el(
                   'button',
                   { type: 'button', class: `giorno ${r.daCorreggere ? 'giorno-errato' : ''}`, onclick: () => apriGiorno(data) },
                   el('span', { class: 'giorno-data' }, formattaDataBreve(data)),
-                  el(
-                    'span',
-                    { class: 'giorno-dettagli' },
-                    el('span', {}, `Lav. ${formattaDurata(r.lavorati)}`),
-                    r.permesso > 0 ? el('span', {}, `Perm. ${formattaDurata(r.permesso)}`) : null,
-                    r.daCorreggere || r.stato !== 'CHIUSA' ? el('span', { class: 'badge' }, statoLeggibile(r)) : null,
-                  ),
-                  data === adesso.data && r.stato !== 'CHIUSA'
-                    ? el('span', { class: 'giorno-saldo' }, 'in corso')
-                    : el('span', { class: `giorno-saldo ${r.saldo > 0 ? 'positivo' : r.saldo < 0 ? 'negativo' : ''}` }, formattaSaldo(r.saldo)),
+                  cella('Lavoro', ore.lavoro),
+                  cella('Straord.', ore.straordinario, 'positivo'),
+                  cella('Permesso', ore.permesso),
+                  nota || mancano > 0
+                    ? el(
+                        'span',
+                        { class: 'giorno-note' },
+                        nota ? el('span', { class: 'badge' }, nota) : null,
+                        mancano > 0 ? el('span', { class: 'negativo' }, `Mancano ${formattaDurata(mancano)}`) : null,
+                      )
+                    : null,
                 ),
-              ),
-            ),
+              );
+            }),
           ),
     ),
     el(
@@ -79,6 +88,16 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
       el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void scegliGiorno(adesso.data, apriGiorno) }, '+ Giornata dimenticata'),
       el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void esportaCsvCondividi(adesso) }, 'Esporta CSV'),
     ),
+  );
+}
+
+/** Cella di una colonna del giorno: il valore, o un trattino se è zero. */
+function cella(nome: string, minuti: number, classeSeAttiva = ''): HTMLElement {
+  return el(
+    'span',
+    { class: 'giorno-cella' },
+    el('span', { class: 'giorno-cella-nome' }, nome),
+    el('span', { class: minuti > 0 ? classeSeAttiva : 'zero' }, minuti > 0 ? formattaDurata(minuti) : '–'),
   );
 }
 
