@@ -1,6 +1,10 @@
+import { EMAIL_CONTATTO, linkSegnalazione, type ContestoApp, type TipoSegnalazione } from '../core/segnalazione';
+import { inApp } from '../native/app';
 import { store } from '../storage/store';
 import { filtraAiuto, SEZIONI_AIUTO, vociAiuto, type VoceAiuto } from './aiutoTesti';
 import { el } from './dom';
+import { inModalitaApp } from './installa';
+import { preferenzaTema } from './tema';
 
 export const EVENTO_APRI_AIUTO = 'apri-aiuto';
 
@@ -73,6 +77,47 @@ export function vistaAiuto(destinazione: string | null): HTMLElement {
     el('header', { class: 'intestazione' }, el('h1', {}, 'Aiuto'), el('p', { class: 'sottotitolo' }, 'Risposte ai dubbi più comuni')),
     campo,
     elenco,
+    schedaContatti(),
+  );
+}
+
+/** Dati tecnici del momento, per il messaggio di segnalazione. */
+function contestoApp(): ContestoApp {
+  const tema = document.documentElement.dataset.tema ?? 'chiaro';
+  return {
+    versione: __VERSIONE_APP__,
+    piattaforma: inApp() ? 'app Android' : inModalitaApp() ? 'app installata' : 'browser',
+    dispositivo: navigator.userAgent,
+    schermo: `${screen.width}×${screen.height}`,
+    tema: preferenzaTema() === 'auto' ? `${tema} (automatico)` : tema,
+    dataOra: new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'short', timeStyle: 'short' }).format(new Date()),
+  };
+}
+
+/** Suggerimenti e segnalazioni: il messaggio si prepara al tocco, con data e ora del momento. */
+function schedaContatti(): HTMLElement {
+  const bottone = (tipo: TipoSegnalazione, testo: string) =>
+    el(
+      'button',
+      {
+        type: 'button',
+        class: 'btn btn-secondario',
+        onclick: () => {
+          window.location.href = linkSegnalazione(tipo, contestoApp(), store.impostazioni);
+        },
+      },
+      testo,
+    );
+  return el(
+    'div',
+    { class: 'scheda', id: 'aiuto-contatti' },
+    el('h2', { class: 'titolo-sezione' }, 'Suggerimenti e problemi'),
+    el(
+      'p',
+      { class: 'nota' },
+      `Si apre la tua app di posta con un messaggio già pronto per ${EMAIL_CONTATTO}: puoi rileggerlo e modificarlo prima di inviarlo.`,
+    ),
+    el('div', { class: 'pila-pulsanti' }, bottone('suggerimento', 'Invia un suggerimento'), bottone('problema', 'Segnala un problema')),
   );
 }
 

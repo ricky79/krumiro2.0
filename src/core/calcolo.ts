@@ -247,6 +247,7 @@ export function calcolaGiornata(
     dovuti,
     lavorati,
     pausa: pausaRegistrataMin + pausaScalata,
+    pausaAggiuntaMinima: penalitaPausa,
     permessoInizio,
     permessoInizioDichiarato,
     permessoIntermedio,

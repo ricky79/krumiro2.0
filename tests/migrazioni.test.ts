@@ -22,7 +22,8 @@ describe('migrazioni', () => {
         'non-una-data': { eventi: [] },
       },
     });
-    expect(d.impostazioni.pausaDaScalare).toBe(60);
+    // Valore non valido → predefinito (30 min).
+    expect(d.impostazioni.pausaDaScalare).toBe(30);
     expect(d.impostazioni.pranzo).toEqual({ inizio: 720, fine: 870 });
     expect(d.impostazioni.pausaMinima).toBe(20);
     expect(d.giornate['2026-10-01']!.eventi).toEqual([{ id: 'b', tipo: 'USCITA', minuti: 1050 }]);

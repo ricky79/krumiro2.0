@@ -29,7 +29,7 @@ export function giornata(
   };
 }
 
-/** 8h dovute, pausa da scalare 60 min (come richiesto per i test). */
+/** 8h dovute, pausa da scalare 60 min (come richiesto per i test; il predefinito dell'app è 30). */
 export function impostazioni(modifiche: Partial<Impostazioni> = {}): Impostazioni {
-  return { ...clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE), ...modifiche };
+  return { ...clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE), pausaDaScalare: 60, ...modifiche };
 }

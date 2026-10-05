@@ -92,7 +92,7 @@ export interface Impostazioni {
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   minutiDovuti: { predefinito: 480, perGiorno: [0, null, null, null, null, null, 0] },
   pranzo: { inizio: 720, fine: 870 },
-  pausaDaScalare: 60,
+  pausaDaScalare: 30,
   orarioMinimoConteggio: 510,
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
@@ -149,6 +149,8 @@ export interface RisultatoGiornata {
   lavorati: number;
   /** Pausa effettivamente conteggiata (registrata, con il minimo applicato, + scalata). */
   pausa: number;
+  /** Minuti aggiunti alle pause concluse più brevi della pausa minima (inclusi in `pausa`). */
+  pausaAggiuntaMinima: number;
   permessoInizio: number;
   /** Permesso a inizio giornata inserito; `permessoInizio` è il valore a blocchi. */
   permessoInizioDichiarato: number;

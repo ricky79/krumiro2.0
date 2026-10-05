@@ -251,7 +251,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
           type: 'button',
           class: 'btn btn-secondario',
           onclick: async () => {
-            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 60 min da scalare, tolleranza sigaretta 11 min, sigaretta normale, avvisi attivi con pranzo da 30 min e sigaretta 1 min prima). Le timbrature non vengono toccate.', 'Ripristina', true)) {
+            if (await conferma('Ripristinare le impostazioni?', 'Tornano i valori predefiniti (8h lun–ven, pranzo 12:00–14:30, 30 min da scalare, tolleranza sigaretta 11 min, sigaretta normale, avvisi attivi con pranzo da 30 min e sigaretta 1 min prima). Le timbrature non vengono toccate.', 'Ripristina', true)) {
               store.modificaImpostazioni((i) => Object.assign(i, clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE)));
               salvato();
             }

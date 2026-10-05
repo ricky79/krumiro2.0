@@ -1,8 +1,15 @@
 name: App Android
 
-# Costruisce l'APK dell'app (Capacitor). Con un tag di versione (1.8.0 o v1.8.0) lo allega alla
-# release di GitHub, anche con il nome fisso krumiro.apk per il link di download permanente.
+# Costruisce l'APK dell'app (Capacitor). Richiamato da rilascio.yml a ogni nuova versione su main, o
+# con un tag di versione creato a mano (1.8.0 o v1.8.0), lo allega alla release di GitHub, anche con
+# il nome fisso krumiro.apk per il link di download permanente.
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Tag del rilascio a cui allegare l'APK (es. v1.9.0)
+        type: string
+        required: true
   push:
     tags: ['v*', '[0-9]+.[0-9]+.[0-9]+']
   pull_request:
@@ -11,6 +18,8 @@ on:
       - 'capacitor.config.ts'
       - 'src/native/**'
       - 'package.json'
+      - 'scripts/rilascio.ts'
+      - 'scripts/versione.ts'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
@@ -41,7 +50,10 @@ jobs:
       - run: npm run build:android
       - name: Versione dell'app
         id: versione
-        run: echo "numero=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        # versionCode = major × 10000 + minor × 100 + patch (scripts/versione.ts): cresce con la versione.
+        run: |
+          echo "numero=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "codice=$(npm run -s versione:codice)" >> "$GITHUB_OUTPUT"
       # Con i secret KRUMIRO_KEYSTORE_BASE64 e KRUMIRO_KEYSTORE_PASSWORD l'APK è firmato sempre con
       # la stessa chiave, quindi ogni versione si installa sopra la precedente. Senza, si ripiega su
       # una chiave di debug che cambia a ogni esecuzione.
@@ -64,24 +76,26 @@ jobs:
           KRUMIRO_KEYSTORE_PASSWORD: ${{ secrets.KRUMIRO_KEYSTORE_PASSWORD }}
           TIPO: ${{ steps.firma.outputs.tipo }}
           VERSIONE: ${{ steps.versione.outputs.numero }}
+          CODICE: ${{ steps.versione.outputs.codice }}
         run: |
           if [ "$TIPO" = release ]; then
-            ./gradlew assembleRelease -PversionName="$VERSIONE" -PversionCode=${{ github.run_number }}
+            ./gradlew assembleRelease -PversionName="$VERSIONE" -PversionCode="$CODICE"
             cp app/build/outputs/apk/release/app-release.apk "../krumiro-$VERSIONE.apk"
           else
-            ./gradlew assembleDebug -PversionName="$VERSIONE" -PversionCode=${{ github.run_number }}
+            ./gradlew assembleDebug -PversionName="$VERSIONE" -PversionCode="$CODICE"
             cp app/build/outputs/apk/debug/app-debug.apk "../krumiro-$VERSIONE.apk"
           fi
       - uses: actions/upload-artifact@v4
         with:
           name: krumiro-apk
           path: krumiro-${{ steps.versione.outputs.numero }}.apk
+      # Con un tag creato a mano il tag esiste già; da rilascio.yml lo crea gh sul commit di main.
       - name: Allega l'APK alla release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.tag
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes --target "$GITHUB_SHA"
           cp krumiro-${{ steps.versione.outputs.numero }}.apk krumiro.apk
           gh release upload "$TAG" krumiro-${{ steps.versione.outputs.numero }}.apk krumiro.apk --clobber

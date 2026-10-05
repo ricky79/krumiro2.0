@@ -12,7 +12,8 @@
     "noUncheckedIndexedAccess": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "tests", "vite.config.ts", "capacitor.config.ts"]
+  "include": ["src", "tests", "scripts", "vite.config.ts", "capacitor.config.ts"]
 }

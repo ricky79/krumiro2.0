@@ -139,7 +139,22 @@ describe('pausa minima 30 min', () => {
     const r = calcolaGiornata(g, imp, h('13:00'));
     expect(r.lavorati).toBe(240 + 15 - 15); // 4h + 15 min dopo la pausa − 15 min di penalità
     expect(r.pausa).toBe(30);
+    expect(r.pausaAggiuntaMinima).toBe(15);
     expect(uscita(r)).toBe('17:00');
+  });
+
+  it('una pausa lunga almeno il minimo non aggiunge nulla, anche se in corso', () => {
+    const fatta = giornata([
+      ['ENTRATA', '08:30'],
+      ['INIZIO_PAUSA', '12:30'],
+      ['FINE_PAUSA', '13:15'],
+    ]);
+    const r = calcolaGiornata(fatta, imp, h('14:00'));
+    expect(r.pausa).toBe(45);
+    expect(r.pausaAggiuntaMinima).toBe(0);
+    const inCorso = calcolaGiornata(giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '12:30']]), imp, h('12:40'));
+    expect(inCorso.pausa).toBe(10);
+    expect(inCorso.pausaAggiuntaMinima).toBe(0);
   });
 
   it('pausa di 15 minuti con uscita: il saldo tiene conto del minimo', () => {

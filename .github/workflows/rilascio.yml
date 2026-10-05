@@ -1,0 +1,49 @@
+name: Rilascio
+
+# A ogni push su main (PR approvata): se la versione di package.json non ha ancora un tag, crea il
+# rilascio v<versione> con le note generate dalle PR e allega l'APK firmato (android.yml).
+# La PWA la pubblica deploy.yml sullo stesso push.
+#
+# Il rilascio parte da qui e non da un tag creato con il token del workflow: GitHub non avvia altri
+# workflow per gli eventi prodotti da quel token, quindi android.yml è richiamato direttamente.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rilascio
+  cancel-in-progress: false
+
+jobs:
+  versione:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      nuova: ${{ steps.v.outputs.nuova }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # servono i tag
+      - id: v
+        run: |
+          VERSIONE=$(node -p "require('./package.json').version")
+          echo "tag=v$VERSIONE" >> "$GITHUB_OUTPUT"
+          # Vale anche per i tag storici senza "v" (1.7.0).
+          if git rev-parse -q --verify "refs/tags/v$VERSIONE" >/dev/null || git rev-parse -q --verify "refs/tags/$VERSIONE" >/dev/null; then
+            echo "nuova=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::La versione $VERSIONE ha già un tag: nessun nuovo rilascio."
+          else
+            echo "nuova=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  apk:
+    needs: versione
+    if: needs.versione.outputs.nuova == 'true'
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: ${{ needs.versione.outputs.tag }}
+    secrets: inherit

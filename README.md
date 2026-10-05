@@ -86,7 +86,8 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 - **Oggi**: il bottone grande propone l'azione più probabile
   (Entrata → Inizio pausa → Fine pausa → Uscita). Sotto trovi le azioni secondarie:
   *Pausa sigaretta*, *Esco in permesso*, *Rientro da permesso*, *Uscita anticipata*, *Entro dopo*
-  (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte e il saldo.
+  (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte, il saldo e la
+  durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima).
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
@@ -109,6 +110,9 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 - **Aiuto**: risposte ai dubbi più comuni (per esempio la differenza tra *Esco in permesso*
   e *Uscita anticipata*), con ricerca. I link **?** nelle schermate aprono direttamente
   la risposta che riguarda quel punto. Gli esempi usano le tue impostazioni correnti.
+  In fondo, *Invia un suggerimento* e *Segnala un problema* aprono l'app di posta con un
+  messaggio già pronto per krumiro@proton.me (la segnalazione include versione, dispositivo e
+  impostazioni, mai le timbrature).
 
 ## Regole di calcolo
 
@@ -126,7 +130,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
 | Permessi | ogni permesso vale un multiplo di 30 min (1h23 → 1h30); i minuti in più non contano come lavorate, il saldo non cambia |
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
-| Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 60 min diventano pausa; al rientro l'app mostra la ripartizione proposta (es. "1h pausa + 1h30 permesso"), che puoi modificare prima di confermare |
+| Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
 
 Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
 l'app non va in crash: segnala la giornata come **da correggere**, spiega il problema
@@ -188,11 +192,11 @@ Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web es
 `npm run build:android`. Gli avvisi si calcolano in `src/core/avvisi.ts` (funzione pura, con test);
 `src/native/avvisi.ts` li programma con il plugin `@capacitor/local-notifications`.
 
-**APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK a ogni push di un
-tag di versione, nello stesso formato dei tag del progetto (`git tag 1.8.0 && git push origin 1.8.0`;
-va bene anche `v1.8.0`). Lo allega alla release come `krumiro-<versione>.apk` e come `krumiro.apk`,
-il nome fisso usato dal link di download permanente, e lo salva anche come artefatto del workflow.
-Il tag va creato su un commit che contiene già questo workflow.
+**APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK quando
+`rilascio.yml` lo richiama per una nuova versione (vedi *Rilascio*), oppure a ogni push di un tag di
+versione creato a mano (`git tag v1.8.0 && git push origin v1.8.0`). Lo allega alla release come
+`krumiro-<versione>.apk` e come `krumiro.apk`, il nome fisso usato dal link di download permanente, e
+lo salva anche come artefatto del workflow.
 
 **Firma dell'APK:** perché ogni versione si installi sopra la precedente, l'APK va firmato sempre con
 la stessa chiave. La chiave non sta nel repository ma in due *secret* (Settings → Secrets and
@@ -213,6 +217,24 @@ Play Store. Il numero di versione viene da
 `package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
 pubblicazione. Icone e schermata di avvio sono le stesse della PWA: `npm run icone` le rigenera tutte
 (PWA e Android) da `scripts/genera-icone.mjs`.
+
+### Rilascio
+
+Ogni PR approvata su `main` è un rilascio:
+
+1. Nella PR verso `main` (di solito da `develop`) aggiorna la versione e fai il commit:
+   `npm version patch --no-git-tag-version` per le correzioni, `minor` per le novità, `major` per i
+   cambiamenti incompatibili. Il controllo **Versione** (`.github/workflows/versione.yml`) fallisce se
+   la versione non è più alta dell'ultimo tag.
+2. Approvando la PR, `deploy.yml` pubblica la PWA e `rilascio.yml` crea il tag `v<versione>` con la
+   release (note generate dalle PR) e ci allega l'APK costruito da `android.yml`: PWA e APK escono
+   insieme, con la stessa versione.
+
+Se la versione ha già un tag (per esempio un push su `main` senza aggiornarla), `rilascio.yml` non
+pubblica nulla. Il versionCode di Android deriva dalla versione: major × 10000 + minor × 100 + patch
+(1.8.0 → 10800, `scripts/versione.ts`), quindi minor e patch devono restare sotto 100. Per rendere il
+controllo obbligatorio: Settings → Branches → regola di `main` → *Require status checks to pass* →
+`controlla`.
 
 ### Tag NFC (wave 2, non ancora implementato)
 
