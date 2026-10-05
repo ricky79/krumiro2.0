@@ -109,6 +109,9 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 - **Aiuto**: risposte ai dubbi più comuni (per esempio la differenza tra *Esco in permesso*
   e *Uscita anticipata*), con ricerca. I link **?** nelle schermate aprono direttamente
   la risposta che riguarda quel punto. Gli esempi usano le tue impostazioni correnti.
+  In fondo, *Invia un suggerimento* e *Segnala un problema* aprono l'app di posta con un
+  messaggio già pronto per krumiro@proton.me (la segnalazione include versione, dispositivo e
+  impostazioni, mai le timbrature).
 
 ## Regole di calcolo
 

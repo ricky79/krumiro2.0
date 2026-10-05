@@ -39,7 +39,8 @@ let comeFare: () => void = () => {};
 let banner: HTMLElement | null = null;
 let misura: ResizeObserver | null = null;
 
-const inModalitaApp = () =>
+/** True se l'app è aperta dall'icona sulla schermata Home (PWA installata). */
+export const inModalitaApp = () =>
   window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 
 function installa(): void {
