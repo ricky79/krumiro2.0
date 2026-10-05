@@ -10,7 +10,8 @@ import { esportaBackupJson, esportaCsvCondividi, importaFile } from './dati';
 import type { Adesso } from './giorno';
 import { impostaPreferenza, preferenzaTema, type PreferenzaTema } from './tema';
 import { inApp } from '../native/app';
-import { richiediPermessi, statoPermessi } from '../native/avvisi';
+import * as avvisiApp from '../native/avvisi';
+import * as avvisiPwa from '../web/avvisi';
 import type { StatoPermessi } from '../core/avvisi';
 
 /** Lunedì → domenica, come in un calendario italiano. */
@@ -53,28 +54,40 @@ function interruttore(valore: boolean, onCambio: (v: boolean) => void, aria: str
   return i;
 }
 
-const TESTO_PERMESSI: Record<StatoPermessi, string> = {
+const TESTO_PERMESSI_APP: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate.',
   negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Krumiro → Notifiche).',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
-  'da-installare': 'Su iPhone gli avvisi arrivano solo con l\'app aggiunta alla schermata Home.',
-  'non-disponibili': 'Gli avvisi funzionano solo nell\'app per Android: nel browser e nella PWA non sono disponibili.',
+  'da-installare': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.', // solo PWA: qui non capita
+  'non-disponibili': 'Avvisi non disponibili su questo telefono.',
 };
 
-/** Sezione Avvisi: scelta degli avvisi, durata del pranzo e stato dei permessi del telefono. */
+const TESTO_PERMESSI_PWA: Record<StatoPermessi, string> = {
+  concessi: 'Notifiche autorizzate. Gli avvisi arrivano tramite internet, con fino a un minuto di ritardo.',
+  'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
+  negati: 'Notifiche bloccate: abilitale nelle impostazioni del browser per questo sito.',
+  'da-installare': 'Su iPhone gli avvisi arrivano solo con l\'app aggiunta alla schermata Home.',
+  'non-disponibili': 'Questo browser non supporta le notifiche push.',
+};
+
+/** Sezione Avvisi: scelta degli avvisi, durata del pranzo e stato dei permessi (app Android o PWA). */
 function sezioneAvvisi(): HTMLElement {
   const avvisi = store.impostazioni.avvisi;
   const nativa = inApp();
-  const stato = el('small', { class: 'nota' }, nativa ? 'Controllo dei permessi…' : TESTO_PERMESSI['non-disponibili']);
+  const piattaforma = nativa ? avvisiApp : avvisiPwa;
+  const testi = nativa ? TESTO_PERMESSI_APP : TESTO_PERMESSI_PWA;
+  const stato = el('small', { class: 'nota' }, 'Controllo dei permessi…');
   const pulsante = el('button', { type: 'button', class: 'btn btn-secondario', hidden: true }, 'Autorizza gli avvisi');
+  const comeInstallare = linkAiuto('Come installo l\'app sull\'iPhone?', 'installazione');
+  comeInstallare.hidden = true;
   const mostra = (s: StatoPermessi) => {
-    stato.textContent = TESTO_PERMESSI[s];
-    pulsante.hidden = s === 'concessi' || s === 'non-disponibili';
+    stato.textContent = testi[s];
+    // Nell'app Android si può richiedere anche dopo un rifiuto; nel browser un rifiuto è definitivo.
+    pulsante.hidden = nativa ? s === 'concessi' || s === 'non-disponibili' : s !== 'da-chiedere';
+    comeInstallare.hidden = s !== 'da-installare';
   };
-  if (nativa) {
-    void statoPermessi().then(mostra);
-    pulsante.addEventListener('click', () => void richiediPermessi().then(mostra));
-  }
+  void piattaforma.statoPermessi().then(mostra);
+  pulsante.addEventListener('click', () => void piattaforma.richiediPermessi().then(mostra));
   const cambia = (modifica: (a: typeof avvisi) => void) => {
     store.modificaImpostazioni((i) => modifica(i.avvisi));
     salvato();
@@ -85,6 +98,7 @@ function sezioneAvvisi(): HTMLElement {
     el('h2', { class: 'titolo-sezione' }, 'Avvisi'),
     stato,
     pulsante,
+    comeInstallare,
     riga('Uscita prevista', interruttore(avvisi.uscita, (v) => cambia((a) => void (a.uscita = v)), 'Avviso di uscita prevista'), 'quando puoi andare via'),
     riga('Rientro dal pranzo', interruttore(avvisi.pranzo, (v) => cambia((a) => void (a.pranzo = v)), 'Avviso di rientro dalla pausa pranzo'), 'dopo la durata qui sotto'),
     riga('Durata del pranzo (min)', inputMinuti(avvisi.pranzoMinuti, (v) => cambia((a) => void (a.pranzoMinuti = v)), 'Durata della pausa pranzo in minuti', 240, 5, 1), 'di quanto avvisare dopo l\'inizio della pausa'),

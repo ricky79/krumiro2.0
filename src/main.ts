@@ -12,7 +12,8 @@ import { registraServiceWorker } from './pwa';
 import { avviaTema } from './ui/tema';
 import { avviaBannerInstallazione } from './ui/installa';
 import { inApp } from './native/app';
-import { avviaAvvisi } from './native/avvisi';
+import { avviaAvvisi as avviaAvvisiApp } from './native/avvisi';
+import { avviaAvvisi as avviaAvvisiPwa } from './web/avvisi';
 
 type Scheda = 'oggi' | 'storico' | 'impostazioni' | 'aiuto';
 
@@ -111,9 +112,11 @@ document.addEventListener('visibilitychange', () => {
 void richiediPersistenza();
 if (inApp()) {
   // App Android: niente service worker né invito a installare; le notifiche sono locali.
-  avviaAvvisi();
+  avviaAvvisiApp();
 } else {
   registraServiceWorker();
+  // PWA: gli avvisi passano dal backend e arrivano come notifiche push.
+  avviaAvvisiPwa();
   avviaBannerInstallazione(() => apriAiuto('installazione'));
 }
 if (store.erroreCaricamento) void avviso('Attenzione', store.erroreCaricamento);
