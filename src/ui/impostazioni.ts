@@ -10,7 +10,8 @@ import { esportaBackupJson, esportaCsvCondividi, importaFile } from './dati';
 import type { Adesso } from './giorno';
 import { impostaPreferenza, preferenzaTema, type PreferenzaTema } from './tema';
 import { inApp } from '../native/app';
-import { richiediPermessi, statoPermessi, type StatoPermessi } from '../native/avvisi';
+import { richiediPermessi, statoPermessi } from '../native/avvisi';
+import type { StatoPermessi } from '../core/avvisi';
 
 /** Lunedì → domenica, come in un calendario italiano. */
 const ORDINE_GIORNI = [1, 2, 3, 4, 5, 6, 0];
@@ -56,6 +57,7 @@ const TESTO_PERMESSI: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate.',
   negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Krumiro → Notifiche).',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
+  'da-installare': 'Su iPhone gli avvisi arrivano solo con l\'app aggiunta alla schermata Home.',
   'non-disponibili': 'Gli avvisi funzionano solo nell\'app per Android: nel browser e nella PWA non sono disponibili.',
 };
 

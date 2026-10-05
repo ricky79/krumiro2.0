@@ -1,4 +1,4 @@
-import { ID_AVVISO, pianificaAvvisi, type Avviso } from '../core/avvisi';
+import { ID_AVVISO, pianificaAvvisi, type Avviso, type StatoPermessi } from '../core/avvisi';
 import { istanteDaMinuti } from '../core/sigaretta';
 import { adessoRoma } from '../core/tempo';
 import { store } from '../storage/store';
@@ -17,8 +17,6 @@ async function notifiche() {
   const { LocalNotifications } = await import('@capacitor/local-notifications');
   return { LN: LocalNotifications };
 }
-
-export type StatoPermessi = 'concessi' | 'negati' | 'da-chiedere' | 'non-disponibili';
 
 export async function statoPermessi(): Promise<StatoPermessi> {
   if (!inApp()) return 'non-disponibili';
