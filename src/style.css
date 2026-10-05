@@ -181,9 +181,6 @@ button {
   margin: 0;
   text-align: left;
 }
-.stat-intera {
-  grid-column: 1 / -1;
-}
 .stat dt {
   font-size: 13px;
   color: var(--testo-2);
@@ -192,6 +189,12 @@ button {
   margin: 0;
   font-size: 19px;
   font-weight: 600;
+}
+.stat-nota {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--testo-2);
 }
 
 .avviso-problemi {
