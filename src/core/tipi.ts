@@ -92,7 +92,7 @@ export interface Impostazioni {
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   minutiDovuti: { predefinito: 480, perGiorno: [0, null, null, null, null, null, 0] },
   pranzo: { inizio: 720, fine: 870 },
-  pausaDaScalare: 60,
+  pausaDaScalare: 30,
   orarioMinimoConteggio: 510,
   pausaMinima: 30,
   tolleranzaSigaretta: 11,

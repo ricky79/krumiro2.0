@@ -126,7 +126,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
 | Permessi | ogni permesso vale un multiplo di 30 min (1h23 → 1h30); i minuti in più non contano come lavorate, il saldo non cambia |
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
-| Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 60 min diventano pausa; al rientro l'app mostra la ripartizione proposta (es. "1h pausa + 1h30 permesso"), che puoi modificare prima di confermare |
+| Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
 
 Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
 l'app non va in crash: segnala la giornata come **da correggere**, spiega il problema
