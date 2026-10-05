@@ -6,6 +6,7 @@ import {
   idAvviso,
   notificaDaPush,
   operazioniPush,
+  opzioniNotifica,
   statoPermessiWeb,
   tipoDaId,
   type AvvisoPush,
@@ -175,6 +176,18 @@ describe('testo della notifica', () => {
     expect(notificaDaPush(null, null)).toEqual(generica);
     expect(notificaDaPush('ciao', null)).toEqual(generica);
     expect(notificaDaPush({ id: 7 }, null)).toEqual(generica);
+  });
+});
+
+describe('opzioni della notifica', () => {
+  it('una notifica dello stesso tipo ancora visibile viene sostituita e suona di nuovo', () => {
+    expect(opzioniNotifica({ titolo: 'Fine pausa pranzo', testo: 'È ora di rientrare.', tag: 'abc-pausa' })).toEqual({
+      body: 'È ora di rientrare.',
+      tag: 'abc-pausa',
+      icon: 'icons/icon-192.png',
+      badge: 'icons/badge-96.png',
+      renotify: true,
+    });
   });
 });
 

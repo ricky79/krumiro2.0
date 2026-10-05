@@ -321,7 +321,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
           : `• Pausa sigaretta: allo scadere della tolleranza (${tolleranza}). Puoi anticiparlo in Impostazioni → Avvisi.`,
         'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato. Per riceverli tocca "Autorizza gli avvisi" in Impostazioni → Avvisi.',
         'Nell\'app per Android gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo.',
-        'Nella PWA (Chrome, Safari, Firefox) l\'orario di ogni avviso va a un server che invia la notifica al momento giusto: quando timbri serve internet e l\'avviso può arrivare con un minuto di ritardo. Su iPhone funziona solo con l\'app aggiunta alla schermata Home (iOS 16.4 o successivi). Al server arrivano solo l\'orario e l\'indirizzo per le notifiche del browser: niente timbrature né testi.',
+        'Nella PWA (Chrome, Safari, Firefox) l\'orario di ogni avviso va a un server che invia la notifica al momento giusto: quando timbri serve internet e l\'avviso può arrivare con un minuto di ritardo. Su iPhone funziona solo con l\'app aggiunta alla schermata Home (iOS 16.4 o successivi). Al server arrivano solo l\'orario e il tipo di ogni avviso e l\'indirizzo per le notifiche del browser: niente timbrature né testi.',
       ],
     },
     {

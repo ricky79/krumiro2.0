@@ -292,6 +292,12 @@ describe('permessi', () => {
     expect(await statoPermessi()).toBe('non-disponibili');
   });
 
+  it('service worker ancora in installazione (prima apertura): aspetta che sia attivo', async () => {
+    sw.getRegistration.mockResolvedValue({ ...registrazione, active: null });
+    const { statoPermessi } = await carica();
+    expect(await statoPermessi()).toBe('concessi');
+  });
+
   it('permesso concesso e iscrizione presente: concessi', async () => {
     const { statoPermessi } = await carica();
     expect(await statoPermessi()).toBe('concessi');

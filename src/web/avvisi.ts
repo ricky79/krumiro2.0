@@ -79,9 +79,21 @@ async function registrazionePronta(): Promise<ServiceWorkerRegistration | null> 
   return Promise.race([navigator.serviceWorker.ready, new Promise<null>((r) => setTimeout(() => r(null), 10_000))]);
 }
 
+/**
+ * Per mostrare lo stato: se il service worker si sta ancora installando (prima apertura, anche
+ * dell'app appena aggiunta alla Home su iPhone, che ha dati separati da Safari) lo si aspetta;
+ * se non c'è proprio (in sviluppo) no.
+ */
+async function registrazionePerStato(): Promise<ServiceWorkerRegistration | null> {
+  if (!supportato()) return null;
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return null;
+  return reg.active ? reg : registrazionePronta();
+}
+
 export async function statoPermessi(): Promise<StatoPermessi> {
   try {
-    const reg = await registrazioneAttiva();
+    const reg = await registrazionePerStato();
     return statoPermessiWeb({
       iosNonInstallata: iosNonInstallata(),
       supportato: reg !== null,

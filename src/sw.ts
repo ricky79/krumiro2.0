@@ -1,7 +1,7 @@
 import { clientsClaim } from 'workbox-core';
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute, type PrecacheEntry } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { CACHE_AVVISI, chiaveCache, notificaDaPush } from './core/avvisiPush';
+import { CACHE_AVVISI, chiaveCache, notificaDaPush, opzioniNotifica } from './core/avvisiPush';
 
 /** Service worker della PWA: app offline (precache) e notifiche degli avvisi (web push dal backend). */
 
@@ -41,12 +41,7 @@ self.addEventListener('push', (evento) => {
   evento.waitUntil(
     (async () => {
       const n = notificaDaPush(payload, id ? await testoSalvato(id) : null);
-      await self.registration.showNotification(n.titolo, {
-        body: n.testo,
-        tag: n.tag,
-        icon: 'icons/icon-192.png',
-        badge: 'icons/badge-96.png',
-      });
+      await self.registration.showNotification(n.titolo, opzioniNotifica(n));
       if (id) {
         await caches
           .open(CACHE_AVVISI)

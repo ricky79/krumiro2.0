@@ -115,6 +115,15 @@ export interface Notifica {
   tag: string;
 }
 
+/**
+ * Opzioni di `showNotification`. Il tag è l'id dell'avviso, uguale ogni giorno per lo stesso tipo:
+ * con `renotify` una notifica che ne sostituisce una ancora visibile (es. la sigaretta del pomeriggio
+ * su quella del mattino) suona e vibra comunque, invece di arrivare in silenzio.
+ */
+export function opzioniNotifica(n: Notifica): NotificationOptions & { renotify: boolean } {
+  return { body: n.testo, tag: n.tag, icon: 'icons/icon-192.png', badge: 'icons/badge-96.png', renotify: true };
+}
+
 /** Testi usati quando manca quello salvato (es. Cache svuotata dal browser). */
 const TESTI_GENERICI: Record<TipoAvviso, { titolo: string; testo: string }> = {
   uscita: { titolo: 'Puoi andare via', testo: 'Le ore di oggi sono completate.' },

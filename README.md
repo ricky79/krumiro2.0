@@ -44,8 +44,8 @@ sigaretta) come **notifiche push**. Si attivano in *Impostazioni → Avvisi → 
 
 - Il browser non può programmare notifiche da solo: a ogni timbratura la PWA invia l'orario
   dell'avviso a un piccolo server (Cloudflare Worker, repository `krumiro2.0_backend`), che allo
-  scadere manda la notifica. Al server arrivano solo l'orario e l'indirizzo per le notifiche del
-  browser; timbrature e testi restano sul dispositivo.
+  scadere manda la notifica. Al server arrivano solo l'orario e il tipo di ogni avviso e l'indirizzo
+  per le notifiche del browser; timbrature e testi restano sul dispositivo.
 - Serve internet quando si timbra (senza, l'avviso parte appena si torna online con l'app aperta);
   la notifica arriva con al massimo circa un minuto di ritardo.
 - Su iPhone funziona solo con l'app aggiunta alla schermata Home (iOS 16.4 o successivi).
