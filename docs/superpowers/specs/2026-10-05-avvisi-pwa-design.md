@@ -48,6 +48,7 @@ d'errore a schermo quando il server non risponde, push all'app Android.
 | `vite.config.ts` | `strategies: 'injectManifest'`, `srcDir: 'src'`, `filename: 'sw.ts'`, `injectManifest.globPatterns` uguale all'attuale `workbox.globPatterns`; la build Android resta con `disable: true` |
 | `tsconfig.json` / `tsconfig.sw.json` *(nuovo)* | `src/sw.ts` escluso dal tsconfig principale e controllato con `lib: ["ES2022", "WebWorker"]` (incompatibile con `DOM` nello stesso progetto) |
 | `package.json` | `typecheck`, `build` e `build:android` eseguono anche `tsc --noEmit -p tsconfig.sw.json`; devDependencies `workbox-core`, `workbox-precaching`, `workbox-routing` (già presenti come dipendenze indirette di `vite-plugin-pwa`, nella stessa versione) |
+| `scripts/genera-icone.mjs`, `public/icons/badge-96.png` *(nuovo)* | icona monocromatica `badge` delle notifiche |
 | `src/main.ts` | nella PWA, dopo `registraServiceWorker()`, chiama `avviaAvvisi()` di `web/avvisi` |
 | `src/ui/impostazioni.ts` | la sezione Avvisi usa `web/avvisi` nella PWA e `native/avvisi` nell'app, con testi diversi |
 | `src/ui/aiutoTesti.ts`, `README.md` | avvisi disponibili anche nella PWA, con le differenze |
@@ -175,9 +176,15 @@ registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 
 - **`push`**: `event.waitUntil(...)`: legge `event.data?.json()` (`null` se manca o non è JSON valido),
   cerca la voce `avvisi/<id>` nella Cache `krumiro-avvisi`, calcola `notificaDaPush`, chiama
-  `registration.showNotification(titolo, { body: testo, tag, icon: 'icons/icon-192.png' })` e poi
-  cancella la voce dalla Cache. Con `tag` una notifica dello stesso tipo sostituisce la precedente.
-  Niente `badge`: manca un'icona monocromatica e Chrome mostrerebbe un quadrato.
+  `registration.showNotification(titolo, { body: testo, tag, icon: 'icons/icon-192.png',
+  badge: 'icons/badge-96.png' })` e poi cancella la voce dalla Cache. Con `tag` una notifica dello
+  stesso tipo sostituisce la precedente.
+- **Badge**: `public/icons/badge-96.png`, l'orologio bianco su fondo trasparente (96×96, la misura
+  consigliata da Chrome), generato da `scripts/genera-icone.mjs` con la funzione `primoPiano` già usata
+  per l'icona adattiva Android, con una scala che riempie meglio il riquadro (`primoPiano(96, 1.3)`).
+  Android usa solo il canale alfa e lo mostra nella barra di stato; Safari lo ignora. Entra nella
+  precache da solo (`globPatterns` comprende i `.png`). Rigenerare con `npm run icone` non deve
+  cambiare le altre icone (l'algoritmo è deterministico).
 - **`notificationclick`**: chiude la notifica; se c'è una finestra dell'app nello `scope`, la porta in
   primo piano (`focus()`), altrimenti `clients.openWindow(registration.scope)`.
 
@@ -239,7 +246,8 @@ Vitest, ambiente node come oggi.
   1. `npm run build && npx vite preview --port 5173` (porta ammessa dal CORS del backend), apri
      `http://localhost:5173/krumiro2.0/`, *Impostazioni → Avvisi → Autorizza gli avvisi*;
   2. durata del pranzo 1 min, timbra entrata e inizio pausa: arriva "Fine pausa pranzo" entro circa
-     due minuti; cliccandola si apre l'app;
+     due minuti, con l'orologio come icona piccola nella barra di stato (Android); cliccandola si
+     apre l'app;
   3. timbra il rientro prima dello scadere con una durata più lunga: nessuna notifica (`DELETE`);
   4. offline e app ancora utilizzabile (precache e fallback di navigazione funzionano come prima);
   5. dopo il deploy su GitHub Pages, la stessa prova su Android/Chrome e su iPhone con la PWA installata.
