@@ -18,6 +18,10 @@ export default defineConfig(({ mode }) => {
     plugins: [
       VitePWA({
         disable: android,
+        // Service worker nostro (src/sw.ts): precache come prima, più le notifiche degli avvisi.
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.ts',
         registerType: 'autoUpdate',
         injectRegister: false,
         includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
@@ -40,10 +44,8 @@ export default defineConfig(({ mode }) => {
             { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
-        workbox: {
+        injectManifest: {
           globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
-          navigateFallback: `${BASE}index.html`,
-          cleanupOutdatedCaches: true,
         },
       }),
     ],
