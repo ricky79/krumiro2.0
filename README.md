@@ -86,7 +86,8 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 - **Oggi**: il bottone grande propone l'azione più probabile
   (Entrata → Inizio pausa → Fine pausa → Uscita). Sotto trovi le azioni secondarie:
   *Pausa sigaretta*, *Esco in permesso*, *Rientro da permesso*, *Uscita anticipata*, *Entro dopo*
-  (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte e il saldo.
+  (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte, il saldo e la
+  durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima).
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.

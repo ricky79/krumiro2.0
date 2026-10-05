@@ -149,6 +149,8 @@ export interface RisultatoGiornata {
   lavorati: number;
   /** Pausa effettivamente conteggiata (registrata, con il minimo applicato, + scalata). */
   pausa: number;
+  /** Minuti aggiunti alle pause concluse più brevi della pausa minima (inclusi in `pausa`). */
+  pausaAggiuntaMinima: number;
   permessoInizio: number;
   /** Permesso a inizio giornata inserito; `permessoInizio` è il valore a blocchi. */
   permessoInizioDichiarato: number;

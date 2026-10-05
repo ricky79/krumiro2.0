@@ -2,6 +2,7 @@ import { calcolaGiornata, propostaRientro } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import { analizzaGiornata, azioniDisponibili, ETICHETTE_AZIONE, type Azione } from '../core/statoGiornata';
 import { formattaDataLunga, formattaDurata, formattaOra, formattaSaldo } from '../core/tempo';
+import { testoPausa } from '../core/testi';
 import { ETICHETTE_EVENTO, type Evento, type Giornata, type RisultatoGiornata } from '../core/tipi';
 import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
@@ -68,6 +69,9 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
   }
 
   const percentuale = r.dovuti > 0 ? Math.min(100, Math.round((r.coperti / r.dovuti) * 100)) : 100;
+  // Da sola nell'ultima riga: tutta la larghezza, così "30 min (fatta 20 min)" non va a capo.
+  const pausa = stat('Pausa', testoPausa(r));
+  pausa.classList.add('stat-intera');
   return el(
     'div',
     { class: 'scheda scheda-principale' },
@@ -82,6 +86,7 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
       statSaldo(r),
       stat('Lavorate', formattaDurata(r.lavorati)),
       stat('Permesso', formattaDurata(r.permesso)),
+      pausa,
     ),
   );
 }
