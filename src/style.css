@@ -181,6 +181,9 @@ button {
   margin: 0;
   text-align: left;
 }
+.stat-intera {
+  grid-column: 1 / -1;
+}
 .stat dt {
   font-size: 13px;
   color: var(--testo-2);
