@@ -19,6 +19,16 @@ describe('aiuto', () => {
     for (const s of SEZIONI_AIUTO) expect(voci.some((v) => v.sezione === s)).toBe(true);
   });
 
+  it('gli avvisi spiegano anche la PWA', () => {
+    const avvisi = voci.find((x) => x.id === 'avvisi')!.testo.join(' ');
+    expect(avvisi).toContain('PWA');
+    expect(avvisi).toContain('schermata Home');
+    expect(avvisi).not.toContain('non sono disponibili');
+    const problemi = voci.find((x) => x.id === 'avvisi-non-arrivano')!.testo.join(' ');
+    expect(problemi).toContain('internet');
+    expect(problemi).toContain('Sveglie e promemoria');
+  });
+
   it('i testi seguono le impostazioni correnti', () => {
     const v = vociAiuto(impostazioni({ pranzo: { inizio: 750, fine: 840 }, pausaDaScalare: 45 }));
     const rientro = v.find((x) => x.id === 'rientro')!;

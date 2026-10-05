@@ -37,6 +37,21 @@ usa **⋮ → Installa**. Se la voce non compare, ricarica la pagina e riprova.
 Dopo la prima apertura l'app funziona anche **senza connessione**. Quando viene pubblicata una
 nuova versione, viene scaricata in background e applicata alla successiva apertura.
 
+### Avvisi nella PWA
+
+La PWA ha gli stessi tre avvisi dell'app Android (uscita prevista, rientro dal pranzo, rientro dalla
+sigaretta) come **notifiche push**. Si attivano in *Impostazioni → Avvisi → Autorizza gli avvisi*.
+
+- Il browser non può programmare notifiche da solo: a ogni timbratura la PWA invia l'orario
+  dell'avviso a un piccolo server (Cloudflare Worker, repository `krumiro2.0_backend`), che allo
+  scadere manda la notifica. Al server arrivano solo l'orario e l'indirizzo per le notifiche del
+  browser; timbrature e testi restano sul dispositivo.
+- Serve internet quando si timbra (senza, l'avviso parte appena si torna online con l'app aperta);
+  la notifica arriva con al massimo circa un minuto di ritardo.
+- Su iPhone funziona solo con l'app aggiunta alla schermata Home (iOS 16.4 o successivi).
+- Funziona su Chrome, Edge, Samsung Internet, Firefox e Safari; l'app Android resta l'unica che
+  avvisa anche senza connessione.
+
 ### App Android con gli avvisi
 
 Oltre alla PWA esiste un'app Android vera (costruita con [Capacitor](https://capacitorjs.com)
@@ -46,7 +61,8 @@ dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiu
 - **rientro dalla pausa sigaretta**: 1 minuto prima della fine della tolleranza (anticipo configurabile, 0 = allo scadere).
 
 Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
-telefono: nessun server, nessun dato fuori dal dispositivo. Nella PWA gli avvisi non esistono.
+telefono: nessun server, nessun dato fuori dal dispositivo. Anche la PWA ha gli stessi avvisi, ma
+passano da un server (vedi *Avvisi nella PWA*).
 
 #### Scaricare e installare l'APK
 
@@ -163,10 +179,31 @@ Struttura:
 ```
 src/core/      logica pura, senza DOM: tipi, macchina a stati, calcolo, riepilogo, CSV
 src/storage/   localStorage, schema versionato e migrazioni
+src/native/    avvisi dell'app Android (notifiche locali con Capacitor)
+src/web/       avvisi della PWA (iscrizione push e chiamate al backend)
+src/sw.ts      service worker della PWA: app offline e notifiche push
 src/ui/        viste (Oggi/giornata, Storico, Impostazioni, Aiuto), dialoghi, editor
                (i testi dell'aiuto sono in src/ui/aiutoTesti.ts)
 tests/         test Vitest
 ```
+
+### Avvisi della PWA (sviluppo)
+
+URL del backend e chiave pubblica VAPID sono costanti in `src/web/avvisi.ts` (`URL_NOTIFICHE`,
+`CHIAVE_VAPID`); se il backend cambia la coppia di chiavi, la chiave va aggiornata e gli utenti devono
+autorizzare di nuovo gli avvisi. La logica pura (operazioni verso il backend, testo della notifica) è in
+`src/core/avvisiPush.ts`, con test. Il service worker è scritto a mano (`src/sw.ts`, strategia
+`injectManifest` di vite-plugin-pwa) e si controlla con `tsconfig.sw.json`.
+
+Con `npm run dev` il service worker non c'è e gli avvisi risultano "non disponibili". Per provarli:
+
+```bash
+npm run build
+npx vite preview --port 5173   # il backend accetta richieste solo da questa porta e da GitHub Pages
+```
+
+Poi apri `http://localhost:5173/krumiro2.0/`, autorizza gli avvisi e timbra. In Chrome, DevTools →
+Application → Service workers → *Push* simula un push senza passare dal backend.
 
 ### Deploy su GitHub Pages
 
