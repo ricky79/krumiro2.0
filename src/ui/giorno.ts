@@ -69,9 +69,10 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
   }
 
   const percentuale = r.dovuti > 0 ? Math.min(100, Math.round((r.coperti / r.dovuti) * 100)) : 100;
-  // Da sola nell'ultima riga: tutta la larghezza, così "30 min (fatta 20 min)" non va a capo.
-  const pausa = stat('Pausa', testoPausa(r));
-  pausa.classList.add('stat-intera');
+  // Sotto il valore, in piccolo, la pausa fatta davvero se è scattata la pausa minima.
+  const testo = testoPausa(r);
+  const pausa = stat('Pausa', testo.valore);
+  if (testo.nota) pausa.querySelector('dd')!.append(el('small', { class: 'stat-nota' }, testo.nota));
   return el(
     'div',
     { class: 'scheda scheda-principale' },
@@ -84,9 +85,8 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
       { class: 'statistiche' },
       stat('Coperte', `${formattaDurata(r.coperti)} / ${formattaDurata(r.dovuti)}`),
       statSaldo(r),
-      stat('Lavorate', formattaDurata(r.lavorati)),
-      stat('Permesso', formattaDurata(r.permesso)),
       pausa,
+      stat('Permesso', formattaDurata(r.permesso)),
     ),
   );
 }

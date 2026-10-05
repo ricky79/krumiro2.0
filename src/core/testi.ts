@@ -6,11 +6,14 @@ export function statoLeggibile(r: RisultatoGiornata): string {
   return r.daCorreggere ? 'Da correggere' : ETICHETTE_STATO[r.stato];
 }
 
-/** Pausa per il riepilogo: "—", "45 min", o "30 min (fatta 20 min)" se è scattata la pausa minima. */
-export function testoPausa(r: RisultatoGiornata): string {
-  if (r.pausa <= 0) return '—';
-  const conteggiata = formattaDurata(r.pausa);
-  return r.pausaAggiuntaMinima > 0
-    ? `${conteggiata} (fatta ${formattaDurata(r.pausa - r.pausaAggiuntaMinima)})`
-    : conteggiata;
+/**
+ * Pausa per il riepilogo: il valore conteggiato ("—" se non c'è) e, se è scattata la pausa minima,
+ * una nota con quella fatta davvero ("fatta 20 min").
+ */
+export function testoPausa(r: RisultatoGiornata): { valore: string; nota: string | null } {
+  if (r.pausa <= 0) return { valore: '—', nota: null };
+  return {
+    valore: formattaDurata(r.pausa),
+    nota: r.pausaAggiuntaMinima > 0 ? `fatta ${formattaDurata(r.pausa - r.pausaAggiuntaMinima)}` : null,
+  };
 }
