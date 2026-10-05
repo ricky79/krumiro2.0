@@ -7,7 +7,8 @@ android {
         applicationId "io.github.ricky79.krumiro"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // La CI passa la versione di package.json e il numero della build: -PversionName=1.8.0 -PversionCode=42
+        // La CI passa la versione di package.json e il versionCode che ne deriva
+        // (major × 10000 + minor × 100 + patch, scripts/versione.ts): -PversionName=1.8.0 -PversionCode=10800
         // Assegnazione con "=": senza, Groovy leggerebbe `versionCode (x).toInteger()` come
         // `versionCode(x).toInteger()` e passerebbe una stringa.
         versionCode = (project.findProperty('versionCode') ?: '1') as Integer

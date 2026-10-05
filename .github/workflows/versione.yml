@@ -1,0 +1,23 @@
+name: Versione
+
+# Ogni PR approvata su main pubblica un rilascio (vedi rilascio.yml): la versione di package.json
+# deve quindi essere più alta dell'ultimo tag. Si aggiorna nella PR con
+# `npm version patch --no-git-tag-version` (o minor/major).
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  controlla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # servono i tag
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run -s versione:controlla

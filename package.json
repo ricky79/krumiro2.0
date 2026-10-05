@@ -11,6 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "icone": "node scripts/genera-icone.mjs",
+    "versione:controlla": "node --experimental-strip-types scripts/rilascio.ts controlla",
+    "versione:codice": "node --experimental-strip-types scripts/rilascio.ts codice",
     "build:android": "tsc --noEmit && vite build --mode android && cap sync android",
     "android:apri": "npm run build:android && cap open android"
   },
