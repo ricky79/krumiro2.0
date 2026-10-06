@@ -20,6 +20,26 @@ export function misureElettronica(consumata: number): { yLiquido: number; altezz
   return { yLiquido: LIQUIDO_Y + LIQUIDO_ALTEZZA * c, altezzaLiquido: LIQUIDO_ALTEZZA * (1 - c) };
 }
 
+/** Colori del liquido della sigaretta elettronica. */
+export const COLORI_LIQUIDO = {
+  rosso: '#ef4444',
+  blu: '#3b82f6',
+  arancione: '#f97316',
+  giallo: '#facc15',
+  viola: '#a855f7',
+  verde: '#22c55e',
+  bianco: '#fafaf9',
+} as const;
+
+/**
+ * Colore del liquido per la pausa iniziata a `inizio` (ms): a caso da una pausa all'altra, ma sempre
+ * lo stesso per la stessa pausa, anche se l'app viene chiusa e riaperta.
+ */
+export function coloreLiquido(inizio: number): string {
+  const colori = Object.values(COLORI_LIQUIDO);
+  return colori[Math.abs(Math.floor(inizio)) % colori.length]!;
+}
+
 /*
  * Sigaretta normale: in alto la sigaretta (filtro a sinistra, brace a destra), sotto il posacenere.
  * Il posacenere, il mozzicone schiacciato e il residuo di brace sono nascosti dal CSS finché la pausa
@@ -98,7 +118,7 @@ const SVG_ELETTRONICA = `
   </g>
   <rect x="12" y="61" width="36" height="14" rx="6" fill="#3f3a36" stroke="#78716c" stroke-width="1"/>
   <rect x="46" y="56" width="80" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
-  <rect class="svapo-liquido" x="48" y="${LIQUIDO_Y}" width="76" height="${LIQUIDO_ALTEZZA}" rx="2" fill="#f59e0b" opacity="0.85"/>
+  <rect class="svapo-liquido" x="48" y="${LIQUIDO_Y}" width="76" height="${LIQUIDO_ALTEZZA}" rx="2" opacity="0.85"/>
   <rect x="46" y="56" width="80" height="24" rx="4" fill="none" stroke="#a8a29e" stroke-width="1.5"/>
   <rect x="126" y="56" width="140" height="24" rx="3" fill="url(#svapo-metallo)"/>
   <rect x="150" y="56" width="3" height="24" fill="#57534e"/>
@@ -114,13 +134,14 @@ export interface Disegno {
   aggiorna(consumata: number): void;
 }
 
-/** Crea il disegno della schermata della pausa per il tipo di sigaretta scelto. */
-export function creaDisegno(tipo: TipoSigaretta): Disegno {
+/** Crea il disegno della schermata della pausa per il tipo di sigaretta scelto. `inizio` (ms) è l'inizio della pausa. */
+export function creaDisegno(tipo: TipoSigaretta, inizio: number): Disegno {
   const contenitore = document.createElement('div');
   contenitore.innerHTML = tipo === 'elettronica' ? SVG_ELETTRONICA : SVG_NORMALE; // markup statico, nessun dato dell'utente
   const elemento = contenitore.firstElementChild!;
   if (tipo === 'elettronica') {
     const liquido = elemento.querySelector('.svapo-liquido')!;
+    liquido.setAttribute('fill', coloreLiquido(inizio));
     return {
       elemento,
       aggiorna: (consumata) => {
