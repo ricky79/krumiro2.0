@@ -1,7 +1,7 @@
 import { EMAIL_CONTATTO, linkSegnalazione, type ContestoApp, type TipoSegnalazione } from '../core/segnalazione';
 import { inApp } from '../native/app';
 import { store } from '../storage/store';
-import { filtraAiuto, SEZIONI_AIUTO, vociAiuto, type VoceAiuto } from './aiutoTesti';
+import { filtraAiuto, pezziRiga, SEZIONI_AIUTO, vociAiuto, type VoceAiuto } from './aiutoTesti';
 import { el } from './dom';
 import { inModalitaApp } from './installa';
 import { preferenzaTema } from './tema';
@@ -130,10 +130,10 @@ function voce(v: VoceAiuto, aperta: boolean): HTMLElement {
         lista = el('ul', {});
         corpo.push(lista);
       }
-      lista.append(el('li', {}, riga.slice(2)));
+      lista.append(el('li', {}, contenutoRiga(riga.slice(2))));
     } else {
       lista = null;
-      corpo.push(el('p', {}, riga));
+      corpo.push(el('p', {}, contenutoRiga(riga)));
     }
   }
   return el(
@@ -142,6 +142,11 @@ function voce(v: VoceAiuto, aperta: boolean): HTMLElement {
     el('summary', {}, v.domanda),
     el('div', { class: 'risposta' }, corpo),
   );
+}
+
+/** Testo di una riga con i link cliccabili. Nell'app Android Capacitor apre gli indirizzi esterni nel browser. */
+function contenutoRiga(riga: string): (string | HTMLElement)[] {
+  return pezziRiga(riga).map((p) => (typeof p === 'string' ? p : el('a', { href: p.url }, p.testo)));
 }
 
 function slug(s: string): string {

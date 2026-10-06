@@ -2,10 +2,11 @@ import { DURATA_PAUSA_PROPOSTA, OFFSET_PAUSA_PROPOSTA } from '../core/pausaPranz
 import type { Azione } from '../core/statoGiornata';
 import { formattaDurata, formattaOra } from '../core/tempo';
 import type { Impostazioni } from '../core/tipi';
+import { URL_APK } from './aggiornamento';
 
 /**
  * Contenuti dell'aiuto. Testo semplice: ogni elemento di `testo` è un paragrafo;
- * le righe che iniziano con "• " diventano un elenco puntato.
+ * le righe che iniziano con "• " diventano un elenco puntato e "[testo](url)" diventa un link.
  * Gli importi (fascia pranzo, pausa da scalare…) seguono le impostazioni correnti.
  */
 export interface VoceAiuto {
@@ -371,7 +372,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Installazione',
       domanda: 'C\'è un\'app per Android con gli avvisi?',
       testo: [
-        '• Dal telefono apri https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk : il browser scarica l\'app (krumiro.apk).',
+        `• Dal telefono [clicca qui](${URL_APK}): il browser scarica l'app (krumiro.apk).`,
         '• Aprilo: Android chiede di consentire l\'installazione da questa fonte. Conferma e installa.',
         '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
         'Rispetto alla PWA, nell\'app gli avvisi funzionano anche senza internet e senza passare da un server.',
@@ -388,7 +389,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'Nell\'app per Android l\'aggiornamento va installato a mano:',
         '• Quando esce una nuova versione compare un riquadro in basso: tocca "Scarica".',
         '• Apri il file scaricato (krumiro.apk) e tocca "Aggiorna" o "Installa".',
-        'Se hai chiuso il riquadro, l\'ultima versione si scarica sempre da https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk . La versione installata è scritta in fondo alle Impostazioni.',
+        `Se hai chiuso il riquadro, l'ultima versione si scarica sempre [da qui](${URL_APK}). La versione installata è scritta in fondo alle Impostazioni.`,
         'In tutti e due i casi i dati non vengono toccati.',
       ],
     },
@@ -396,12 +397,35 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
 }
 
 /** Ricerca senza distinzione tra maiuscole/minuscole e accenti. */
+/** Pezzo di una riga dell'aiuto: testo semplice o link. */
+export type PezzoRiga = string | { testo: string; url: string };
+
+/** Divide una riga nei suoi pezzi: ogni "[testo](url)" diventa un link. */
+export function pezziRiga(riga: string): PezzoRiga[] {
+  const pezzi: PezzoRiga[] = [];
+  let da = 0;
+  for (const m of riga.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)) {
+    if (m.index > da) pezzi.push(riga.slice(da, m.index));
+    pezzi.push({ testo: m[1]!, url: m[2]! });
+    da = m.index + m[0].length;
+  }
+  if (da < riga.length) pezzi.push(riga.slice(da));
+  return pezzi;
+}
+
+/** Il testo che si legge: dei link conta l'etichetta, non l'indirizzo. */
+function testoVisibile(riga: string): string {
+  return pezziRiga(riga)
+    .map((p) => (typeof p === 'string' ? p : p.testo))
+    .join('');
+}
+
 export function filtraAiuto(voci: VoceAiuto[], query: string): VoceAiuto[] {
   const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const parole = norm(query).split(/\s+/).filter(Boolean);
   if (parole.length === 0) return voci;
   return voci.filter((v) => {
-    const t = norm(`${v.domanda} ${v.sezione} ${v.testo.join(' ')}`);
+    const t = norm(`${v.domanda} ${v.sezione} ${v.testo.map(testoVisibile).join(' ')}`);
     return parole.every((p) => t.includes(p));
   });
 }

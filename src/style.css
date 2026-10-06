@@ -1161,6 +1161,7 @@ input:disabled {
 .risposta {
   padding: 0 0 12px;
   color: var(--testo);
+  overflow-wrap: anywhere;
 }
 .risposta p {
   margin: 0 0 8px;
@@ -1171,6 +1172,10 @@ input:disabled {
 }
 .risposta li + li {
   margin-top: 4px;
+}
+.risposta a {
+  color: var(--accento);
+  font-weight: 500;
 }
 .vista [id^='aiuto-'] {
   scroll-margin-top: calc(var(--sicuro-alto) + 12px);
