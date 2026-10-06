@@ -27,6 +27,7 @@ export const SEZIONI_AIUTO = [
   'Dati e backup',
   'Avvisi',
   'Installazione',
+  'Informazioni',
 ] as const;
 
 export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
@@ -391,6 +392,17 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Apri il file scaricato (krumiro.apk) e tocca "Aggiorna" o "Installa".',
         `Se hai chiuso il riquadro, l'ultima versione si scarica sempre [da qui](${URL_APK}). La versione installata è scritta in fondo alle Impostazioni.`,
         'In tutti e due i casi i dati non vengono toccati.',
+      ],
+    },
+
+    // --- Informazioni
+    {
+      id: 'nome',
+      sezione: 'Informazioni',
+      domanda: 'Perché si chiama Krumiro?',
+      testo: [
+        'Anni fa, nel nostro gruppo di lavoro, esisteva una webapp per segnare le ore di lavoro: si chiamava Krumiro.',
+        'Da lì è nata l\'idea di questa app, che ne porta il nome. Grazie, Leo Olmi!',
       ],
     },
   ];

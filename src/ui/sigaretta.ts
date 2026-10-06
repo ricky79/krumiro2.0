@@ -47,7 +47,7 @@ function apriSchermata(data: string, uscita: Evento): void {
 
   // Il tipo si legge all'apertura: con la schermata aperta le impostazioni non sono raggiungibili.
   const tipo = store.impostazioni.tipoSigaretta;
-  const disegno = creaDisegno(tipo);
+  const disegno = creaDisegno(tipo, inizio);
   const scena = el('div', { class: 'sigaretta-scena' }, disegno.elemento);
   const timer = el('p', { class: 'sigaretta-timer', role: 'timer' });
   const nota = el('p', { class: 'sigaretta-nota' });
