@@ -160,7 +160,7 @@ export function esitoLettura(p: {
 `toast(messaggio, annulla?)`: con `annulla` il messaggio ha un pulsante **Annulla** e resta circa
 5 secondi invece di 2,2. Toccandolo il messaggio sparisce e si chiama `annulla`. Il toast oggi ha
 `pointer-events: none`: la variante con il pulsante li riattiva, e il pulsante ha un'area di tocco di
-almeno 44 px. Il toast largo quanto il testo (`width: max-content`, al massimo lo schermo meno
+almeno 44 px. Il toast è largo quanto il testo (`width: max-content`, al massimo lo schermo meno
 32 px) e mostrato come popover nel top layer (`popover="manual"` + `showPopover()`, dove c'è):
 altrimenti un messaggio mostrato con un foglio modale aperto, come "Chiudi la finestra aperta…",
 resterebbe nascosto sotto il foglio.
