@@ -2,9 +2,8 @@ import type { TipoSigaretta } from '../core/tipi';
 
 /** Lunghezza della cartina nel disegno (unità SVG): si accorcia fino a 0. */
 const CARTINA = 200;
-/** Liquido nel serbatoio della sigaretta elettronica: il livello scende verso il fondo. */
-const LIQUIDO_Y = 58;
-const LIQUIDO_ALTEZZA = 20;
+/** Liquido nel corpo della sigaretta elettronica: si ritira da destra (LED) verso sinistra (bocchino). */
+const LIQUIDO_LARGHEZZA = 214;
 
 const tra0e1 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -14,10 +13,9 @@ export function misureNormale(consumata: number): { larghezzaCartina: number; sp
   return { larghezzaCartina: CARTINA * (1 - c), spostamentoPunta: -CARTINA * c };
 }
 
-/** Sigaretta elettronica con `consumata` da 0 (serbatoio pieno) a 1 (vuoto). */
-export function misureElettronica(consumata: number): { yLiquido: number; altezzaLiquido: number } {
-  const c = tra0e1(consumata);
-  return { yLiquido: LIQUIDO_Y + LIQUIDO_ALTEZZA * c, altezzaLiquido: LIQUIDO_ALTEZZA * (1 - c) };
+/** Sigaretta elettronica con `consumata` da 0 (piena) a 1 (vuota). */
+export function misureElettronica(consumata: number): { larghezzaLiquido: number } {
+  return { larghezzaLiquido: LIQUIDO_LARGHEZZA * (1 - tra0e1(consumata)) };
 }
 
 /*
@@ -75,15 +73,10 @@ const SVG_NORMALE = `
   </g>
 </svg>`;
 
-/* Sigaretta elettronica: bocchino, serbatoio con il liquido, corpo metallico, LED rosso in punta. */
+/* Sigaretta elettronica: bocchino, corpo trasparente pieno di liquido, LED rosso in punta. */
 const SVG_ELETTRONICA = `
 <svg class="sigaretta-disegno" viewBox="0 0 300 100" aria-hidden="true">
   <defs>
-    <linearGradient id="svapo-metallo" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e7e5e4"/>
-      <stop offset="0.5" stop-color="#78716c"/>
-      <stop offset="1" stop-color="#a8a29e"/>
-    </linearGradient>
     <filter id="svapo-sfocatura" x="-1" y="-1" width="3" height="3">
       <feGaussianBlur stdDeviation="4"/>
     </filter>
@@ -97,11 +90,10 @@ const SVG_ELETTRONICA = `
     <circle cx="34" cy="46" r="7"/>
   </g>
   <rect x="12" y="61" width="36" height="14" rx="6" fill="#3f3a36" stroke="#78716c" stroke-width="1"/>
-  <rect x="46" y="56" width="80" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
-  <rect class="svapo-liquido" x="48" y="${LIQUIDO_Y}" width="76" height="${LIQUIDO_ALTEZZA}" rx="2" fill="#f59e0b" opacity="0.85"/>
-  <rect x="46" y="56" width="80" height="24" rx="4" fill="none" stroke="#a8a29e" stroke-width="1.5"/>
-  <rect x="126" y="56" width="140" height="24" rx="3" fill="url(#svapo-metallo)"/>
-  <rect x="150" y="56" width="3" height="24" fill="#57534e"/>
+  <rect x="46" y="56" width="218" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
+  <rect class="svapo-liquido" x="48" y="58" width="${LIQUIDO_LARGHEZZA}" height="20" rx="2" fill="#f59e0b" opacity="0.85"/>
+  <rect x="50" y="59" width="210" height="2" rx="1" fill="#fff" opacity="0.25"/>
+  <rect x="46" y="56" width="218" height="24" rx="4" fill="none" stroke="#a8a29e" stroke-width="1.5"/>
   <g class="svapo-led">
     <ellipse class="svapo-alone" cx="270" cy="68" rx="12" ry="14" fill="#ff1f1f" filter="url(#svapo-sfocatura)"/>
     <rect class="svapo-luce" x="264" y="57" width="10" height="22" rx="4" fill="#ff2d2d"/>
@@ -124,9 +116,7 @@ export function creaDisegno(tipo: TipoSigaretta): Disegno {
     return {
       elemento,
       aggiorna: (consumata) => {
-        const m = misureElettronica(consumata);
-        liquido.setAttribute('y', String(m.yLiquido));
-        liquido.setAttribute('height', String(m.altezzaLiquido));
+        liquido.setAttribute('width', String(misureElettronica(consumata).larghezzaLiquido));
       },
     };
   }
