@@ -1,0 +1,61 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { datiVuoti } from '../src/storage/migrazioni';
+import { GIOVEDI, giornata } from './helpers';
+
+// localStorage condiviso tra le schede e window finti: si simula un'altra scheda che salva.
+let memoria: Map<string, string>;
+let ascoltatori: Map<string, (e: { key: string | null }) => void>;
+
+async function carica() {
+  vi.resetModules();
+  return import('../src/storage/store');
+}
+
+/** Ciò che scrive un'altra scheda dopo aver timbrato l'entrata. */
+function salvataggioAltraScheda(): string {
+  const dati = datiVuoti();
+  dati.giornate[GIOVEDI] = giornata([['ENTRATA', '08:30']]);
+  return JSON.stringify(dati);
+}
+
+beforeEach(() => {
+  memoria = new Map();
+  ascoltatori = new Map();
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => memoria.get(k) ?? null,
+    setItem: (k: string, v: string) => void memoria.set(k, String(v)),
+    removeItem: (k: string) => void memoria.delete(k),
+  });
+  vi.stubGlobal('window', { addEventListener: (tipo: string, f: (e: { key: string | null }) => void) => ascoltatori.set(tipo, f) });
+});
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe('più schede aperte', () => {
+  it('quando un\'altra scheda salva, rilegge i dati e avvisa chi ascolta', async () => {
+    const { store, seguiAltreSchede } = await carica();
+    seguiAltreSchede();
+    const cambiato = vi.fn();
+    store.ascolta(cambiato);
+    expect(store.giornata(GIOVEDI).eventi).toEqual([]);
+
+    memoria.set('timbrature', salvataggioAltraScheda());
+    ascoltatori.get('storage')!({ key: 'timbrature' });
+
+    expect(store.giornata(GIOVEDI).eventi.map((e) => e.tipo)).toEqual(['ENTRATA']);
+    expect(cambiato).toHaveBeenCalledOnce();
+  });
+
+  it('ignora le chiavi che non sono i dati (tema, avvisi, banner…)', async () => {
+    const { store, seguiAltreSchede } = await carica();
+    seguiAltreSchede();
+    const cambiato = vi.fn();
+    store.ascolta(cambiato);
+
+    memoria.set('timbrature', salvataggioAltraScheda());
+    ascoltatori.get('storage')!({ key: 'timbrature-avvisi-push' });
+
+    expect(cambiato).not.toHaveBeenCalled();
+    expect(store.giornata(GIOVEDI).eventi).toEqual([]);
+  });
+});

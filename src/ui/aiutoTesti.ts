@@ -313,14 +313,15 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Avvisi',
       domanda: 'Come funzionano gli avvisi?',
       testo: [
-        'Nell\'app per Android ricevi una notifica, anche ad app chiusa, in tre momenti:',
+        'Ricevi una notifica, anche ad app chiusa, in tre momenti:',
         '• Uscita prevista: quando puoi andare via. Si programma mentre sei al lavoro e si aggiorna se modifichi le timbrature.',
         `• Rientro dal pranzo: ${pranzoAvviso} dopo l'inizio della pausa. La durata si cambia in Impostazioni → Avvisi.`,
         imp.avvisi.sigarettaAnticipo > 0
           ? `• Pausa sigaretta: ${formattaDurata(imp.avvisi.sigarettaAnticipo)} prima della fine della tolleranza (${tolleranza}), per rientrare prima che diventi permesso. L'anticipo si cambia in Impostazioni → Avvisi.`
           : `• Pausa sigaretta: allo scadere della tolleranza (${tolleranza}). Puoi anticiparlo in Impostazioni → Avvisi.`,
-        'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato.',
-        'Gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo. Nella PWA (Safari o Chrome) non sono disponibili.',
+        'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato. Per riceverli tocca "Autorizza gli avvisi" in Impostazioni → Avvisi.',
+        'Nell\'app per Android gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo.',
+        'Nella PWA (Chrome, Safari, Firefox) l\'orario di ogni avviso va a un server che invia la notifica al momento giusto: quando timbri serve internet e l\'avviso può arrivare con un minuto di ritardo. Su iPhone funziona solo con l\'app aggiunta alla schermata Home (iOS 16.4 o successivi); sul computer le notifiche arrivano solo con il browser aperto. Al server arrivano solo l\'orario e il tipo di ogni avviso e l\'indirizzo per le notifiche del browser: niente timbrature né testi.',
       ],
     },
     {
@@ -329,9 +330,15 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       domanda: 'Gli avvisi non arrivano o arrivano in ritardo',
       testo: [
         '• Controlla in Impostazioni → Avvisi che le notifiche siano autorizzate; se serve tocca "Autorizza gli avvisi".',
+        '• Se hai attivato "Non disturbare" o una modalità Focus, le notifiche vengono silenziate.',
+        'Nell\'app per Android:',
         '• Su Android 12 e successivi concedi anche "Sveglie e promemoria" all\'app: senza, gli avvisi possono ritardare di qualche minuto.',
         '• Nelle impostazioni di Android (App → Krumiro) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
-        '• Se hai attivato "Non disturbare" o una modalità Focus, le notifiche vengono silenziate.',
+        'Nella PWA:',
+        '• Quando timbri serve internet: se manca, l\'avviso viene programmato appena torni online con l\'app aperta.',
+        '• Le notifiche del sito devono essere permesse: in Chrome da ⋮ → Impostazioni → Privacy e sicurezza → Impostazioni sito → Notifiche; su iPhone da Impostazioni → Notifiche → Krumiro.',
+        '• Su iPhone apri l\'app dall\'icona sulla schermata Home, non da Safari.',
+        '• Sul computer il browser deve restare aperto (anche ridotto a icona).',
       ],
     },
 
@@ -367,6 +374,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Dal telefono apri https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk : il browser scarica l\'app (krumiro.apk).',
         '• Aprilo: Android chiede di consentire l\'installazione da questa fonte. Conferma e installa.',
         '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
+        'Rispetto alla PWA, nell\'app gli avvisi funzionano anche senza internet e senza passare da un server.',
         'L\'app ha dati separati dalla PWA: per portarli con te esporta il backup JSON dalla PWA e importalo nell\'app.',
         'Per aggiornarla scarica di nuovo dallo stesso indirizzo e installa sopra: i dati restano.',
       ],

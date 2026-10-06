@@ -116,6 +116,8 @@ writeFileSync('public/icons/apple-touch-icon.png', icona(180, 1));
 writeFileSync('public/icons/icon-192.png', icona(192, 1));
 writeFileSync('public/icons/icon-512.png', icona(512, 1));
 writeFileSync('public/icons/icon-maskable-512.png', icona(512, 0.78));
+// Badge delle notifiche (Android): conta solo la forma, Chrome usa il canale alfa. 96×96 come consiglia Chrome.
+writeFileSync('public/icons/badge-96.png', primoPiano(96, 1.3));
 console.log('Icone generate in public/icons/');
 
 // App Android: stesse icone della PWA in tutte le densità.
