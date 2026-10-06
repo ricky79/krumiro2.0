@@ -178,7 +178,48 @@ describe('sincronizzazione con il backend', () => {
 
     expect(fetchFinta).not.toHaveBeenCalled();
     expect(stato().inviati).toEqual({});
-    expect(cache.has(voce)).toBe(false);
+    // Il push potrebbe non essere ancora partito: il testo resta, lo cancella il service worker dopo averlo mostrato.
+    expect(cache.has(voce)).toBe(true);
+  });
+
+  it('ogni chiamata al server ha un timeout', async () => {
+    const { sincronizzaAvvisi } = await carica();
+    await sincronizzaAvvisi();
+    const init = fetchFinta.mock.calls[0]![1] as RequestInit;
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('DELETE fallito: l\'avviso resta e la sincronizzazione dopo riprova', async () => {
+    const { sincronizzaAvvisi } = await carica();
+    await sincronizzaAvvisi();
+    fetchFinta.mockClear();
+
+    dati.giornata = giornata([['ENTRATA', '08:30'], ['USCITA', '09:00']]); // giornata chiusa: niente più uscita prevista
+    fetchFinta.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    await sincronizzaAvvisi();
+    expect(stato().inviati.uscita).toBeDefined();
+
+    await sincronizzaAvvisi();
+    expect(chiamate().map((c) => c.method)).toEqual(['DELETE', 'DELETE']);
+    expect(stato().inviati).toEqual({});
+  });
+
+  it('rientro prima della fine della pausa: annulla il rientro e programma l\'uscita', async () => {
+    dati.giornata = giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '09:50']]);
+    dati.impostazioni = impostazioni({ avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 45 } });
+    const { sincronizzaAvvisi } = await carica();
+    await sincronizzaAvvisi();
+    const id = (tipo: string) => `${BASE}/avvisi/${stato().dispositivo}-${tipo}`;
+    fetchFinta.mockClear();
+
+    dati.giornata = giornata([['ENTRATA', '08:30'], ['INIZIO_PAUSA', '09:50'], ['FINE_PAUSA', '10:00']]);
+    await sincronizzaAvvisi();
+
+    expect(chiamate().map((c) => [c.method, c.url])).toEqual([
+      ['PUT', id('uscita')],
+      ['DELETE', id('pausa')],
+    ]);
+    expect(Object.keys(stato().inviati)).toEqual(['uscita']);
   });
 
   it('errore di rete: lo stato non cambia e la sincronizzazione dopo riprova', async () => {

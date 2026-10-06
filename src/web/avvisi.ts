@@ -130,6 +130,8 @@ async function chiama(metodo: 'PUT' | 'DELETE', id: string, corpo?: unknown): Pr
   try {
     const r = await fetch(`${URL_NOTIFICHE}/avvisi/${id}`, {
       method: metodo,
+      // Una rete bloccata non deve fermare la coda per minuti: la prossima sincronizzazione riprova.
+      signal: AbortSignal.timeout(10_000),
       ...(corpo === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) }),
     });
     if (r.ok) return true;
@@ -187,11 +189,14 @@ async function esegui(): Promise<void> {
       } else {
         programmaFallito = true;
       }
-    } else {
+    } else if (op.azione === 'annulla') {
       const id = idAvviso(stato.dispositivo, op.tipo);
-      if (op.azione === 'annulla' && !(await chiama('DELETE', id))) continue;
+      if (!(await chiama('DELETE', id))) continue;
       delete stato.inviati[op.tipo];
       await cancellaTesto(reg.scope, id);
+    } else {
+      // Scaduto: il push può essere ancora in viaggio, il testo nella Cache lo cancella il service worker.
+      delete stato.inviati[op.tipo];
     }
     salvaStato(stato);
   }
