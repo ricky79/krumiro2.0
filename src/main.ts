@@ -12,6 +12,7 @@ import { registraServiceWorker } from './pwa';
 import { avviaTema } from './ui/tema';
 import { avviaBannerInstallazione } from './ui/installa';
 import { avviaControlloAggiornamenti } from './ui/aggiornamento';
+import { avviaTagNfc } from './ui/tagNfc';
 import { inApp } from './native/app';
 import { avviaAvvisi as avviaAvvisiApp } from './native/avvisi';
 import { avviaAvvisi as avviaAvvisiPwa } from './web/avvisi';
@@ -117,6 +118,9 @@ if (inApp()) {
   avviaAvvisiApp();
   // L'APK non si aggiorna da solo: un banner propone la nuova versione pubblicata su GitHub.
   avviaControlloAggiornamenti(__VERSIONE_APP__);
+  // Tag NFC (krumiro://timbra): timbra come il pulsante principale. Dopo il primo render, così
+  // l'evento trattenuto all'avvio a freddo trova la vista già montata.
+  avviaTagNfc(() => vai('oggi'));
 } else {
   registraServiceWorker();
   // PWA: gli avvisi passano dal backend e arrivano come notifiche push.

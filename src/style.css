@@ -709,6 +709,23 @@ input:disabled {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+/* Toast con Annulla (timbratura col tag NFC): il pulsante deve ricevere il tocco. */
+.toast.con-annulla {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+}
+.toast-annulla {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  padding: 4px 0;
+  cursor: pointer;
+}
 
 /* Banner sopra la barra delle schede (src/ui/banner.ts): installazione nella PWA, nuova versione
    nell'app Android. --altezza-banner è impostata dallo script finché il banner è visibile. */
