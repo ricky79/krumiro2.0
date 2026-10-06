@@ -92,6 +92,13 @@ export function toast(messaggio: string, annulla?: () => void): void {
     );
   }
   document.body.append(t);
+  // Nel top layer, sopra i dialoghi modali aperti: altrimenti un messaggio mostrato con un foglio
+  // aperto (es. "Chiudi la finestra aperta…" letto dal tag) resterebbe nascosto. Senza Popover API
+  // (WebView vecchie) il toast si vede come prima, sotto i dialoghi.
+  if (typeof t.showPopover === 'function') {
+    t.popover = 'manual';
+    t.showPopover();
+  }
   requestAnimationFrame(() => t.classList.add('visibile'));
   setTimeout(() => {
     t.classList.remove('visibile');

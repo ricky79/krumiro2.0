@@ -159,6 +159,18 @@ describe('lettura del tag', () => {
     expect(azioni.eseguiAzione).toHaveBeenCalledWith('INIZIO_PAUSA', OGGI, expect.any(Function));
   });
 
+  it('vibra solo dopo aver timbrato: con la scelta annullata non vibra', async () => {
+    vi.setSystemTime(new Date('2026-10-01T15:30:00Z')); // 17:30 a Roma
+    finto.giornate[OGGI] = giornata([['ENTRATA', '08:30']], { data: OGGI });
+    finto.sceltaFoglio = 'Annulla';
+    const { gestisciTag } = await carica();
+    await gestisciTag(vi.fn());
+    expect(nfc.vibra).not.toHaveBeenCalled();
+    finto.sceltaFoglio = 'Uscita';
+    await gestisciTag(vi.fn());
+    expect(nfc.vibra).toHaveBeenCalledOnce();
+  });
+
   it('con una finestra aperta o la giornata chiusa mostra un messaggio e non vibra', async () => {
     const { gestisciTag } = await carica();
     finto.finestraAperta = true;

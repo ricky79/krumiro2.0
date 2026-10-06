@@ -36,7 +36,6 @@ export async function gestisciTag(mostraOggi: () => void): Promise<void> {
   mostraOggi();
   if (esito === 'chiusa' || azione === null) return toast('Giornata già chiusa');
 
-  void vibra();
   const prima = structuredClone(giornata);
   const sigaretta = sigarettaInCorso(prima);
   const inizio = sigaretta ? inizioSigarettaSalvato(data, sigaretta.id) : null;
@@ -54,7 +53,12 @@ export async function gestisciTag(mostraOggi: () => void): Promise<void> {
     if (scelta) await eseguiAzione(scelta, data, annulla);
   } else await eseguiAzione(azione, data, annulla);
 
-  if (JSON.stringify(store.giornata(data).eventi) !== JSON.stringify(prima.eventi)) ultimaTimbratura = Date.now();
+  // La vibrazione conferma la timbratura: solo se la giornata è cambiata davvero (non dopo un foglio
+  // lasciato a metà, che altrimenti farebbe credere di aver timbrato).
+  if (JSON.stringify(store.giornata(data).eventi) !== JSON.stringify(prima.eventi)) {
+    ultimaTimbratura = Date.now();
+    void vibra();
+  }
 }
 
 /** Fascia pranzo finita senza pausa: il tag non indovina, chiede. */

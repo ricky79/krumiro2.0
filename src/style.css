@@ -688,12 +688,21 @@ input:disabled {
   color: var(--tab-attiva);
 }
 
-/* Toast */
+/* Toast. È un popover nel top layer (src/ui/dialoghi.ts): top, right, margin, border, overflow e
+   height annullano gli stili predefiniti dei popover (inset: 0, margin: auto, bordo, Canvas). */
 .toast {
   position: fixed;
+  top: auto;
+  right: auto;
   left: 50%;
   bottom: calc(var(--altezza-tab) + var(--sicuro-basso) + var(--altezza-banner, 0px) + 16px);
   transform: translate(-50%, 20px);
+  margin: 0;
+  border: 0;
+  overflow: visible;
+  height: auto;
+  /* Senza, con left: 50% il toast avrebbe a disposizione solo mezzo schermo. */
+  width: max-content;
   max-width: calc(100% - 32px);
   padding: 10px 18px;
   border-radius: 20px;
@@ -713,17 +722,22 @@ input:disabled {
 .toast.con-annulla {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  padding-block: 2px;
+  padding-right: 6px;
   pointer-events: auto;
 }
+/* Si tocca camminando, entro 5 secondi: area di tocco di almeno 44 px. */
 .toast-annulla {
+  flex: none;
+  min-height: 44px;
   border: 0;
   background: none;
   color: inherit;
   font: inherit;
   font-weight: 700;
   text-decoration: underline;
-  padding: 4px 0;
+  padding: 0 12px;
   cursor: pointer;
 }
 

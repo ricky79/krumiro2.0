@@ -159,7 +159,11 @@ export function esitoLettura(p: {
 
 `toast(messaggio, annulla?)`: con `annulla` il messaggio ha un pulsante **Annulla** e resta circa
 5 secondi invece di 2,2. Toccandolo il messaggio sparisce e si chiama `annulla`. Il toast oggi ha
-`pointer-events: none`: la variante con il pulsante li riattiva.
+`pointer-events: none`: la variante con il pulsante li riattiva, e il pulsante ha un'area di tocco di
+almeno 44 px. Il toast largo quanto il testo (`width: max-content`, al massimo lo schermo meno
+32 px) e mostrato come popover nel top layer (`popover="manual"` + `showPopover()`, dove c'è):
+altrimenti un messaggio mostrato con un foglio modale aperto, come "Chiudi la finestra aperta…",
+resterebbe nascosto sotto il foglio.
 
 ### `eseguiAzione` (`src/ui/giorno.ts`)
 
@@ -192,7 +196,7 @@ Entro la tolleranza la pausa si annulla, oltre diventa permesso, come oggi.
    - `finestra-aperta` → toast "Chiudi la finestra aperta e riavvicina il tag" (non si chiude nulla al
      posto dell'utente: potrebbe perdere una modifica);
    - `chiusa` → `mostraOggi()`, toast "Giornata già chiusa";
-   - `timbra` → `mostraOggi()`, `vibra()`, fotografia della giornata e dell'inizio sigaretta salvato
+   - `timbra` → `mostraOggi()`, fotografia della giornata e dell'inizio sigaretta salvato
      (per *Annulla*), poi:
      - `RIENTRO_SIGARETTA` → `rientroSigarettaDaTag(data, annulla)`;
      - `PAUSA_O_USCITA` → foglio "Cosa timbri?" con il testo "La fascia pranzo è finita e la pausa non
@@ -200,9 +204,11 @@ Entro la tolleranza la pausa si annulla, oltre diventa permesso, come oggi.
        `eseguiAzione(scelta, data, annulla)`, *Annulla* o il tocco sullo sfondo non timbrano;
      - altrimenti → `eseguiAzione(azione, data, annulla)`.
 
-     Finita l'azione, se gli eventi della giornata sono cambiati `ultimaTimbratura = Date.now()`.
+     Finita l'azione, se gli eventi della giornata sono cambiati `ultimaTimbratura = Date.now()` e
+     `vibra()`.
 
-   Solo `timbra` vibra. Il messaggio di conferma ("Entrata alle 9:02", "Rientro alle 10:47 · 30 min
+   La vibrazione conferma la timbratura: vibra solo se la giornata è cambiata davvero, quindi non con
+   un foglio annullato o lasciato a metà. Il messaggio di conferma ("Entrata alle 9:02", "Rientro alle 10:47 · 30 min
    di permesso"…) è quello del tocco, con in più il tasto *Annulla*.
 
 **Annulla:** salva di nuovo l'inizio sigaretta fotografato (se c'era una pausa sigaretta in corso),
