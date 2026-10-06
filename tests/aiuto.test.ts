@@ -19,6 +19,23 @@ describe('aiuto', () => {
     for (const s of SEZIONI_AIUTO) expect(voci.some((v) => v.sezione === s)).toBe(true);
   });
 
+  it('gli avvisi spiegano anche la PWA', () => {
+    const avvisi = voci.find((x) => x.id === 'avvisi')!.testo.join(' ');
+    expect(avvisi).toContain('PWA');
+    expect(avvisi).toContain('schermata Home');
+    expect(avvisi).not.toContain('non sono disponibili');
+    // L'id dell'avviso rivela al server di che avviso si tratta: il testo sulla privacy deve dirlo.
+    expect(avvisi).toContain('l\'orario e il tipo di ogni avviso');
+    const problemi = voci.find((x) => x.id === 'avvisi-non-arrivano')!.testo.join(' ');
+    expect(problemi).toContain('internet');
+    expect(problemi).toContain('Sveglie e promemoria');
+    // Sul computer il browser deve essere aperto; il percorso dei permessi vale anche nell'app installata.
+    expect(avvisi).toMatch(/sul computer/i);
+    expect(problemi).toContain('Impostazioni sito');
+    expect(problemi).toContain('Impostazioni → Notifiche → Krumiro');
+    expect(problemi).not.toContain('a sinistra dell\'indirizzo');
+  });
+
   it('i testi seguono le impostazioni correnti', () => {
     const v = vociAiuto(impostazioni({ pranzo: { inizio: 750, fine: 840 }, pausaDaScalare: 45 }));
     const rientro = v.find((x) => x.id === 'rientro')!;
