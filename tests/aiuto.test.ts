@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ETICHETTE_AZIONE, type Azione } from '../src/core/statoGiornata';
-import { aiutoPerAzione, filtraAiuto, SEZIONI_AIUTO, vociAiuto } from '../src/ui/aiutoTesti';
+import { URL_APK } from '../src/ui/aggiornamento';
+import { aiutoPerAzione, filtraAiuto, pezziRiga, SEZIONI_AIUTO, vociAiuto } from '../src/ui/aiutoTesti';
 import { impostazioni } from './helpers';
 
 const voci = vociAiuto(impostazioni());
@@ -42,9 +43,37 @@ describe('aiuto', () => {
     expect(testo).toContain('Nella PWA');
     expect(testo).toContain('Nell\'app per Android');
     expect(testo).toContain('"Scarica"');
-    expect(testo).toContain('releases/latest/download/krumiro.apk');
     const installazione = voci.find((x) => x.id === 'installazione-app')!.testo.join(' ');
     expect(installazione).toContain('riquadro in basso');
+  });
+
+  it('il download dell\'APK è un link con un testo breve, non un indirizzo da copiare', () => {
+    const pezzi = (id: string) => voci.find((x) => x.id === id)!.testo.flatMap(pezziRiga);
+    expect(pezzi('installazione-app')).toContainEqual({ testo: 'clicca qui', url: URL_APK });
+    for (const id of ['installazione-app', 'aggiornamenti']) {
+      expect(pezzi(id), id).toContainEqual(expect.objectContaining({ url: URL_APK }));
+      const visibile = pezzi(id).map((p) => (typeof p === 'string' ? p : p.testo)).join(' ');
+      expect(visibile, id).not.toContain('https://');
+    }
+  });
+
+  it('pezziRiga separa i link [testo](url) dal testo', () => {
+    expect(pezziRiga('Niente link.')).toEqual(['Niente link.']);
+    expect(pezziRiga('Dal telefono [clicca qui](https://x.it/a.apk): scarica.')).toEqual([
+      'Dal telefono ',
+      { testo: 'clicca qui', url: 'https://x.it/a.apk' },
+      ': scarica.',
+    ]);
+    expect(pezziRiga('[a](https://x.it) e [b](https://y.it)')).toEqual([
+      { testo: 'a', url: 'https://x.it' },
+      ' e ',
+      { testo: 'b', url: 'https://y.it' },
+    ]);
+  });
+
+  it('la ricerca trova il testo dei link ma non l\'indirizzo nascosto', () => {
+    expect(filtraAiuto(voci, 'clicca qui').map((v) => v.id)).toContain('installazione-app');
+    expect(filtraAiuto(voci, 'releases')).toEqual([]);
   });
 
   it('i testi seguono le impostazioni correnti', () => {
