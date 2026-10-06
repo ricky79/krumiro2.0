@@ -321,7 +321,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
           : `• Pausa sigaretta: allo scadere della tolleranza (${tolleranza}). Puoi anticiparlo in Impostazioni → Avvisi.`,
         'Ogni avviso si può disattivare dalle Impostazioni. Nessun avviso se la giornata è chiusa, da correggere o se l\'orario è già passato. Per riceverli tocca "Autorizza gli avvisi" in Impostazioni → Avvisi.',
         'Nell\'app per Android gli avvisi sono programmati sul telefono: non serve connessione e nessun dato esce dal dispositivo.',
-        'Nella PWA (Chrome, Safari, Firefox) l\'orario di ogni avviso va a un server che invia la notifica al momento giusto: quando timbri serve internet e l\'avviso può arrivare con un minuto di ritardo. Su iPhone funziona solo con l\'app aggiunta alla schermata Home (iOS 16.4 o successivi). Al server arrivano solo l\'orario e il tipo di ogni avviso e l\'indirizzo per le notifiche del browser: niente timbrature né testi.',
+        'Nella PWA (Chrome, Safari, Firefox) l\'orario di ogni avviso va a un server che invia la notifica al momento giusto: quando timbri serve internet e l\'avviso può arrivare con un minuto di ritardo. Su iPhone funziona solo con l\'app aggiunta alla schermata Home (iOS 16.4 o successivi); sul computer le notifiche arrivano solo con il browser aperto. Al server arrivano solo l\'orario e il tipo di ogni avviso e l\'indirizzo per le notifiche del browser: niente timbrature né testi.',
       ],
     },
     {
@@ -336,8 +336,9 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Nelle impostazioni di Android (App → Krumiro) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
         'Nella PWA:',
         '• Quando timbri serve internet: se manca, l\'avviso viene programmato appena torni online con l\'app aperta.',
-        '• Le notifiche del sito devono essere permesse nel browser (in Chrome: icona a sinistra dell\'indirizzo → Notifiche).',
+        '• Le notifiche del sito devono essere permesse: in Chrome da ⋮ → Impostazioni → Privacy e sicurezza → Impostazioni sito → Notifiche; su iPhone da Impostazioni → Notifiche → Krumiro.',
         '• Su iPhone apri l\'app dall\'icona sulla schermata Home, non da Safari.',
+        '• Sul computer il browser deve restare aperto (anche ridotto a icona).',
       ],
     },
 

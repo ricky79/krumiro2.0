@@ -81,16 +81,20 @@ function sezioneAvvisi(): HTMLElement {
   const testi = nativa ? TESTO_PERMESSI_APP : TESTO_PERMESSI_PWA;
   const stato = el('small', { class: 'nota' }, 'Controllo dei permessi…');
   const pulsante = el('button', { type: 'button', class: 'btn btn-secondario', hidden: true }, 'Autorizza gli avvisi');
-  const comeInstallare = linkAiuto('Come installo l\'app sull\'iPhone?', 'installazione');
+  const comeInstallare = linkAiuto('Come aggiungo l\'app alla schermata Home?', 'installazione');
   comeInstallare.hidden = true;
   const mostra = (s: StatoPermessi) => {
     stato.textContent = testi[s];
     // Nell'app Android si può richiedere anche dopo un rifiuto; nel browser un rifiuto è definitivo.
     pulsante.hidden = nativa ? s === 'concessi' || s === 'non-disponibili' : s !== 'da-chiedere' && s !== 'da-attivare';
     comeInstallare.hidden = s !== 'da-installare';
+    pulsante.disabled = false;
   };
   void piattaforma.statoPermessi().then(mostra);
-  pulsante.addEventListener('click', () => void piattaforma.richiediPermessi().then(mostra));
+  pulsante.addEventListener('click', () => {
+    pulsante.disabled = true; // niente richieste doppie mentre il browser chiede il permesso e si iscrive
+    void piattaforma.richiediPermessi().then(mostra);
+  });
   const cambia = (modifica: (a: typeof avvisi) => void) => {
     store.modificaImpostazioni((i) => modifica(i.avvisi));
     salvato();

@@ -29,6 +29,11 @@ describe('aiuto', () => {
     const problemi = voci.find((x) => x.id === 'avvisi-non-arrivano')!.testo.join(' ');
     expect(problemi).toContain('internet');
     expect(problemi).toContain('Sveglie e promemoria');
+    // Sul computer il browser deve essere aperto; il percorso dei permessi vale anche nell'app installata.
+    expect(avvisi).toMatch(/sul computer/i);
+    expect(problemi).toContain('Impostazioni sito');
+    expect(problemi).toContain('Impostazioni → Notifiche → Krumiro');
+    expect(problemi).not.toContain('a sinistra dell\'indirizzo');
   });
 
   it('i testi seguono le impostazioni correnti', () => {
