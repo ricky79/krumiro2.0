@@ -6,6 +6,7 @@ import {
   idAvviso,
   operazioniPush,
   statoPermessiWeb,
+  stessaChiave,
   type AvvisoPush,
   type Inviati,
   type TestoSalvato,
@@ -80,6 +81,19 @@ async function registrazionePronta(): Promise<ServiceWorkerRegistration | null> 
 }
 
 /**
+ * L'iscrizione push, se è stata fatta con la chiave attuale del backend. Se il backend ha cambiato la
+ * coppia di chiavi i push verrebbero rifiutati: l'iscrizione vecchia si annulla e in Impostazioni
+ * ricompare il pulsante per riattivare gli avvisi.
+ */
+async function iscrizioneValida(reg: ServiceWorkerRegistration): Promise<PushSubscription | null> {
+  const iscrizione = await reg.pushManager.getSubscription();
+  if (!iscrizione) return null;
+  if (stessaChiave(iscrizione.options?.applicationServerKey ?? null, chiaveDaBase64url(CHIAVE_VAPID))) return iscrizione;
+  await iscrizione.unsubscribe().catch(() => false);
+  return null;
+}
+
+/**
  * Per mostrare lo stato: se il service worker si sta ancora installando (prima apertura, anche
  * dell'app appena aggiunta alla Home su iPhone, che ha dati separati da Safari) lo si aspetta;
  * se non c'è proprio (in sviluppo) no.
@@ -98,7 +112,7 @@ export async function statoPermessi(): Promise<StatoPermessi> {
       iosNonInstallata: iosNonInstallata(),
       supportato: reg !== null,
       permesso: reg ? Notification.permission : 'default',
-      iscritto: reg ? (await reg.pushManager.getSubscription()) !== null : false,
+      iscritto: reg ? (await iscrizioneValida(reg)) !== null : false,
     });
   } catch {
     return 'non-disponibili';
@@ -115,7 +129,7 @@ export async function richiediPermessi(): Promise<StatoPermessi> {
     if ((await Notification.requestPermission()) !== 'granted') return statoPermessi();
     const reg = await registrazionePronta();
     if (!reg) return 'non-disponibili';
-    if (!(await reg.pushManager.getSubscription())) {
+    if (!(await iscrizioneValida(reg))) {
       await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveDaBase64url(CHIAVE_VAPID) });
     }
   } catch (e) {
@@ -164,7 +178,7 @@ let coda: Promise<void> = Promise.resolve();
 async function esegui(): Promise<void> {
   if (!supportato() || Notification.permission !== 'granted') return;
   const reg = await registrazioneAttiva();
-  const iscrizione = reg ? await reg.pushManager.getSubscription() : null;
+  const iscrizione = reg ? await iscrizioneValida(reg) : null;
   if (!reg || !iscrizione) return; // all'avvio non ci si iscrive di nascosto: c'è il pulsante
 
   const ora = new Date();

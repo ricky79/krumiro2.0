@@ -98,8 +98,18 @@ export function statoPermessiWeb(a: AmbientePush): StatoPermessi {
   if (a.iosNonInstallata) return 'da-installare';
   if (!a.supportato) return 'non-disponibili';
   if (a.permesso === 'denied') return 'negati';
-  if (a.permesso === 'granted' && a.iscritto) return 'concessi';
+  if (a.permesso === 'granted') return a.iscritto ? 'concessi' : 'da-attivare';
   return 'da-chiedere';
+}
+
+/**
+ * True se l'iscrizione è stata fatta con la chiave VAPID attuale del backend. Con una chiave vecchia
+ * il push service rifiuterebbe ogni invio. Se il browser non la dice (null) la si dà per buona.
+ */
+export function stessaChiave(chiaveIscrizione: ArrayBuffer | null, attuale: Uint8Array): boolean {
+  if (chiaveIscrizione === null) return true;
+  const byte = new Uint8Array(chiaveIscrizione);
+  return byte.length === attuale.length && byte.every((v, i) => v === attuale[i]);
 }
 
 /** Testo che la pagina salva nella Cache per un avviso: `orario` in ISO UTC, come nel payload del backend. */

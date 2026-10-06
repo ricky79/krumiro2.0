@@ -58,13 +58,16 @@ const TESTO_PERMESSI_APP: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate.',
   negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Krumiro → Notifiche).',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
-  'da-installare': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.', // solo PWA: qui non capita
+  // Solo PWA: nell'app non capitano.
+  'da-attivare': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
+  'da-installare': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
   'non-disponibili': 'Avvisi non disponibili su questo telefono.',
 };
 
 const TESTO_PERMESSI_PWA: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate. Gli avvisi arrivano tramite internet, con fino a un minuto di ritardo.',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
+  'da-attivare': 'Notifiche permesse, ma gli avvisi non sono attivi su questo dispositivo: tocca «Autorizza gli avvisi» (serve internet).',
   negati: 'Notifiche bloccate: abilitale nelle impostazioni del browser per questo sito.',
   'da-installare': 'Su iPhone gli avvisi arrivano solo con l\'app aggiunta alla schermata Home.',
   'non-disponibili': 'Questo browser non supporta le notifiche push.',
@@ -83,7 +86,7 @@ function sezioneAvvisi(): HTMLElement {
   const mostra = (s: StatoPermessi) => {
     stato.textContent = testi[s];
     // Nell'app Android si può richiedere anche dopo un rifiuto; nel browser un rifiuto è definitivo.
-    pulsante.hidden = nativa ? s === 'concessi' || s === 'non-disponibili' : s !== 'da-chiedere';
+    pulsante.hidden = nativa ? s === 'concessi' || s === 'non-disponibili' : s !== 'da-chiedere' && s !== 'da-attivare';
     comeInstallare.hidden = s !== 'da-installare';
   };
   void piattaforma.statoPermessi().then(mostra);

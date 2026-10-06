@@ -8,6 +8,7 @@ import {
   operazioniPush,
   opzioniNotifica,
   statoPermessiWeb,
+  stessaChiave,
   tipoDaId,
   type AvvisoPush,
 } from '../src/core/avvisiPush';
@@ -104,8 +105,11 @@ describe('stato dei permessi nella PWA', () => {
 
   it('concessi solo con permesso e iscrizione', () => {
     expect(statoPermessiWeb(base)).toBe('concessi');
-    expect(statoPermessiWeb({ ...base, iscritto: false })).toBe('da-chiedere');
     expect(statoPermessiWeb({ ...base, permesso: 'default', iscritto: false })).toBe('da-chiedere');
+  });
+
+  it('permesso concesso ma iscrizione assente (fallita o persa): da attivare', () => {
+    expect(statoPermessiWeb({ ...base, iscritto: false })).toBe('da-attivare');
   });
 
   it('permesso negato', () => {
@@ -197,6 +201,17 @@ describe('cache e chiave VAPID', () => {
     expect(chiaveCache('https://ricky79.github.io/krumiro2.0/', 'abc-pausa')).toBe(
       'https://ricky79.github.io/krumiro2.0/avvisi/abc-pausa',
     );
+  });
+
+  it('riconosce un\'iscrizione fatta con un\'altra chiave VAPID', () => {
+    const attuale = chiaveDaBase64url('BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA');
+    expect(stessaChiave(attuale.slice().buffer, attuale)).toBe(true);
+    const altra = attuale.slice();
+    altra[10] = altra[10]! ^ 0xff;
+    expect(stessaChiave(altra.buffer, attuale)).toBe(false);
+    expect(stessaChiave(new ArrayBuffer(0), attuale)).toBe(false);
+    // Se il browser non dice con che chiave è stata fatta l'iscrizione, la si tiene.
+    expect(stessaChiave(null, attuale)).toBe(true);
   });
 
   it('decodifica la chiave VAPID in un punto P-256 non compresso', () => {

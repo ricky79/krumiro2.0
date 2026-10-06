@@ -10,10 +10,11 @@ export type TipoAvviso = 'uscita' | 'pausa' | 'sigaretta';
 export const ID_AVVISO: Record<TipoAvviso, number> = { uscita: 1, pausa: 2, sigaretta: 3 };
 
 /**
- * Stato dei permessi di notifica. 'da-installare' vale solo nella PWA su iPhone, dove le notifiche
- * arrivano soltanto con l'app aggiunta alla schermata Home.
+ * Stato dei permessi di notifica. Solo nella PWA: 'da-installare' su iPhone, dove le notifiche
+ * arrivano soltanto con l'app aggiunta alla schermata Home; 'da-attivare' con il permesso concesso
+ * ma senza un'iscrizione push valida (iscrizione fallita, persa o fatta con una chiave vecchia).
  */
-export type StatoPermessi = 'concessi' | 'negati' | 'da-chiedere' | 'da-installare' | 'non-disponibili';
+export type StatoPermessi = 'concessi' | 'negati' | 'da-chiedere' | 'da-attivare' | 'da-installare' | 'non-disponibili';
 
 export interface Avviso {
   tipo: TipoAvviso;

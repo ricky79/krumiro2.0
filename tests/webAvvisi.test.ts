@@ -321,6 +321,42 @@ describe('permessi', () => {
     expect(chiamate().map((c) => c.method)).toEqual(['PUT']);
   });
 
+  it('iscrizione fallita (es. offline): da attivare, con il permesso già concesso', async () => {
+    notifica.permission = 'default';
+    notifica.requestPermission.mockImplementation(async () => {
+      notifica.permission = 'granted';
+      return 'granted';
+    });
+    pushManager.getSubscription.mockImplementation(async () => null);
+    pushManager.subscribe.mockRejectedValue(new DOMException('Registration failed - push service error', 'AbortError'));
+    const { richiediPermessi } = await carica();
+    expect(await richiediPermessi()).toBe('da-attivare');
+    expect(fetchFinta).not.toHaveBeenCalled();
+  });
+
+  it('iscrizione fatta con un\'altra chiave VAPID: la annulla e chiede di riattivare', async () => {
+    const unsubscribe = vi.fn(async () => true);
+    iscrizione = { endpoint: contatto.endpoint, toJSON: () => contatto, options: { applicationServerKey: new Uint8Array(65).buffer }, unsubscribe } as typeof iscrizione;
+    const { statoPermessi, sincronizzaAvvisi } = await carica();
+    await sincronizzaAvvisi();
+    expect(fetchFinta).not.toHaveBeenCalled();
+    expect(unsubscribe).toHaveBeenCalled();
+    pushManager.getSubscription.mockImplementation(async () => null); // dopo unsubscribe il browser non ha più l'iscrizione
+    expect(await statoPermessi()).toBe('da-attivare');
+  });
+
+  it('iscrizione fatta con la chiave attuale: resta valida', async () => {
+    const { CHIAVE_VAPID } = await carica();
+    const chiave = Uint8Array.from(atob(CHIAVE_VAPID.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+    const unsubscribe = vi.fn(async () => true);
+    iscrizione = { endpoint: contatto.endpoint, toJSON: () => contatto, options: { applicationServerKey: chiave.buffer }, unsubscribe } as typeof iscrizione;
+    const { sincronizzaAvvisi, statoPermessi } = await carica();
+    await sincronizzaAvvisi();
+    expect(unsubscribe).not.toHaveBeenCalled();
+    expect(fetchFinta).toHaveBeenCalledOnce();
+    expect(await statoPermessi()).toBe('concessi');
+  });
+
   it('iPhone aperto in Safari: da installare', async () => {
     nav.userAgent = UA_IPHONE;
     const { statoPermessi } = await carica();
