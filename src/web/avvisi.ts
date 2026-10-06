@@ -1,12 +1,14 @@
 import { pianificaAvvisi, type StatoPermessi } from '../core/avvisi';
 import {
   CACHE_AVVISI,
+  CHIAVE_VAPID,
   chiaveCache,
   chiaveDaBase64url,
   idAvviso,
   operazioniPush,
   statoPermessiWeb,
   stessaChiave,
+  URL_NOTIFICHE,
   type AvvisoPush,
   type Inviati,
   type TestoSalvato,
@@ -23,10 +25,6 @@ import { inModalitaApp, piattaforma } from '../ui/installa';
  * va al backend (Cloudflare Worker), che allo scadere manda una notifica web push. Il testo resta nel
  * browser (Cache), dove il service worker lo legge.
  */
-
-export const URL_NOTIFICHE = 'https://krumiro-notifiche.oliosi-riccardo.workers.dev';
-/** Chiave pubblica VAPID del backend (`VAPID_PUBLIC_KEY` in wrangler.jsonc): cambia solo con la coppia di chiavi. */
-export const CHIAVE_VAPID = 'BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA';
 
 /** Stato del dispositivo, come tema e banner: fuori dai dati e dal backup. */
 const CHIAVE = 'timbrature-avvisi-push';

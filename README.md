@@ -189,10 +189,11 @@ tests/         test Vitest
 
 ### Avvisi della PWA (sviluppo)
 
-URL del backend e chiave pubblica VAPID sono costanti in `src/web/avvisi.ts` (`URL_NOTIFICHE`,
-`CHIAVE_VAPID`); se il backend cambia la coppia di chiavi, la chiave va aggiornata e gli utenti devono
-autorizzare di nuovo gli avvisi. La logica pura (operazioni verso il backend, testo della notifica) è in
-`src/core/avvisiPush.ts`, con test. Il service worker è scritto a mano (`src/sw.ts`, strategia
+URL del backend e chiave pubblica VAPID sono costanti in `src/core/avvisiPush.ts` (`URL_NOTIFICHE`,
+`CHIAVE_VAPID`), insieme alla logica pura (operazioni verso il backend, testo della notifica), con test.
+Se il backend cambia la coppia di chiavi, la chiave va aggiornata qui: le iscrizioni fatte con quella
+vecchia vengono annullate e in *Impostazioni → Avvisi* ricompare il pulsante per riattivare gli avvisi.
+Se il browser rinnova da solo l'iscrizione push, il service worker riprogramma gli avvisi in sospeso. Il service worker è scritto a mano (`src/sw.ts`, strategia
 `injectManifest` di vite-plugin-pwa) e si controlla con `tsconfig.sw.json`.
 
 Con `npm run dev` il service worker non c'è e gli avvisi risultano "non disponibili". Per provarli:

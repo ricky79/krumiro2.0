@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CHIAVE_VAPID } from '../src/core/avvisiPush';
 import { giornata, impostazioni } from './helpers';
 
 // Browser, backend e store sono finti: si verifica cosa viene chiesto al backend e cosa resta salvato.
@@ -346,7 +347,6 @@ describe('permessi', () => {
   });
 
   it('iscrizione fatta con la chiave attuale: resta valida', async () => {
-    const { CHIAVE_VAPID } = await carica();
     const chiave = Uint8Array.from(atob(CHIAVE_VAPID.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
     const unsubscribe = vi.fn(async () => true);
     iscrizione = { endpoint: contatto.endpoint, toJSON: () => contatto, options: { applicationServerKey: chiave.buffer }, unsubscribe } as typeof iscrizione;

@@ -8,6 +8,13 @@ import type { StatoPermessi, TipoAvviso } from './avvisi';
 
 const TIPI: readonly TipoAvviso[] = ['uscita', 'pausa', 'sigaretta'];
 
+/** Backend degli avvisi (Cloudflare Worker, repository `krumiro2.0_backend`). */
+export const URL_NOTIFICHE = 'https://krumiro-notifiche.oliosi-riccardo.workers.dev';
+/** Chiave pubblica VAPID del backend (`VAPID_PUBLIC_KEY` in wrangler.jsonc): cambia solo con la coppia di chiavi. */
+export const CHIAVE_VAPID = 'BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA';
+/** Formato degli id accettato dal backend. */
+const ID_VALIDO = /^[A-Za-z0-9_-]{1,64}$/;
+
 /** Cache del browser in cui la pagina lascia il testo di ogni avviso per il service worker. */
 export const CACHE_AVVISI = 'krumiro-avvisi';
 
@@ -148,6 +155,23 @@ function isOggetto(v: unknown): v is Record<string, unknown> {
 function testoSalvato(v: unknown): TestoSalvato | null {
   if (!isOggetto(v) || typeof v.titolo !== 'string' || typeof v.testo !== 'string' || typeof v.orario !== 'string') return null;
   return { titolo: v.titolo, testo: v.testo, orario: v.orario };
+}
+
+/**
+ * Avvisi da riprogrammare quando il browser rinnova l'iscrizione push: le voci della Cache ancora
+ * future, con id (ultima parte dell'indirizzo della voce) e orario. Serve al service worker, che non
+ * ha accesso alle timbrature. `voci`: coppie [indirizzo della voce, contenuto JSON].
+ */
+export function avvisiDaRiprogrammare(voci: [string, unknown][], scope: string, ora: number): { id: string; orario: string }[] {
+  const prefisso = chiaveCache(scope, '');
+  const avvisi: { id: string; orario: string }[] = [];
+  for (const [indirizzo, contenuto] of voci) {
+    const id = indirizzo.startsWith(prefisso) ? indirizzo.slice(prefisso.length) : '';
+    const t = testoSalvato(contenuto);
+    if (!ID_VALIDO.test(id) || !t || !(Date.parse(t.orario) > ora)) continue;
+    avvisi.push({ id, orario: t.orario });
+  }
+  return avvisi;
 }
 
 /**

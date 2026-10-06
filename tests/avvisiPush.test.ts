@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  avvisiDaRiprogrammare,
   CACHE_AVVISI,
+  CHIAVE_VAPID,
   chiaveCache,
   chiaveDaBase64url,
   idAvviso,
@@ -10,6 +12,7 @@ import {
   statoPermessiWeb,
   stessaChiave,
   tipoDaId,
+  URL_NOTIFICHE,
   type AvvisoPush,
 } from '../src/core/avvisiPush';
 
@@ -218,5 +221,35 @@ describe('cache e chiave VAPID', () => {
     const chiave = chiaveDaBase64url('BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA');
     expect(chiave).toHaveLength(65);
     expect(chiave[0]).toBe(4);
+  });
+
+  it('backend e chiave sono quelli del Worker in produzione', () => {
+    expect(URL_NOTIFICHE).toBe('https://krumiro-notifiche.oliosi-riccardo.workers.dev');
+    expect(CHIAVE_VAPID).toBe('BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA');
+  });
+});
+
+describe('riprogrammazione dopo un cambio di iscrizione push', () => {
+  const SCOPE = 'https://ricky79.github.io/krumiro2.0/';
+  const voce = (id: string, orario: string): [string, unknown] => [chiaveCache(SCOPE, id), { titolo: 't', testo: 'x', orario }];
+
+  it('riprende dalla Cache gli avvisi ancora futuri, con id e orario', () => {
+    const voci = [
+      voce(idAvviso(DISPOSITIVO, 'uscita'), '2026-10-01T15:30:00.000Z'),
+      voce(idAvviso(DISPOSITIVO, 'pausa'), '2026-10-01T07:59:00.000Z'), // già passato
+    ];
+    expect(avvisiDaRiprogrammare(voci, SCOPE, ORA)).toEqual([
+      { id: idAvviso(DISPOSITIVO, 'uscita'), orario: '2026-10-01T15:30:00.000Z' },
+    ]);
+  });
+
+  it('salta voci malformate, di un altro scope o con un id non valido', () => {
+    const voci: [string, unknown][] = [
+      [chiaveCache(SCOPE, idAvviso(DISPOSITIVO, 'pausa')), 'non json'],
+      [chiaveCache(SCOPE, idAvviso(DISPOSITIVO, 'pausa')), { titolo: 't', testo: 'x', orario: 'domani' }],
+      voce('id con spazi', '2026-10-01T15:30:00.000Z'),
+      [chiaveCache('https://altro.example/', idAvviso(DISPOSITIVO, 'uscita')), { titolo: 't', testo: 'x', orario: '2026-10-01T15:30:00.000Z' }],
+    ];
+    expect(avvisiDaRiprogrammare(voci, SCOPE, ORA)).toEqual([]);
   });
 });

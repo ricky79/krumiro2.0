@@ -1,7 +1,16 @@
 import { clientsClaim } from 'workbox-core';
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute, type PrecacheEntry } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { CACHE_AVVISI, chiaveCache, notificaDaPush, opzioniNotifica } from './core/avvisiPush';
+import {
+  avvisiDaRiprogrammare,
+  CACHE_AVVISI,
+  CHIAVE_VAPID,
+  chiaveCache,
+  chiaveDaBase64url,
+  notificaDaPush,
+  opzioniNotifica,
+  URL_NOTIFICHE,
+} from './core/avvisiPush';
 
 /** Service worker della PWA: app offline (precache) e notifiche degli avvisi (web push dal backend). */
 
@@ -49,6 +58,44 @@ self.addEventListener('push', (evento) => {
           .catch(() => undefined);
       }
     })(),
+  );
+});
+
+/** Evento `pushsubscriptionchange`: manca nei tipi di TypeScript. */
+interface CambioIscrizione extends ExtendableEvent {
+  readonly newSubscription: PushSubscription | null;
+}
+
+/** Le voci della Cache degli avvisi come coppie [indirizzo, contenuto JSON o null]. */
+async function vociAvvisi(): Promise<[string, unknown][]> {
+  const cache = await caches.open(CACHE_AVVISI);
+  return Promise.all(
+    (await cache.keys()).map(async (richiesta): Promise<[string, unknown]> => {
+      const voce = await cache.match(richiesta);
+      return [richiesta.url, voce ? await voce.json().catch(() => null) : null];
+    }),
+  );
+}
+
+// Il browser ha rinnovato l'iscrizione push (succede di rado, anche ad app chiusa): gli avvisi già
+// programmati puntano al vecchio indirizzo e andrebbero persi. Si riprogrammano con il nuovo,
+// prendendo id e orario dai testi lasciati nella Cache; alla prossima apertura la pagina rifà tutto.
+self.addEventListener('pushsubscriptionchange', (e) => {
+  const evento = e as CambioIscrizione;
+  evento.waitUntil(
+    (async () => {
+      const iscrizione =
+        evento.newSubscription ??
+        (await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveDaBase64url(CHIAVE_VAPID) }));
+      for (const { id, orario } of avvisiDaRiprogrammare(await vociAvvisi(), self.registration.scope, Date.now())) {
+        await fetch(`${URL_NOTIFICHE}/avvisi/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contatto: iscrizione.toJSON(), orario }),
+          signal: AbortSignal.timeout(10_000),
+        }).catch(() => undefined);
+      }
+    })().catch(() => undefined),
   );
 });
 
