@@ -108,6 +108,13 @@ describe('aiuto', () => {
     expect(testo('uscita-prevista')).toContain('permesso in uscita');
   });
 
+  it('il nome rende omaggio al Krumiro originale di Leo Olmi', () => {
+    const nome = voci.find((v) => v.id === 'nome')!;
+    expect(nome.sezione).toBe('Informazioni');
+    expect(nome.testo.join(' ')).toContain('Leo Olmi');
+    expect(filtraAiuto(voci, 'olmi').map((v) => v.id)).toEqual(['nome']);
+  });
+
   it('la ricerca ignora maiuscole e accenti e richiede tutte le parole', () => {
     expect(filtraAiuto(voci, 'USCITA anticipata').map((v) => v.id)).toContain('permesso-vs-anticipata');
     expect(filtraAiuto(voci, 'perche entrata').map((v) => v.id)).toContain('orario-minimo');
