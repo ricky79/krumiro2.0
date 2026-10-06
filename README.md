@@ -115,6 +115,12 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
   Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
   permesso a blocchi di 30 min.
+- **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
+  `krumiro://timbra` (per esempio vicino ai tornelli) Krumiro si apre e registra l'azione del bottone
+  grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa* o *Uscita*. Il
+  messaggio ha *Annulla* per 5 secondi. Il tag si prepara una volta con un'app come NFC Tools (record
+  "URL / URI personalizzato") e, se sta in un posto pubblico, si blocca in sola lettura: vedi *Aiuto →
+  Come preparo un tag NFC per Krumiro?*.
 - **Permesso in uscita**: se sai già che uscirai prima, tocca *+ Permesso in uscita* e indica la
   durata: l'uscita prevista si anticipa. Quando esci usa *Uscita*: conta il permesso che manca
   davvero, a blocchi di 30 min.
@@ -225,7 +231,8 @@ Il `base` in `vite.config.ts` è `/krumiro2.0/`. Se rinomini il repository, aggi
 ### App Android
 
 L'app (cartella `android/`) racchiude la build web in un contenitore Android. Il codice è lo stesso
-della PWA: la parte nativa è solo `src/native/` (notifiche) e `capacitor.config.ts`.
+della PWA: la parte nativa è `src/native/` (notifiche e tag NFC), `capacitor.config.ts` e il plugin
+`NfcPlugin.java` (vedi *Tag NFC*).
 
 ```bash
 npm run build:android   # build web per Android (base './', senza service worker) + cap sync
@@ -280,22 +287,27 @@ pubblica nulla. Il versionCode di Android deriva dalla versione: major × 10000 
 controllo obbligatorio: Settings → Branches → regola di `main` → *Require status checks to pass* →
 `controlla`.
 
-### Tag NFC (wave 2, non ancora implementato)
+### Tag NFC
 
-Un tag NFC appoggiato al telefono registrerà l'**azione successiva** (il bottone principale della
-schermata Oggi), senza backend: il tag contiene solo un indirizzo, Android apre l'app e l'app
-registra. Decisioni già prese, perché i tag fisici già scritti non si possono più cambiare:
+Nell'app Android un tag NFC con il solo URI `krumiro://timbra` registra l'azione del bottone principale
+di *Oggi*, anche ad app chiusa. Il formato è definitivo: i tag ai tornelli vengono bloccati in sola
+lettura e non si possono più cambiare. Niente Android Application Record: su un telefono senza
+Krumiro aprirebbe il Play Store.
 
-1. **Contenuto del tag:** un record URI `krumiro://timbra` (schema `krumiro`, solo app Android).
-2. **Casi ambigui:** l'app non indovina. Se il bottone principale non corrisponde a ciò che si vuole
-   (uscita senza pausa registrata, rientro da un permesso che copre il pranzo) apre la schermata di
-   conferma invece di registrare.
-3. **Protezione dagli errori:** dopo la registrazione compare un avviso con **Annulla** per qualche
-   secondo, e un secondo tocco entro circa un minuto viene ignorato.
+- `android/app/src/main/AndroidManifest.xml`: filtro `NDEF_DISCOVERED` con schema `krumiro` e host
+  `timbra` su `MainActivity` (`singleTask`), permessi `NFC` e `VIBRATE`, `android.hardware.nfc` non
+  obbligatorio.
+- `NfcPlugin.java` (plugin Capacitor locale `Nfc`, registrato in `MainActivity`): trasforma l'intent
+  del tag nell'evento `tag`, trattenuto finché il JavaScript non ascolta (avvio a freddo) e ignorato
+  se l'app è riaperta dalle recenti; metodi `stato()`, `apriImpostazioniNfc()`, `vibra()`.
+  `MainActivity` non riconsegna il tag quando Android ricrea l'activity.
+- `src/core/tagNfc.ts` (puro, con test): quale azione registrare (dopo la fascia pranzo senza pausa
+  chiede *Inizio pausa* o *Uscita*) e quando ignorare la lettura (entro un minuto da una timbratura
+  col tag, con una finestra aperta, a giornata chiusa).
+- `src/ui/tagNfc.ts`: esegue l'azione come il tocco, con *Annulla* nel messaggio per 5 secondi.
 
-Android legge i tag solo con schermo acceso e telefono sbloccato. Da fare nella wave 2: lettura
-dell'indirizzo di avvio (`@capacitor/app`), filtro per lo schema nel manifest, funzione pura che decide
-cosa registrare (con test), avviso con Annulla, istruzioni per scrivere e bloccare il tag.
+La prova manuale (l'NFC non si emula) è nella checklist di
+`docs/superpowers/specs/2026-10-06-tag-nfc-design.md`.
 
 ### Schema dei dati
 
