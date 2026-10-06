@@ -36,6 +36,17 @@ describe('aiuto', () => {
     expect(problemi).not.toContain('a sinistra dell\'indirizzo');
   });
 
+  it('gli aggiornamenti distinguono la PWA dall\'app Android', () => {
+    const testo = voci.find((x) => x.id === 'aggiornamenti')!.testo.join(' ');
+    // La PWA si aggiorna da sola; l'APK no: va scaricato e installato sopra.
+    expect(testo).toContain('Nella PWA');
+    expect(testo).toContain('Nell\'app per Android');
+    expect(testo).toContain('"Scarica"');
+    expect(testo).toContain('releases/latest/download/krumiro.apk');
+    const installazione = voci.find((x) => x.id === 'installazione-app')!.testo.join(' ');
+    expect(installazione).toContain('riquadro in basso');
+  });
+
   it('i testi seguono le impostazioni correnti', () => {
     const v = vociAiuto(impostazioni({ pranzo: { inizio: 750, fine: 840 }, pausaDaScalare: 45 }));
     const rientro = v.find((x) => x.id === 'rientro')!;

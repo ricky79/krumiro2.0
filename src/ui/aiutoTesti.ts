@@ -376,14 +376,21 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
         'Rispetto alla PWA, nell\'app gli avvisi funzionano anche senza internet e senza passare da un server.',
         'L\'app ha dati separati dalla PWA: per portarli con te esporta il backup JSON dalla PWA e importalo nell\'app.',
-        'Per aggiornarla scarica di nuovo dallo stesso indirizzo e installa sopra: i dati restano.',
+        'Quando esce una nuova versione l\'app te lo dice con un riquadro in basso: scaricala e installala sopra, i dati restano.',
       ],
     },
     {
       id: 'aggiornamenti',
       sezione: 'Installazione',
       domanda: 'Come si aggiorna?',
-      testo: ['Da sola: quando c\'è una nuova versione viene scaricata in background e usata dall\'apertura successiva. I dati non vengono toccati.'],
+      testo: [
+        'Nella PWA (dal sito o dall\'icona sulla schermata Home) si aggiorna da sola: quando c\'è una nuova versione viene scaricata in background e usata dall\'apertura successiva.',
+        'Nell\'app per Android l\'aggiornamento va installato a mano:',
+        '• Quando esce una nuova versione compare un riquadro in basso: tocca "Scarica".',
+        '• Apri il file scaricato (krumiro.apk) e tocca "Aggiorna" o "Installa".',
+        'Se hai chiuso il riquadro, l\'ultima versione si scarica sempre da https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk . La versione installata è scritta in fondo alle Impostazioni.',
+        'In tutti e due i casi i dati non vengono toccati.',
+      ],
     },
   ];
 }

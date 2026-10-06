@@ -710,9 +710,9 @@ input:disabled {
   transform: translate(-50%, 0);
 }
 
-/* Banner di installazione (src/ui/installa.ts), sopra la barra delle schede.
-   --altezza-banner è impostata dallo script finché il banner è visibile. */
-.banner-installa {
+/* Banner sopra la barra delle schede (src/ui/banner.ts): installazione nella PWA, nuova versione
+   nell'app Android. --altezza-banner è impostata dallo script finché il banner è visibile. */
+.banner {
   position: fixed;
   left: calc(var(--sicuro-sx) + 8px);
   right: calc(var(--sicuro-dx) + 8px);
@@ -729,7 +729,7 @@ input:disabled {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 15;
 }
-.banner-installa-testo {
+.banner-testo {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -737,14 +737,14 @@ input:disabled {
   font-size: 15px;
   line-height: 1.3;
 }
-.banner-installa-testo span {
+.banner-testo span {
   color: var(--testo-2);
 }
-.banner-installa .btn {
+.banner .btn {
   flex: none;
   min-height: 40px;
 }
-.banner-installa-chiudi {
+.banner-chiudi {
   flex: none;
   width: 36px;
   height: 36px;
