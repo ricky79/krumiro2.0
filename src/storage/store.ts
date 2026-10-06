@@ -39,6 +39,12 @@ class Store {
     }
   }
 
+  /** Rilegge i dati salvati (es. modificati da un'altra scheda) e avvisa chi ascolta. */
+  ricarica(): void {
+    this.dati = this.carica();
+    for (const a of this.ascoltatori) a();
+  }
+
   private salva(): void {
     try {
       localStorage.setItem(CHIAVE, JSON.stringify(this.dati));
@@ -97,6 +103,17 @@ class Store {
 }
 
 export const store = new Store();
+
+/**
+ * Con l'app aperta in più schede ognuna tiene i dati in memoria: quando un'altra scheda salva, questa
+ * li rilegge. Così non sovrascrive le timbrature dell'altra e gli avvisi seguono i dati veri.
+ * (`key` null: l'altra scheda ha svuotato tutta la memoria del sito.)
+ */
+export function seguiAltreSchede(): void {
+  window.addEventListener('storage', (e) => {
+    if (e.key === CHIAVE || e.key === null) store.ricarica();
+  });
+}
 
 /** Chiede al browser di non cancellare i dati in caso di poco spazio. */
 export async function richiediPersistenza(): Promise<boolean> {

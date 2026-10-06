@@ -1,6 +1,6 @@
 import './style.css';
 import { adessoRoma } from './core/tempo';
-import { richiediPersistenza, store } from './storage/store';
+import { richiediPersistenza, seguiAltreSchede, store } from './storage/store';
 import { avviso } from './ui/dialoghi';
 import { el, monta } from './ui/dom';
 import { impostaOrologio, vistaGiorno, type Adesso } from './ui/giorno';
@@ -97,6 +97,7 @@ function vai(scheda: Scheda): void {
 }
 
 store.ascolta(() => render());
+seguiAltreSchede();
 window.addEventListener(EVENTO_APRI_AIUTO, (e) => {
   stato.aiuto = (e as CustomEvent<string | undefined>).detail ?? null;
   vai('aiuto');
