@@ -1,4 +1,5 @@
 import { el } from './dom';
+import { creaBanner, mostraBanner } from './banner';
 
 export type Piattaforma = 'ios' | 'android' | 'altro';
 /** 'pulsante' apre la finestra di installazione del browser (Android), 'istruzioni' spiega i passaggi (iPhone). */
@@ -36,8 +37,6 @@ let promptRinviato: EventoInstallazione | null = null;
 let chiuso = false;
 let installata = false;
 let comeFare: () => void = () => {};
-let banner: HTMLElement | null = null;
-let misura: ResizeObserver | null = null;
 
 /** True se l'app è aperta dall'icona sulla schermata Home (PWA installata). */
 export const inModalitaApp = () =>
@@ -62,22 +61,18 @@ function chiudi(): void {
   aggiorna();
 }
 
-function creaBanner(proposta: Exclude<Proposta, 'nessuna'>): HTMLElement {
+function bannerInstallazione(proposta: Exclude<Proposta, 'nessuna'>): HTMLElement {
   const android = proposta === 'pulsante';
-  return el(
-    'aside',
-    { class: 'banner-installa', 'aria-label': 'Installa l\'app' },
-    el(
-      'p',
-      { class: 'banner-installa-testo' },
-      el('strong', {}, 'Installa l\'app'),
-      el('span', {}, android ? 'Si apre dall\'icona e funziona anche offline.' : 'Tocca Condividi, poi «Aggiungi alla schermata Home».'),
-    ),
-    android
+  return creaBanner({
+    etichetta: 'Installa l\'app',
+    titolo: 'Installa l\'app',
+    testo: android ? 'Si apre dall\'icona e funziona anche offline.' : 'Tocca Condividi, poi «Aggiungi alla schermata Home».',
+    azione: android
       ? el('button', { type: 'button', class: 'btn btn-primario', onclick: installa }, 'Installa')
       : el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => comeFare() }, 'Come fare'),
-    el('button', { type: 'button', class: 'banner-installa-chiudi', 'aria-label': 'Chiudi e non mostrare più', onclick: chiudi }, '✕'),
-  );
+    chiudi: 'Chiudi e non mostrare più',
+    onChiudi: chiudi,
+  });
 }
 
 function aggiorna(): void {
@@ -87,13 +82,7 @@ function aggiorna(): void {
     chiuso,
     promptPronto: promptRinviato !== null,
   });
-  banner?.remove();
-  misura?.disconnect();
-  document.documentElement.style.removeProperty('--altezza-banner');
-  banner = proposta === 'nessuna' ? null : creaBanner(proposta);
-  if (!banner) return;
-  document.body.append(banner);
-  misura?.observe(banner);
+  mostraBanner(proposta === 'nessuna' ? null : bannerInstallazione(proposta));
 }
 
 /**
@@ -109,10 +98,6 @@ export function avviaBannerInstallazione(apriIstruzioni: () => void): void {
   } catch {
     /* memoria non accessibile: il banner resta proponibile */
   }
-  // Pagina e toast si spostano in su dell'altezza del banner (vedi style.css).
-  misura = new ResizeObserver(() => {
-    if (banner) document.documentElement.style.setProperty('--altezza-banner', `${banner.offsetHeight + 8}px`);
-  });
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); // niente barra automatica di Chrome: si installa dal banner
     promptRinviato = e as EventoInstallazione;

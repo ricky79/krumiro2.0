@@ -78,8 +78,14 @@ passano da un server (vedi *Avvisi nella PWA*).
 5. Apri **Krumiro** → *Impostazioni → Avvisi* → **Autorizza gli avvisi**: concedi le notifiche e,
    su Android 12+, anche "Sveglie e promemoria" (senza, gli avvisi possono ritardare di qualche minuto).
 
-**Aggiornamenti:** scarica di nuovo dallo stesso link e installa sopra: i dati restano. Il numero
-di versione installato è in fondo alle *Impostazioni*.
+**Aggiornamenti:** l'APK non si aggiorna da solo. Quando esce una nuova versione l'app mostra un
+banner in basso con il pulsante **Scarica**: apri il file scaricato e installalo sopra, i dati restano.
+Se hai chiuso il banner (ricompare con la versione successiva), scarica di nuovo dallo stesso link. Il
+numero di versione installato è in fondo alle *Impostazioni*.
+
+L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/krumiro2.0/releases/latest`)
+all'avvio e quando torna in primo piano, al massimo ogni 6 ore (`src/ui/aggiornamento.ts`). Conta solo
+una release che ha già `krumiro.apk` allegato.
 
 **Dalla PWA all'app:** i dati sono separati. Nella PWA fai *Impostazioni → Esporta backup completo
 (JSON)*, poi nell'app *Impostazioni → Importa CSV o backup JSON…*.
