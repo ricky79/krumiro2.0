@@ -139,7 +139,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   e *Uscita anticipata*), con ricerca. I link **?** nelle schermate aprono direttamente
   la risposta che riguarda quel punto. Gli esempi usano le tue impostazioni correnti.
   In fondo, *Invia un suggerimento* e *Segnala un problema* aprono l'app di posta con un
-  messaggio già pronto per krumiro@proton.me (la segnalazione include versione, dispositivo e
+  messaggio già pronto per supporto@sbeggio.app (la segnalazione include versione, dispositivo e
   impostazioni, mai le timbrature).
 
 ## Regole di calcolo
@@ -220,8 +220,9 @@ Application → Service workers → *Push* simula un push senza passare dal back
 
 ### Deploy su Cloudflare
 
-La PWA è un Worker Cloudflare di soli file statici (`wrangler.jsonc`, nome `sbeggio`) servito su
-`https://sbeggio.app`. Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni PR e,
+La PWA è un Worker Cloudflare (`wrangler.jsonc`, nome `sbeggio`) che serve i file statici su
+`https://sbeggio.app`; `src/worker.ts` rimanda `www.sbeggio.app` alla radice con un 301. I due domini
+sono *custom domain* del Worker: i loro record DNS li crea il deploy, non vanno aggiunti a mano. Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni PR e,
 a ogni push su `main`, pubblica `dist/` con `wrangler deploy`. Va configurato una volta sola:
 
 1. Su Cloudflare apri **My Profile → API Tokens → Create Token** e usa il modello

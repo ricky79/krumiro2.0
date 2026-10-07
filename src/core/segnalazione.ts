@@ -2,7 +2,7 @@ import { formattaDurata, formattaOra } from './tempo';
 import type { Impostazioni } from './tipi';
 
 /** Indirizzo a cui arrivano suggerimenti e segnalazioni. */
-export const EMAIL_CONTATTO = 'krumiro@proton.me';
+export const EMAIL_CONTATTO = 'supporto@sbeggio.app';
 
 export type TipoSegnalazione = 'suggerimento' | 'problema';
 
