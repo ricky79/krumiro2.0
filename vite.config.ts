@@ -4,8 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
 
-// GitHub Pages pubblica il sito su https://ricky79.github.io/krumiro2.0/
-const BASE = '/krumiro2.0/';
+// Il sito è pubblicato alla radice del dominio: https://sbeggio.app/
+const BASE = '/';
 
 export default defineConfig(({ mode }) => {
   // `vite build --mode android`: build per l'app Android (Capacitor), senza service worker.
@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
         manifest: {
           id: BASE,
-          name: 'Krumiro',
-          short_name: 'Krumiro',
+          name: 'Sbeggio',
+          short_name: 'Sbeggio',
           description: 'Registra le timbrature di lavoro e calcola l\'ora di uscita.',
           lang: 'it',
           dir: 'ltr',

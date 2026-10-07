@@ -33,7 +33,7 @@ describe('aiuto', () => {
     // Sul computer il browser deve essere aperto; il percorso dei permessi vale anche nell'app installata.
     expect(avvisi).toMatch(/sul computer/i);
     expect(problemi).toContain('Impostazioni sito');
-    expect(problemi).toContain('Impostazioni → Notifiche → Krumiro');
+    expect(problemi).toContain('Impostazioni → Notifiche → Sbeggio');
     expect(problemi).not.toContain('a sinistra dell\'indirizzo');
   });
 
@@ -108,17 +108,21 @@ describe('aiuto', () => {
     expect(testo('uscita-prevista')).toContain('permesso in uscita');
   });
 
-  it('il nome rende omaggio al Krumiro originale di Leo Olmi', () => {
-    const nome = voci.find((v) => v.id === 'nome')!;
-    expect(nome.sezione).toBe('Informazioni');
-    expect(nome.testo.join(' ')).toContain('Leo Olmi');
-    expect(filtraAiuto(voci, 'olmi').map((v) => v.id)).toEqual(['nome']);
-  });
-
   it('la ricerca ignora maiuscole e accenti e richiede tutte le parole', () => {
     expect(filtraAiuto(voci, 'USCITA anticipata').map((v) => v.id)).toContain('permesso-vs-anticipata');
     expect(filtraAiuto(voci, 'perche entrata').map((v) => v.id)).toContain('orario-minimo');
     expect(filtraAiuto(voci, 'zzzz')).toEqual([]);
     expect(filtraAiuto(voci, '  ')).toHaveLength(voci.length);
+  });
+
+  it('il tag NFC spiega uso e preparazione', () => {
+    const uso = voci.find((x) => x.id === 'tag-nfc')!.testo.join(' ');
+    expect(uso).toContain('Annulla');
+    expect(uso).toContain('14:30'); // fine della fascia pranzo con le impostazioni dei test
+    expect(uso).toContain('Impostazioni → Tag NFC');
+    const preparare = voci.find((x) => x.id === 'tag-nfc-preparare')!.testo.join(' ');
+    expect(preparare).toContain('sbeggio://timbra');
+    expect(preparare).toContain('Blocca');
+    expect(preparare).toContain('definitivo');
   });
 });

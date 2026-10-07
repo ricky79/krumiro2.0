@@ -7,10 +7,12 @@ import { impostaOrologio, vistaGiorno, type Adesso } from './ui/giorno';
 import { riprendiPausaSigaretta } from './ui/sigaretta';
 import { vistaImpostazioni } from './ui/impostazioni';
 import { vistaStorico } from './ui/storico';
-import { EVENTO_APRI_AIUTO, vistaAiuto } from './ui/aiuto';
+import { apriAiuto, EVENTO_APRI_AIUTO, vistaAiuto } from './ui/aiuto';
 import { registraServiceWorker } from './pwa';
 import { avviaTema } from './ui/tema';
-import { avviaAvvisoTrasloco } from './ui/trasloco';
+import { avviaBannerInstallazione } from './ui/installa';
+import { avviaControlloAggiornamenti } from './ui/aggiornamento';
+import { avviaTagNfc } from './ui/tagNfc';
 import { inApp } from './native/app';
 import { avviaAvvisi as avviaAvvisiApp } from './native/avvisi';
 import { avviaAvvisi as avviaAvvisiPwa } from './web/avvisi';
@@ -114,11 +116,15 @@ void richiediPersistenza();
 if (inApp()) {
   // App Android: niente service worker né invito a installare; le notifiche sono locali.
   avviaAvvisiApp();
+  // L'APK non si aggiorna da solo: un banner propone la nuova versione pubblicata su GitHub.
+  avviaControlloAggiornamenti(__VERSIONE_APP__);
+  // Tag NFC (sbeggio://timbra): timbra come il pulsante principale. Dopo il primo render, così
+  // l'evento trattenuto all'avvio a freddo trova la vista già montata.
+  avviaTagNfc(() => vai('oggi'));
 } else {
   registraServiceWorker();
   // PWA: gli avvisi passano dal backend e arrivano come notifiche push.
   avviaAvvisiPwa();
+  avviaBannerInstallazione(() => apriAiuto('installazione'));
 }
-// Ultima versione di Krumiro: al posto dei banner di aggiornamento e installazione, il rimando a Sbeggio.
-avviaAvvisoTrasloco();
 if (store.erroreCaricamento) void avviso('Attenzione', store.erroreCaricamento);

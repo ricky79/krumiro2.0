@@ -72,14 +72,36 @@ export function avviso(titolo: string, messaggio: string): Promise<void> {
   return apriFoglio(titolo, el('p', { class: 'testo-foglio' }, messaggio), [{ etichetta: 'OK', stile: 'primario' }]);
 }
 
-/** Notifica breve in basso. */
-export function toast(messaggio: string): void {
+/**
+ * Notifica breve in basso. Con `annulla` ha il tasto Annulla e resta di più: toccandolo il
+ * messaggio sparisce e si chiama `annulla`.
+ */
+export function toast(messaggio: string, annulla?: () => void): void {
   document.querySelectorAll('.toast').forEach((t) => t.remove());
-  const t = el('div', { class: 'toast', role: 'status' }, messaggio);
+  const t = el('div', { class: annulla ? 'toast con-annulla' : 'toast', role: 'status' }, el('span', {}, messaggio));
+  if (annulla) {
+    t.append(
+      el('button', {
+        type: 'button',
+        class: 'toast-annulla',
+        onclick: () => {
+          t.remove();
+          annulla();
+        },
+      }, 'Annulla'),
+    );
+  }
   document.body.append(t);
+  // Nel top layer, sopra i dialoghi modali aperti: altrimenti un messaggio mostrato con un foglio
+  // aperto (es. "Chiudi la finestra aperta…" letto dal tag) resterebbe nascosto. Senza Popover API
+  // (WebView vecchie) il toast si vede come prima, sotto i dialoghi.
+  if (typeof t.showPopover === 'function') {
+    t.popover = 'manual';
+    t.showPopover();
+  }
   requestAnimationFrame(() => t.classList.add('visibile'));
   setTimeout(() => {
     t.classList.remove('visibile');
     setTimeout(() => t.remove(), 300);
-  }, 2200);
+  }, annulla ? 5000 : 2200);
 }

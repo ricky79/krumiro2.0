@@ -1,0 +1,73 @@
+import { calcolaGiornata } from '../core/calcolo';
+import { sigarettaInCorso } from '../core/sigaretta';
+import { azioneTag, esitoLettura } from '../core/tagNfc';
+import { adessoRoma } from '../core/tempo';
+import { ascoltaTag, vibra } from '../native/nfc';
+import { store } from '../storage/store';
+import { apriFoglio, toast } from './dialoghi';
+import { el } from './dom';
+import { eseguiAzione } from './giorno';
+import { inizioSigarettaSalvato, salvaInizioSigaretta } from './inizioSigaretta';
+import { rientroSigarettaDaTag } from './sigaretta';
+
+/** Istante dell'ultima lettura che ha cambiato la giornata (per ignorare il tag tenuto appoggiato). */
+let ultimaTimbratura: number | null = null;
+
+/** App Android: a ogni lettura di un tag di Sbeggio timbra come il pulsante principale di Oggi. */
+export function avviaTagNfc(mostraOggi: () => void): void {
+  ascoltaTag(() => void gestisciTag(mostraOggi));
+}
+
+export async function gestisciTag(mostraOggi: () => void): Promise<void> {
+  const { data, minuti } = adessoRoma();
+  const giornata = store.giornata(data);
+  const r = calcolaGiornata(giornata, store.impostazioni, minuti);
+  const azione = azioneTag(r, sigarettaInCorso(giornata) !== null, minuti, store.impostazioni.pranzo.fine);
+  const esito = esitoLettura({
+    azione,
+    // La schermata della sigaretta non conta: il tag serve proprio a chiuderla.
+    finestraAperta: document.querySelector('dialog[open]:not(.sigaretta)') !== null,
+    ora: Date.now(),
+    ultimaTimbratura,
+  });
+  if (esito === 'gia-letto') return toast('Tag già letto: riavvicinalo tra un minuto');
+  // Non si chiude nulla al posto dell'utente: potrebbe perdere una modifica.
+  if (esito === 'finestra-aperta') return toast('Chiudi la finestra aperta e riavvicina il tag');
+  mostraOggi();
+  if (esito === 'chiusa' || azione === null) return toast('Giornata già chiusa');
+
+  const prima = structuredClone(giornata);
+  const sigaretta = sigarettaInCorso(prima);
+  const inizio = sigaretta ? inizioSigarettaSalvato(data, sigaretta.id) : null;
+  const annulla = () => {
+    // Prima l'inizio: la modifica allo store ridisegna e riapre la schermata della sigaretta, che lo legge.
+    if (sigaretta && inizio !== null) salvaInizioSigaretta({ data, eventoId: sigaretta.id, inizio });
+    store.modificaGiornata(data, (g) => void (g.eventi = structuredClone(prima.eventi)));
+    ultimaTimbratura = null;
+    toast('Timbratura annullata');
+  };
+
+  if (azione === 'RIENTRO_SIGARETTA') rientroSigarettaDaTag(data, annulla);
+  else if (azione === 'PAUSA_O_USCITA') {
+    const scelta = await sceltaPausaOUscita();
+    if (scelta) await eseguiAzione(scelta, data, annulla);
+  } else await eseguiAzione(azione, data, annulla);
+
+  // La vibrazione conferma la timbratura: solo se la giornata è cambiata davvero (non dopo un foglio
+  // lasciato a metà, che altrimenti farebbe credere di aver timbrato).
+  if (JSON.stringify(store.giornata(data).eventi) !== JSON.stringify(prima.eventi)) {
+    ultimaTimbratura = Date.now();
+    void vibra();
+  }
+}
+
+/** Fascia pranzo finita senza pausa: il tag non indovina, chiede. */
+async function sceltaPausaOUscita(): Promise<'INIZIO_PAUSA' | 'USCITA' | null> {
+  let scelta: 'INIZIO_PAUSA' | 'USCITA' | null = null;
+  await apriFoglio('Cosa timbri?', el('p', { class: 'testo-foglio' }, 'La fascia pranzo è finita e la pausa non è registrata.'), [
+    { etichetta: 'Inizio pausa', stile: 'primario', azione: () => void (scelta = 'INIZIO_PAUSA') },
+    { etichetta: 'Uscita', azione: () => void (scelta = 'USCITA') },
+    { etichetta: 'Annulla' },
+  ]);
+  return scelta;
+}

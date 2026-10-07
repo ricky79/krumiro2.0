@@ -9,14 +9,14 @@ import type { StatoPermessi, TipoAvviso } from './avvisi';
 const TIPI: readonly TipoAvviso[] = ['uscita', 'pausa', 'sigaretta'];
 
 /** Backend degli avvisi (Cloudflare Worker, repository `krumiro2.0_backend`). */
-export const URL_NOTIFICHE = 'https://krumiro-notifiche.oliosi-riccardo.workers.dev';
+export const URL_NOTIFICHE = 'https://notifiche.sbeggio.app';
 /** Chiave pubblica VAPID del backend (`VAPID_PUBLIC_KEY` in wrangler.jsonc): cambia solo con la coppia di chiavi. */
 export const CHIAVE_VAPID = 'BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA';
 /** Formato degli id accettato dal backend. */
 const ID_VALIDO = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** Cache del browser in cui la pagina lascia il testo di ogni avviso per il service worker. */
-export const CACHE_AVVISI = 'krumiro-avvisi';
+export const CACHE_AVVISI = 'sbeggio-avvisi';
 
 /** Id dell'avviso sul backend: uno per dispositivo e tipo, così riprogrammare lo sostituisce. */
 export function idAvviso(dispositivo: string, tipo: TipoAvviso): string {
@@ -181,7 +181,7 @@ export function avvisiDaRiprogrammare(voci: [string, unknown][], scope: string, 
  */
 export function notificaDaPush(payload: unknown, salvato: unknown): Notifica {
   if (!isOggetto(payload) || typeof payload.id !== 'string') {
-    return { titolo: 'Krumiro', testo: 'Apri l\'app per i dettagli.', tag: 'krumiro' };
+    return { titolo: 'Sbeggio', testo: 'Apri l\'app per i dettagli.', tag: 'sbeggio' };
   }
   const id = payload.id;
   const t = testoSalvato(salvato);
@@ -189,7 +189,7 @@ export function notificaDaPush(payload: unknown, salvato: unknown): Notifica {
   const tipo = tipoDaId(id);
   if (tipo) return { ...TESTI_GENERICI[tipo], tag: id };
   return {
-    titolo: typeof payload.titolo === 'string' && payload.titolo !== '' ? payload.titolo : 'Krumiro',
+    titolo: typeof payload.titolo === 'string' && payload.titolo !== '' ? payload.titolo : 'Sbeggio',
     testo: typeof payload.testo === 'string' ? payload.testo : '',
     tag: id,
   };

@@ -7,6 +7,7 @@ import {
   type FaseSigaretta,
   istanteDaMinuti,
   sigarettaDaRiprendere,
+  sigarettaInCorso,
   spegnimentoDaAnimare,
   testoTimer,
 } from '../core/sigaretta';
@@ -23,6 +24,17 @@ function leggiInizio(data: string, uscita: Evento): number {
 }
 
 let aperta = false;
+
+/** Il tasto Rientro della schermata aperta, per il tag NFC (null a schermata chiusa). */
+let rientroSchermata: ((annulla?: () => void) => void) | null = null;
+
+/** Rientro dalla pausa sigaretta in corso letto dal tag: come il tasto Rientro, con Annulla. */
+export function rientroSigarettaDaTag(data: string, annulla: () => void): void {
+  if (rientroSchermata) return rientroSchermata(annulla);
+  // Schermata non aperta (giornata con timbrature incoerenti): stessa regola, senza schermata.
+  const uscita = sigarettaInCorso(store.giornata(data));
+  if (uscita) rientra(data, uscita, leggiInizio(data, uscita), annulla);
+}
 
 /** Registra l'uscita della pausa sigaretta e apre la schermata. */
 export function avviaPausaSigaretta(data: string, minuti: number): void {
@@ -69,6 +81,12 @@ function apriSchermata(data: string, uscita: Evento): void {
     );
     return true;
   };
+  const rientro = (annulla?: () => void) => {
+    if (giornoCambiato()) return;
+    termina();
+    rientra(data, uscita, inizio, annulla);
+  };
+  rientroSchermata = rientro;
 
   const dlg = el(
     'dialog',
@@ -85,11 +103,7 @@ function apriSchermata(data: string, uscita: Evento): void {
         {
           type: 'button',
           class: 'btn btn-primario',
-          onclick: () => {
-            if (giornoCambiato()) return;
-            termina();
-            rientra(data, uscita, inizio);
-          },
+          onclick: () => rientro(),
         },
         'Rientro',
       ),
@@ -145,6 +159,7 @@ function apriSchermata(data: string, uscita: Evento): void {
     clearInterval(intervallo);
     dlg.remove();
     aperta = false;
+    rientroSchermata = null;
     // Chiusa dal sistema (Esc, tasto Indietro): la pausa è ancora in corso, si riapre.
     if (!chiusaDaNoi) riprendiPausaSigaretta(data);
   });
@@ -153,16 +168,16 @@ function apriSchermata(data: string, uscita: Evento): void {
   aggiorna();
 }
 
-function rientra(data: string, uscita: Evento, inizio: number): void {
+function rientra(data: string, uscita: Evento, inizio: number, annulla?: () => void): void {
   const trascorsi = Date.now() - inizio;
   const { minuti } = adessoRoma();
   cancellaInizioSigaretta();
   if (esitoRientroSigaretta(trascorsi, store.impostazioni.tolleranzaSigaretta) === 'annulla') {
     store.modificaGiornata(data, (g) => void (g.eventi = g.eventi.filter((e) => e.id !== uscita.id)));
-    toast(`Pausa sigaretta di ${formattaDurata(Math.max(1, Math.round(trascorsi / 60_000)))}: non conteggiata`);
+    toast(`Pausa sigaretta di ${formattaDurata(Math.max(1, Math.round(trascorsi / 60_000)))}: non conteggiata`, annulla);
     return;
   }
   const permesso = anteprimaSigaretta(store.giornata(data), store.impostazioni, minuti)?.permesso ?? BLOCCO_PERMESSO_SIGARETTA;
   store.modificaGiornata(data, (g) => void g.eventi.push({ id: nuovoId(), tipo: 'RIENTRO_PERMESSO', minuti }));
-  toast(`Rientro alle ${formattaOra(minuti)} · ${formattaDurata(permesso)} di permesso`);
+  toast(`Rientro alle ${formattaOra(minuti)} · ${formattaDurata(permesso)} di permesso`, annulla);
 }
