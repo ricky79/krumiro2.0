@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ID_AVVISO, pianificaAvvisi } from '../src/core/avvisi';
 import { formattaOra } from '../src/core/tempo';
+import { IMPOSTAZIONI_PREDEFINITE } from '../src/core/tipi';
 import { GIOVEDI, giornata, h, impostazioni } from './helpers';
 
 const imp = impostazioni();
@@ -165,7 +166,7 @@ describe('quando non programmare avvisi', () => {
 });
 
 describe('impostazioni degli avvisi', () => {
-  it('predefiniti: tutti attivi, pausa pranzo 30 minuti', () => {
-    expect(imp.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
+  it('predefiniti: tutti attivi, pausa pranzo 30 minuti, sigaretta 2 minuti prima', () => {
+    expect(IMPOSTAZIONI_PREDEFINITE.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 2, pranzo: true, pranzoMinuti: 30 });
   });
 });

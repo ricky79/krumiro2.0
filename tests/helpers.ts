@@ -29,7 +29,17 @@ export function giornata(
   };
 }
 
-/** 8h dovute, pausa da scalare 60 min (come richiesto per i test; il predefinito dell'app è 30). */
+/**
+ * 8h dovute, pausa da scalare 60 min, fascia pranzo 12:00–14:30, avviso sigaretta 1 min prima: valori
+ * fissi su cui sono scritti gli scenari dei test, indipendenti dai predefiniti dell'app (30 min, 12:15, 2 min).
+ */
 export function impostazioni(modifiche: Partial<Impostazioni> = {}): Impostazioni {
-  return { ...clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE), pausaDaScalare: 60, ...modifiche };
+  const base = clonaImpostazioni(IMPOSTAZIONI_PREDEFINITE);
+  return {
+    ...base,
+    pausaDaScalare: 60,
+    pranzo: { inizio: 720, fine: 870 },
+    avvisi: { ...base.avvisi, sigarettaAnticipo: 1 },
+    ...modifiche,
+  };
 }

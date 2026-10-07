@@ -24,7 +24,7 @@ describe('migrazioni', () => {
     });
     // Valore non valido → predefinito (30 min).
     expect(d.impostazioni.pausaDaScalare).toBe(30);
-    expect(d.impostazioni.pranzo).toEqual({ inizio: 720, fine: 870 });
+    expect(d.impostazioni.pranzo).toEqual({ inizio: 735, fine: 870 }); // fascia non valida → predefinita (12:15–14:30)
     expect(d.impostazioni.pausaMinima).toBe(20);
     expect(d.giornate['2026-10-01']!.eventi).toEqual([{ id: 'b', tipo: 'USCITA', minuti: 1050 }]);
     expect(Object.keys(d.giornate)).toEqual(['2026-10-01']);
@@ -99,8 +99,8 @@ describe('migrazioni', () => {
 describe('avvisi nelle impostazioni', () => {
   const avvisi = (v: unknown) => migra({ version: 1, impostazioni: { avvisi: v } }).impostazioni.avvisi;
 
-  it('predefiniti: attivi, pranzo 30 minuti', () => {
-    expect(migra({}).impostazioni.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
+  it('predefiniti: attivi, pranzo 30 minuti, sigaretta 2 minuti prima', () => {
+    expect(migra({}).impostazioni.avvisi).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 2, pranzo: true, pranzoMinuti: 30 });
   });
 
   it('conserva i valori validi', () => {
@@ -119,9 +119,9 @@ describe('avvisi nelle impostazioni', () => {
     expect(avvisi({ pranzoMinuti: 7.5 }).pranzoMinuti).toBe(30);
     expect(avvisi({ pranzoMinuti: 1 }).pranzoMinuti).toBe(1);
     expect(avvisi({ sigarettaAnticipo: 0 }).sigarettaAnticipo).toBe(0);
-    expect(avvisi({ sigarettaAnticipo: 31 }).sigarettaAnticipo).toBe(1);
-    expect(avvisi({ sigarettaAnticipo: -1 }).sigarettaAnticipo).toBe(1);
-    expect(avvisi('boh')).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 });
+    expect(avvisi({ sigarettaAnticipo: 31 }).sigarettaAnticipo).toBe(2);
+    expect(avvisi({ sigarettaAnticipo: -1 }).sigarettaAnticipo).toBe(2);
+    expect(avvisi('boh')).toEqual({ uscita: true, sigaretta: true, sigarettaAnticipo: 2, pranzo: true, pranzoMinuti: 30 });
   });
 
   it('le impostazioni predefinite non vengono mutate', () => {
