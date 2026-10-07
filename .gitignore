@@ -5,3 +5,5 @@ dist
 # Chiavi di firma Android: solo nei secret del repository, mai nel codice
 *.jks
 *.keystore
+# Cache locale di wrangler (deploy su Cloudflare)
+.wrangler

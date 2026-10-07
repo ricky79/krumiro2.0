@@ -218,15 +218,18 @@ npx vite preview --port 5173   # il backend accetta richieste solo da questa por
 Poi apri `http://localhost:5173/`, autorizza gli avvisi e timbra. In Chrome, DevTools →
 Application → Service workers → *Push* simula un push senza passare dal backend.
 
-### Deploy su GitHub Pages
+### Deploy su Cloudflare
 
-Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `main`
-e pubblica `dist/` su GitHub Pages. Va configurato una volta sola:
+La PWA è un Worker Cloudflare di soli file statici (`wrangler.jsonc`, nome `sbeggio`) servito su
+`https://sbeggio.app`. Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni PR e,
+a ogni push su `main`, pubblica `dist/` con `wrangler deploy`. Va configurato una volta sola:
 
-1. Su GitHub apri **Settings → Pages**.
-2. In **Build and deployment → Source** scegli **GitHub Actions**.
+1. Su Cloudflare apri **My Profile → API Tokens → Create Token** e usa il modello
+   **Edit Cloudflare Workers** (account e zona `sbeggio.app`).
+2. Su GitHub salvalo nel secret `CLOUDFLARE_API_TOKEN` (**Settings → Secrets and variables → Actions**).
 
-Il `base` in `vite.config.ts` è `/`: il sito è servito dalla radice del dominio `sbeggio.app`.
+A mano: `npm run build && npx wrangler deploy`. Il `base` in `vite.config.ts` è `/`: il sito è servito
+dalla radice del dominio.
 
 ### App Android
 
