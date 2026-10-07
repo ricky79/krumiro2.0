@@ -91,13 +91,13 @@ export interface Impostazioni {
 
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   minutiDovuti: { predefinito: 480, perGiorno: [0, null, null, null, null, null, 0] },
-  pranzo: { inizio: 720, fine: 870 },
+  pranzo: { inizio: 735, fine: 870 },
   pausaDaScalare: 30,
   orarioMinimoConteggio: 510,
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
   tipoSigaretta: 'normale',
-  avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 },
+  avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 2, pranzo: true, pranzoMinuti: 30 },
 };
 
 export type StatoGiornata = 'NON_INIZIATA' | 'AL_LAVORO' | 'IN_PAUSA' | 'IN_PERMESSO' | 'CHIUSA';
