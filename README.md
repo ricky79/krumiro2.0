@@ -1,4 +1,4 @@
-# Krumiro
+# Sbeggio
 
 Web app installabile (PWA) per registrare le timbrature di lavoro da iPhone o Android e sapere
 a che ora si può uscire. Funziona offline, non ha backend: **i dati restano sul telefono**
@@ -8,7 +8,7 @@ App pubblicata: **https://sbeggio.app/**
 
 ## Installare l'app
 
-Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk** dal telefono e segui le istruzioni per il tuo sistema.
+Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk** dal telefono e segui le istruzioni per il tuo sistema.
 
 ### iPhone (Safari)
 
@@ -17,7 +17,7 @@ Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.ap
 2. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto).
 3. Scorri e scegli **Aggiungi alla schermata Home**.
    Su iOS 18 e successivi verifica che **Apri come app web** sia attivo.
-4. Conferma il nome "Krumiro" e tocca **Aggiungi**.
+4. Conferma il nome "Sbeggio" e tocca **Aggiungi**.
 5. Apri l'app dall'icona sulla schermata Home: parte a tutto schermo, senza la barra di Safari.
 
 ### Android (Chrome)
@@ -25,7 +25,7 @@ Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.ap
 1. Apri **Chrome** e vai su `https://sbeggio.app/`.
 2. Tocca il menu **⋮** (in alto a destra).
 3. Scegli **Installa app** (su alcune versioni la voce è **Aggiungi a schermata Home**,
-   poi **Installa**). Se compare in basso il banner "Installa Krumiro", puoi usare quello.
+   poi **Installa**). Se compare in basso il banner "Installa Sbeggio", puoi usare quello.
 4. Conferma con **Installa**: l'icona compare nel cassetto delle app e, se vuoi,
    sulla schermata Home.
 5. Apri l'app dall'icona: parte a tutto schermo, senza la barra di Chrome.
@@ -66,16 +66,16 @@ passano da un server (vedi *Avvisi nella PWA*).
 
 #### Scaricare e installare l'APK
 
-**Link diretto all'ultima versione:** [https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk](https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk)
-(oppure la pagina [Release](https://github.com/ricky79/krumiro2.0/releases/latest), file `krumiro-<versione>.apk`).
+**Link diretto all'ultima versione:** [https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk](https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk)
+(oppure la pagina [Release](https://github.com/ricky79/krumiro2.0/releases/latest), file `sbeggio-<versione>.apk`).
 
-1. Apri il link dal telefono Android: il browser scarica `krumiro.apk`.
+1. Apri il link dal telefono Android: il browser scarica `sbeggio.apk`.
 2. Apri il file scaricato (dalla notifica del download o dall'app *File*).
 3. Android chiede di consentire l'installazione da quella fonte (Chrome, File…): tocca
    **Impostazioni**, attiva **Consenti da questa fonte** e torna indietro.
 4. Tocca **Installa**. Se compare un avviso di *Play Protect* ("app sconosciuta"), scegli
    **Installa comunque**: l'app non viene dal Play Store, ma è firmata sempre con la stessa chiave.
-5. Apri **Krumiro** → *Impostazioni → Avvisi* → **Autorizza gli avvisi**: concedi le notifiche e,
+5. Apri **Sbeggio** → *Impostazioni → Avvisi* → **Autorizza gli avvisi**: concedi le notifiche e,
    su Android 12+, anche "Sveglie e promemoria" (senza, gli avvisi possono ritardare di qualche minuto).
 
 **Aggiornamenti:** l'APK non si aggiorna da solo. Quando esce una nuova versione l'app mostra un
@@ -85,13 +85,13 @@ numero di versione installato è in fondo alle *Impostazioni*.
 
 L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/krumiro2.0/releases/latest`)
 all'avvio e quando torna in primo piano, al massimo ogni 6 ore (`src/ui/aggiornamento.ts`). Conta solo
-una release che ha già `krumiro.apk` allegato.
+una release che ha già `sbeggio.apk` allegato.
 
 **Dalla PWA all'app:** i dati sono separati. Nella PWA fai *Impostazioni → Esporta backup completo
 (JSON)*, poi nell'app *Impostazioni → Importa CSV o backup JSON…*.
 
 **Se l'installazione fallisce** ("App non installata"): di solito c'è già una versione firmata con
-un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstalla Krumiro e reinstalla.
+un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstalla Sbeggio e reinstalla.
 
 ### Attenzione ai dati
 
@@ -116,11 +116,11 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
   permesso a blocchi di 30 min.
 - **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
-  `sbeggio://timbra` (per esempio vicino ai tornelli) Krumiro si apre e registra l'azione del bottone
+  `sbeggio://timbra` (per esempio vicino ai tornelli) Sbeggio si apre e registra l'azione del bottone
   grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa* o *Uscita*. Il
   messaggio ha *Annulla* per 5 secondi. Il tag si prepara una volta con un'app come NFC Tools (record
   "URL / URI personalizzato") e, se sta in un posto pubblico, si blocca in sola lettura: vedi *Aiuto →
-  Come preparo un tag NFC per Krumiro?*.
+  Come preparo un tag NFC per Sbeggio?*.
 - **Permesso in uscita**: se sai già che uscirai prima, tocca *+ Permesso in uscita* e indica la
   durata: l'uscita prevista si anticipa. Quando esci usa *Uscita*: conta il permesso che manca
   davvero, a blocchi di 30 min.
@@ -246,7 +246,7 @@ Serve Android Studio (JDK 21 e SDK Android). Dopo ogni modifica al codice web es
 **APK in automatico:** il workflow `.github/workflows/android.yml` costruisce l'APK quando
 `rilascio.yml` lo richiama per una nuova versione (vedi *Rilascio*), oppure a ogni push di un tag di
 versione creato a mano (`git tag v1.8.0 && git push origin v1.8.0`). Lo allega alla release come
-`krumiro-<versione>.apk` e come `krumiro.apk`, il nome fisso usato dal link di download permanente, e
+`sbeggio-<versione>.apk` e come `sbeggio.apk`, il nome fisso usato dal link di download permanente, e
 lo salva anche come artefatto del workflow.
 
 **Firma dell'APK:** perché ogni versione si installi sopra la precedente, l'APK va firmato sempre con
@@ -257,9 +257,9 @@ release; senza, ripiega su una chiave di debug che cambia a ogni esecuzione (avv
 APK non si aggiornano uno sopra l'altro. Per creare una chiave nuova:
 
 ```bash
-keytool -genkeypair -keystore krumiro-firma.jks -storetype PKCS12 -alias krumiro \
-  -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Krumiro, C=IT"
-base64 -w0 krumiro-firma.jks   # valore del secret KRUMIRO_KEYSTORE_BASE64
+keytool -genkeypair -keystore sbeggio-firma.jks -storetype PKCS12 -alias krumiro \
+  -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Sbeggio, C=IT"
+base64 -w0 sbeggio-firma.jks   # valore del secret KRUMIRO_KEYSTORE_BASE64
 ```
 
 Conserva keystore e password fuori dal repository (sono già esclusi da `.gitignore`): se li perdi,
@@ -292,7 +292,7 @@ controllo obbligatorio: Settings → Branches → regola di `main` → *Require 
 Nell'app Android un tag NFC con il solo URI `sbeggio://timbra` registra l'azione del bottone principale
 di *Oggi*, anche ad app chiusa. Il formato è definitivo: i tag ai tornelli vengono bloccati in sola
 lettura e non si possono più cambiare. Niente Android Application Record: su un telefono senza
-Krumiro aprirebbe il Play Store.
+Sbeggio aprirebbe il Play Store.
 
 - `android/app/src/main/AndroidManifest.xml`: filtro `NDEF_DISCOVERED` con schema `sbeggio` e host
   `timbra` su `MainActivity` (`singleTask`), permessi `NFC` e `VIBRATE`, `android.hardware.nfc` non

@@ -16,7 +16,7 @@ vi.mock('../src/storage/store', () => ({
   },
 }));
 
-const BASE = 'https://krumiro-notifiche.oliosi-riccardo.workers.dev';
+const BASE = 'https://notifiche.sbeggio.app';
 const SCOPE = 'https://sbeggio.app/';
 const CHIAVE = 'timbrature-avvisi-push';
 const UA_ANDROID =

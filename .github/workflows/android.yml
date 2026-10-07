@@ -2,7 +2,7 @@ name: App Android
 
 # Costruisce l'APK dell'app (Capacitor). Richiamato da rilascio.yml a ogni nuova versione su main, o
 # con un tag di versione creato a mano (1.8.0 o v1.8.0), lo allega alla release di GitHub, anche con
-# il nome fisso krumiro.apk per il link di download permanente.
+# il nome fisso sbeggio.apk per il link di download permanente.
 on:
   workflow_call:
     inputs:
@@ -80,15 +80,15 @@ jobs:
         run: |
           if [ "$TIPO" = release ]; then
             ./gradlew assembleRelease -PversionName="$VERSIONE" -PversionCode="$CODICE"
-            cp app/build/outputs/apk/release/app-release.apk "../krumiro-$VERSIONE.apk"
+            cp app/build/outputs/apk/release/app-release.apk "../sbeggio-$VERSIONE.apk"
           else
             ./gradlew assembleDebug -PversionName="$VERSIONE" -PversionCode="$CODICE"
-            cp app/build/outputs/apk/debug/app-debug.apk "../krumiro-$VERSIONE.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "../sbeggio-$VERSIONE.apk"
           fi
       - uses: actions/upload-artifact@v4
         with:
-          name: krumiro-apk
-          path: krumiro-${{ steps.versione.outputs.numero }}.apk
+          name: sbeggio-apk
+          path: sbeggio-${{ steps.versione.outputs.numero }}.apk
       # Con un tag creato a mano il tag esiste già; da rilascio.yml lo crea gh sul commit di main.
       - name: Allega l'APK alla release
         if: startsWith(github.ref, 'refs/tags/') || inputs.tag
@@ -97,5 +97,5 @@ jobs:
           TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes --target "$GITHUB_SHA"
-          cp krumiro-${{ steps.versione.outputs.numero }}.apk krumiro.apk
-          gh release upload "$TAG" krumiro-${{ steps.versione.outputs.numero }}.apk krumiro.apk --clobber
+          cp sbeggio-${{ steps.versione.outputs.numero }}.apk sbeggio.apk
+          gh release upload "$TAG" sbeggio-${{ steps.versione.outputs.numero }}.apk sbeggio.apk --clobber

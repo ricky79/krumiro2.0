@@ -13,7 +13,7 @@ import { rientroSigarettaDaTag } from './sigaretta';
 /** Istante dell'ultima lettura che ha cambiato la giornata (per ignorare il tag tenuto appoggiato). */
 let ultimaTimbratura: number | null = null;
 
-/** App Android: a ogni lettura di un tag di Krumiro timbra come il pulsante principale di Oggi. */
+/** App Android: a ogni lettura di un tag di Sbeggio timbra come il pulsante principale di Oggi. */
 export function avviaTagNfc(mostraOggi: () => void): void {
   ascoltaTag(() => void gestisciTag(mostraOggi));
 }

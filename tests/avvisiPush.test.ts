@@ -175,11 +175,11 @@ describe('testo della notifica', () => {
       testo: 'È ora di timbrare il rientro',
       tag: 'altro',
     });
-    expect(notificaDaPush({ id: 'altro' }, null)).toEqual({ titolo: 'Krumiro', testo: '', tag: 'altro' });
+    expect(notificaDaPush({ id: 'altro' }, null)).toEqual({ titolo: 'Sbeggio', testo: '', tag: 'altro' });
   });
 
   it('payload non valido → notifica generica', () => {
-    const generica = { titolo: 'Krumiro', testo: 'Apri l\'app per i dettagli.', tag: 'krumiro' };
+    const generica = { titolo: 'Sbeggio', testo: 'Apri l\'app per i dettagli.', tag: 'sbeggio' };
     expect(notificaDaPush(null, null)).toEqual(generica);
     expect(notificaDaPush('ciao', null)).toEqual(generica);
     expect(notificaDaPush({ id: 7 }, null)).toEqual(generica);
@@ -200,7 +200,7 @@ describe('opzioni della notifica', () => {
 
 describe('cache e chiave VAPID', () => {
   it('la voce della cache è la stessa nella pagina e nel service worker', () => {
-    expect(CACHE_AVVISI).toBe('krumiro-avvisi');
+    expect(CACHE_AVVISI).toBe('sbeggio-avvisi');
     expect(chiaveCache('https://sbeggio.app/', 'abc-pausa')).toBe(
       'https://sbeggio.app/avvisi/abc-pausa',
     );
@@ -224,7 +224,7 @@ describe('cache e chiave VAPID', () => {
   });
 
   it('backend e chiave sono quelli del Worker in produzione', () => {
-    expect(URL_NOTIFICHE).toBe('https://krumiro-notifiche.oliosi-riccardo.workers.dev');
+    expect(URL_NOTIFICHE).toBe('https://notifiche.sbeggio.app');
     expect(CHIAVE_VAPID).toBe('BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA');
   });
 });

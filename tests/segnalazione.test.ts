@@ -27,22 +27,22 @@ describe('link di segnalazione', () => {
   it('suggerimento: oggetto, spazio per il testo, versione e piattaforma, senza impostazioni', () => {
     const { indirizzo, oggetto, testo } = leggi(linkSegnalazione('suggerimento', contesto, imp));
     expect(indirizzo).toBe('krumiro@proton.me');
-    expect(oggetto).toBe('Krumiro: suggerimento');
+    expect(oggetto).toBe('Sbeggio: suggerimento');
     expect(testo).toContain('Il tuo suggerimento:');
-    expect(testo).toContain('Versione: Krumiro v1.7.1');
+    expect(testo).toContain('Versione: Sbeggio v1.7.1');
     expect(testo).toContain('Piattaforma: app Android');
     expect(testo).not.toContain('Pausa da scalare');
   });
 
   it('problema: spazi da riempire, dati tecnici e impostazioni', () => {
     const { oggetto, testo } = leggi(linkSegnalazione('problema', contesto, imp));
-    expect(oggetto).toBe('Krumiro: segnalazione di un problema');
+    expect(oggetto).toBe('Sbeggio: segnalazione di un problema');
     for (const atteso of [
       'Cosa è successo:',
       'Cosa ti aspettavi:',
       'Come riprodurlo:',
       'Dati tecnici (puoi cancellarli)',
-      'Versione: Krumiro v1.7.1',
+      'Versione: Sbeggio v1.7.1',
       'Piattaforma: app Android',
       'Dispositivo: Mozilla/5.0 (Linux; Android 14; Pixel 8)',
       'Schermo: 412×915',

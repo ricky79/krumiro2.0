@@ -47,7 +47,7 @@ export async function vibra(): Promise<void> {
 }
 
 /**
- * Chiama `gestore` a ogni lettura di un tag di Krumiro. All'avvio a freddo l'evento è trattenuto dal
+ * Chiama `gestore` a ogni lettura di un tag di Sbeggio. All'avvio a freddo l'evento è trattenuto dal
  * plugin finché non c'è un listener, quindi arriva anche se questa funzione è chiamata dopo l'apertura.
  */
 export function ascoltaTag(gestore: () => void): void {

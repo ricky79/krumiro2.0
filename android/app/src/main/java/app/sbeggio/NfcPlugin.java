@@ -17,7 +17,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 /**
- * Tag NFC di Krumiro. Un tag con il solo URI sbeggio://timbra apre l'app (filtro NDEF_DISCOVERED nel
+ * Tag NFC di Sbeggio. Un tag con il solo URI sbeggio://timbra apre l'app (filtro NDEF_DISCOVERED nel
  * manifest) e qui diventa l'evento "tag" per il JavaScript, che decide cosa timbrare.
  */
 @CapacitorPlugin(name = "Nfc")
@@ -26,7 +26,7 @@ public class NfcPlugin extends Plugin {
     static final String SCHEMA = "sbeggio";
     static final String HOST = "timbra";
 
-    /** True per l'intent di un tag di Krumiro, tranne quando l'app è riaperta dalle recenti. */
+    /** True per l'intent di un tag di Sbeggio, tranne quando l'app è riaperta dalle recenti. */
     static boolean eTagTimbra(Intent intent) {
         if (intent == null || !NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) return false;
         if ((intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) return false;

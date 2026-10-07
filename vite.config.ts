@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
         manifest: {
           id: BASE,
-          name: 'Krumiro',
-          short_name: 'Krumiro',
+          name: 'Sbeggio',
+          short_name: 'Sbeggio',
           description: 'Registra le timbrature di lavoro e calcola l\'ora di uscita.',
           lang: 'it',
           dir: 'ltr',
