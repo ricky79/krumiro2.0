@@ -1,15 +1,22 @@
 {
   "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
-  // La PWA è un Worker di soli file statici (la build in dist/), servito su https://sbeggio.app.
+  // La PWA (la build in dist/) servita su https://sbeggio.app. Il Worker (src/worker.ts) passa prima di
+  // ogni richiesta solo per rimandare www.sbeggio.app alla radice; il resto sono i file statici.
   // Deploy: .github/workflows/deploy.yml a ogni push su main, o `npm run build && npx wrangler deploy`.
   "name": "sbeggio",
   "account_id": "f6a7b31800dc221db5b5ee4b88e967f8",
+  "main": "src/worker.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
   },
-  "routes": [{ "pattern": "sbeggio.app", "custom_domain": true }],
+  "routes": [
+    { "pattern": "sbeggio.app", "custom_domain": true },
+    { "pattern": "www.sbeggio.app", "custom_domain": true }
+  ],
   "workers_dev": false,
   "preview_urls": false
 }
