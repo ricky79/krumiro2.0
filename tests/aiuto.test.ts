@@ -121,4 +121,15 @@ describe('aiuto', () => {
     expect(filtraAiuto(voci, 'zzzz')).toEqual([]);
     expect(filtraAiuto(voci, '  ')).toHaveLength(voci.length);
   });
+
+  it('il tag NFC spiega uso e preparazione', () => {
+    const uso = voci.find((x) => x.id === 'tag-nfc')!.testo.join(' ');
+    expect(uso).toContain('Annulla');
+    expect(uso).toContain('14:30'); // fine della fascia pranzo con le impostazioni dei test
+    expect(uso).toContain('Impostazioni → Tag NFC');
+    const preparare = voci.find((x) => x.id === 'tag-nfc-preparare')!.testo.join(' ');
+    expect(preparare).toContain('sbeggio://timbra');
+    expect(preparare).toContain('Blocca');
+    expect(preparare).toContain('definitivo');
+  });
 });

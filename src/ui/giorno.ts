@@ -166,7 +166,8 @@ export function impostaOrologio(f: () => Adesso): void {
   leggiAdesso = f;
 }
 
-async function eseguiAzione(azione: Azione, data: string): Promise<void> {
+/** Esegue un'azione di Oggi; `annulla` (timbratura col tag) aggiunge Annulla al messaggio finale. */
+export async function eseguiAzione(azione: Azione, data: string, annulla?: () => void): Promise<void> {
   const { minuti } = leggiAdesso();
   const aggiungi = (tipo: Evento['tipo'], pausaConfermata?: number) =>
     store.modificaGiornata(data, (g) => {
@@ -215,7 +216,7 @@ async function eseguiAzione(azione: Azione, data: string): Promise<void> {
       if (g.permessoUscitaMinuti > 0) {
         const r = calcolaGiornata(g, store.impostazioni, minuti);
         const permesso = r.permessoUscita > 0 ? `${formattaDurata(r.permessoUscita)} di permesso` : 'nessun permesso';
-        toast(`Uscita alle ${formattaOra(minuti)} · ${permesso}`);
+        toast(`Uscita alle ${formattaOra(minuti)} · ${permesso}`, annulla);
         return;
       }
       break;
@@ -250,7 +251,7 @@ async function eseguiAzione(azione: Azione, data: string): Promise<void> {
     default:
       aggiungi(azione);
   }
-  toast(`${ETICHETTE_AZIONE[azione]} alle ${formattaOra(minuti)}`);
+  toast(`${ETICHETTE_AZIONE[azione]} alle ${formattaOra(minuti)}`, annulla);
 }
 
 function timeline(

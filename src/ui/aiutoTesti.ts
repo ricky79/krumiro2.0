@@ -40,6 +40,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
   const pranzoAvviso = formattaDurata(imp.avvisi.pranzoMinuti);
   const inizioProposta = imp.pranzo.inizio + OFFSET_PAUSA_PROPOSTA;
   const pausaProposta = `${formattaOra(inizioProposta)}–${formattaOra(inizioProposta + DURATA_PAUSA_PROPOSTA)}`;
+  const fineFascia = formattaOra(imp.pranzo.fine);
   const fineSigaretta =
     imp.tipoSigaretta === 'elettronica' ? 'il serbatoio si svuota, il LED lampeggia' : 'la sigaretta finisce nel posacenere';
 
@@ -192,6 +193,33 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       azione: 'RIAPRI',
       domanda: 'Riapri giornata',
       testo: ['Elimina l\'ultima uscita (normale o anticipata) e riporta la giornata allo stato "Al lavoro". Utile se hai timbrato l\'uscita per sbaglio.'],
+    },
+    {
+      id: 'tag-nfc',
+      sezione: 'I bottoni',
+      domanda: 'Timbrare con un tag NFC (app Android)',
+      testo: [
+        'Nell\'app per Android puoi timbrare avvicinando il telefono a un tag NFC di Krumiro, per esempio quello vicino ai tornelli, anche ad app chiusa: Krumiro si apre e registra l\'azione del bottone principale.',
+        '• Giornata non iniziata: Entrata.',
+        `• Al lavoro senza pausa: Inizio pausa. Dopo le ${fineFascia}, finita la fascia pranzo, ti chiede se è Inizio pausa o Uscita.`,
+        '• In pausa: Fine pausa.',
+        '• Al lavoro dopo la pausa: Uscita.',
+        `• Pausa sigaretta in corso: Rientro, come con il tasto (entro ${tolleranza} la pausa non conta).`,
+        '• In permesso: Rientro da permesso.',
+        'Il telefono vibra e compare il solito messaggio, con il tasto Annulla per 5 secondi se il tag ha registrato la cosa sbagliata. Una seconda lettura entro un minuto viene ignorata. L\'inizio della pausa sigaretta e l\'uscita in permesso si fanno con i bottoni.',
+        'Il telefono deve essere sbloccato e con l\'NFC attivo: lo vedi in Impostazioni → Tag NFC.',
+      ],
+    },
+    {
+      id: 'tag-nfc-preparare',
+      sezione: 'I bottoni',
+      domanda: 'Come preparo un tag NFC per Krumiro?',
+      testo: [
+        'Serve un tag NFC qualsiasi (va bene un NTAG213, adesivo o portachiavi) e un\'app per scriverlo, per esempio NFC Tools:',
+        '• in Scrivi aggiungi un record "URL / URI personalizzato" con il testo sbeggio://timbra e scrivilo sul tag;',
+        '• prova che funzioni, poi, se il tag va in un posto pubblico come i tornelli, bloccalo in sola lettura (in NFC Tools: Altro → Blocca il tag), altrimenti chiunque può cancellarlo. Il blocco è definitivo.',
+        'Lo stesso tag va bene per tutti i colleghi che hanno l\'app Krumiro per Android; sugli altri telefoni non succede nulla.',
+      ],
     },
 
     // --- Come si calcola

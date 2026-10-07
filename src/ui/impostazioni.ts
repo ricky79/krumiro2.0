@@ -13,6 +13,7 @@ import { inApp } from '../native/app';
 import * as avvisiApp from '../native/avvisi';
 import * as avvisiPwa from '../web/avvisi';
 import type { StatoPermessi } from '../core/avvisi';
+import { apriImpostazioniNfc, statoNfc, type StatoNfc } from '../native/nfc';
 
 /** Lunedì → domenica, come in un calendario italiano. */
 const ORDINE_GIORNI = [1, 2, 3, 4, 5, 6, 0];
@@ -113,6 +114,39 @@ function sezioneAvvisi(): HTMLElement {
     riga('Anticipo sigaretta (min)', inputMinuti(avvisi.sigarettaAnticipo, (v) => cambia((a) => void (a.sigarettaAnticipo = v)), 'Anticipo dell\'avviso della pausa sigaretta in minuti', 30, 1), '0 = allo scadere della tolleranza'),
     linkAiuto('Come funzionano gli avvisi?', 'avvisi'),
   );
+}
+
+/** Ultimo stato letto: la sezione ridisegnata compare subito, senza aspettare il plugin. */
+let ultimoStatoNfc: StatoNfc = 'assente';
+
+/** Sezione Tag NFC (solo app Android): stato dell'NFC. Nascosta sui telefoni senza NFC. */
+function sezioneTagNfc(): HTMLElement {
+  const nota = el('small', { class: 'nota' });
+  const apri = el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void apriImpostazioniNfc() }, 'Apri impostazioni NFC');
+  const sezione = el(
+    'div',
+    { class: 'scheda' },
+    el('h2', { class: 'titolo-sezione' }, 'Tag NFC'),
+    el('p', { class: 'nota' }, 'Avvicina il tag NFC di Krumiro (per esempio quello ai tornelli) per timbrare l\'azione del pulsante principale, anche ad app chiusa.'),
+    nota,
+    apri,
+    linkAiuto('Come funziona il tag NFC?', 'tag-nfc'),
+  );
+  const mostra = (s: StatoNfc) => {
+    ultimoStatoNfc = s;
+    sezione.hidden = s === 'assente';
+    nota.textContent = s === 'attivo' ? 'NFC attivo.' : 'NFC disattivato: attivalo per usare il tag.';
+    apri.hidden = s !== 'spento';
+  };
+  mostra(ultimoStatoNfc);
+  void statoNfc().then(mostra);
+  // Di ritorno dalle impostazioni di Android si rilegge lo stato, finché la sezione è nella pagina.
+  const alRitorno = () => {
+    if (!sezione.isConnected) return document.removeEventListener('visibilitychange', alRitorno);
+    if (document.visibilityState === 'visible') void statoNfc().then(mostra);
+  };
+  document.addEventListener('visibilitychange', alRitorno);
+  return sezione;
 }
 
 const OPZIONI_TEMA: [PreferenzaTema, string][] = [
@@ -260,6 +294,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
       linkAiuto('Come funziona la pausa sigaretta?', 'pausa-sigaretta'),
     ),
     sezioneAvvisi(),
+    inApp() ? sezioneTagNfc() : null,
     el(
       'div',
       { class: 'scheda' },
