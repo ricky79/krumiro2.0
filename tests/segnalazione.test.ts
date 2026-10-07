@@ -21,12 +21,12 @@ function leggi(link: string) {
 
 describe('link di segnalazione', () => {
   it('l\'indirizzo è quello dei contatti', () => {
-    expect(EMAIL_CONTATTO).toBe('krumiro@proton.me');
+    expect(EMAIL_CONTATTO).toBe('supporto@sbeggio.app');
   });
 
   it('suggerimento: oggetto, spazio per il testo, versione e piattaforma, senza impostazioni', () => {
     const { indirizzo, oggetto, testo } = leggi(linkSegnalazione('suggerimento', contesto, imp));
-    expect(indirizzo).toBe('krumiro@proton.me');
+    expect(indirizzo).toBe('supporto@sbeggio.app');
     expect(oggetto).toBe('Sbeggio: suggerimento');
     expect(testo).toContain('Il tuo suggerimento:');
     expect(testo).toContain('Versione: Sbeggio v1.7.1');
