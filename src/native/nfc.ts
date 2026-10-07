@@ -4,7 +4,7 @@ import { inApp } from './app';
 /**
  * Tag NFC dell'app Android. Il plugin `Nfc` è nel progetto Android
  * (`android/app/src/main/java/io/github/ricky79/krumiro/NfcPlugin.java`): un tag con l'URI
- * krumiro://timbra apre l'app e arriva qui come evento "tag".
+ * sbeggio://timbra apre l'app e arriva qui come evento "tag".
  */
 interface PluginNfc {
   stato(): Promise<{ disponibile: boolean; attivo: boolean }>;

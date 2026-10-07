@@ -22,11 +22,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Tag NFC di Krumiro (URI krumiro://timbra): apre l'app e timbra, vedi NfcPlugin. -->
+            <!-- Tag NFC di Krumiro (URI sbeggio://timbra): apre l'app e timbra, vedi NfcPlugin. -->
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="krumiro" android:host="timbra" />
+                <data android:scheme="sbeggio" android:host="timbra" />
             </intent-filter>
 
         </activity>

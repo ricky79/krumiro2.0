@@ -116,7 +116,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
   permesso a blocchi di 30 min.
 - **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
-  `krumiro://timbra` (per esempio vicino ai tornelli) Krumiro si apre e registra l'azione del bottone
+  `sbeggio://timbra` (per esempio vicino ai tornelli) Krumiro si apre e registra l'azione del bottone
   grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa* o *Uscita*. Il
   messaggio ha *Annulla* per 5 secondi. Il tag si prepara una volta con un'app come NFC Tools (record
   "URL / URI personalizzato") e, se sta in un posto pubblico, si blocca in sola lettura: vedi *Aiuto →
@@ -289,12 +289,12 @@ controllo obbligatorio: Settings → Branches → regola di `main` → *Require 
 
 ### Tag NFC
 
-Nell'app Android un tag NFC con il solo URI `krumiro://timbra` registra l'azione del bottone principale
+Nell'app Android un tag NFC con il solo URI `sbeggio://timbra` registra l'azione del bottone principale
 di *Oggi*, anche ad app chiusa. Il formato è definitivo: i tag ai tornelli vengono bloccati in sola
 lettura e non si possono più cambiare. Niente Android Application Record: su un telefono senza
 Krumiro aprirebbe il Play Store.
 
-- `android/app/src/main/AndroidManifest.xml`: filtro `NDEF_DISCOVERED` con schema `krumiro` e host
+- `android/app/src/main/AndroidManifest.xml`: filtro `NDEF_DISCOVERED` con schema `sbeggio` e host
   `timbra` su `MainActivity` (`singleTask`), permessi `NFC` e `VIBRATE`, `android.hardware.nfc` non
   obbligatorio.
 - `NfcPlugin.java` (plugin Capacitor locale `Nfc`, registrato in `MainActivity`): trasforma l'intent

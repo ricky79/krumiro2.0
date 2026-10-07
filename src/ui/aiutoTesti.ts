@@ -216,7 +216,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       domanda: 'Come preparo un tag NFC per Krumiro?',
       testo: [
         'Serve un tag NFC qualsiasi (va bene un NTAG213, adesivo o portachiavi) e un\'app per scriverlo, per esempio NFC Tools:',
-        '• in Scrivi aggiungi un record "URL / URI personalizzato" con il testo krumiro://timbra e scrivilo sul tag;',
+        '• in Scrivi aggiungi un record "URL / URI personalizzato" con il testo sbeggio://timbra e scrivilo sul tag;',
         '• prova che funzioni, poi, se il tag va in un posto pubblico come i tornelli, bloccalo in sola lettura (in NFC Tools: Altro → Blocca il tag), altrimenti chiunque può cancellarlo. Il blocco è definitivo.',
         'Lo stesso tag va bene per tutti i colleghi che hanno l\'app Krumiro per Android; sugli altri telefoni non succede nulla.',
       ],

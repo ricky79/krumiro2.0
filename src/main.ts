@@ -118,7 +118,7 @@ if (inApp()) {
   avviaAvvisiApp();
   // L'APK non si aggiorna da solo: un banner propone la nuova versione pubblicata su GitHub.
   avviaControlloAggiornamenti(__VERSIONE_APP__);
-  // Tag NFC (krumiro://timbra): timbra come il pulsante principale. Dopo il primo render, così
+  // Tag NFC (sbeggio://timbra): timbra come il pulsante principale. Dopo il primo render, così
   // l'evento trattenuto all'avvio a freddo trova la vista già montata.
   avviaTagNfc(() => vai('oggi'));
 } else {

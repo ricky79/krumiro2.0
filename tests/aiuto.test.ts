@@ -128,7 +128,7 @@ describe('aiuto', () => {
     expect(uso).toContain('14:30'); // fine della fascia pranzo con le impostazioni dei test
     expect(uso).toContain('Impostazioni → Tag NFC');
     const preparare = voci.find((x) => x.id === 'tag-nfc-preparare')!.testo.join(' ');
-    expect(preparare).toContain('krumiro://timbra');
+    expect(preparare).toContain('sbeggio://timbra');
     expect(preparare).toContain('Blocca');
     expect(preparare).toContain('definitivo');
   });

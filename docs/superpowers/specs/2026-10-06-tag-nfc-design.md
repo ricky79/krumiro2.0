@@ -22,7 +22,7 @@ timbra.
 
 Scelte concordate:
 
-- il tag contiene il solo URI `krumiro://timbra` (decisione già presa nel README per la "wave 2"): un
+- il tag contiene il solo URI `sbeggio://timbra` (decisione già presa nel README per la "wave 2"): un
   tag scritto e bloccato non si può più cambiare, quindi il formato è definitivo;
 - il tag lo scrive e lo blocca **una volta** chi lo attacca, con un'app come NFC Tools; Krumiro lo
   legge soltanto (niente funzione per scriverlo). Aiuto e README spiegano come prepararlo;
@@ -43,7 +43,7 @@ schermo acceso e sbloccato).
 
 ## Il tag
 
-Messaggio NDEF con un solo record URI: `krumiro://timbra`. Una ventina di byte: va bene qualunque tag
+Messaggio NDEF con un solo record URI: `sbeggio://timbra`. Una ventina di byte: va bene qualunque tag
 NDEF (NTAG213 o simili). Va **bloccato in sola lettura** se sta in un posto pubblico, altrimenti
 chiunque abbia un'app NFC può cancellarlo o riscriverlo; il blocco è definitivo.
 
@@ -78,7 +78,7 @@ chiunque abbia un'app NFC può cancellarlo o riscriverlo; il blocco è definitiv
   <intent-filter>
       <action android:name="android.nfc.action.NDEF_DISCOVERED" />
       <category android:name="android.intent.category.DEFAULT" />
-      <data android:scheme="krumiro" android:host="timbra" />
+      <data android:scheme="sbeggio" android:host="timbra" />
   </intent-filter>
   ```
 
@@ -96,7 +96,7 @@ chiunque abbia un'app NFC può cancellarlo o riscriverlo; il blocco è definitiv
 `onNewIntent(getIntent())`) sia con l'app già aperta (`singleTask` → `onNewIntent`), quindi basta
 `handleOnNewIntent(intent)`:
 
-- azione `NDEF_DISCOVERED`, `intent.getData()` con schema `krumiro` e host `timbra`, senza
+- azione `NDEF_DISCOVERED`, `intent.getData()` con schema `sbeggio` e host `timbra`, senza
   `FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY` (app riaperta dalle recenti) →
   `notifyListeners("tag", new JSObject(), true)`. Con `retainUntilConsumed` l'evento aspetta il
   listener JS, che all'avvio a freddo arriva dopo;
@@ -238,7 +238,7 @@ compare quando arriva la risposta):
   acceso e sbloccato, NFC attivo (Impostazioni → Tag NFC), solo nell'app Android.
 - Voce `tag-nfc-preparare` nella stessa sezione, "Come preparo un tag NFC per Krumiro?": un tag NFC
   qualsiasi (NTAG213 va bene) e un'app per scriverlo, per esempio NFC Tools; si scrive un record
-  URL/URI personalizzato con `krumiro://timbra`; se il tag va in un posto pubblico lo si blocca in sola
+  URL/URI personalizzato con `sbeggio://timbra`; se il tag va in un posto pubblico lo si blocca in sola
   lettura (in NFC Tools *Altro → Blocca il tag*), sapendo che il blocco è definitivo; il tag funziona
   per tutti quelli che hanno l'app Krumiro per Android, sugli altri telefoni non succede nulla.
 - `README.md`: la sezione "Tag NFC (wave 2, non ancora implementato)" diventa la documentazione della
@@ -267,7 +267,7 @@ compare quando arriva la risposta):
   eventi, risalva l'inizio sigaretta prima di modificare la giornata e permette subito una nuova
   lettura; `PAUSA_O_USCITA` apre il foglio e la scelta *Uscita* timbra `USCITA`; finestra aperta e
   giornata chiusa mostrano i loro messaggi senza vibrare.
-- `tests/aiuto.test.ts`: le voci `tag-nfc` e `tag-nfc-preparare` esistono e citano `krumiro://timbra`,
+- `tests/aiuto.test.ts`: le voci `tag-nfc` e `tag-nfc-preparare` esistono e citano `sbeggio://timbra`,
   *Annulla* e il blocco del tag.
 
 **Verifiche automatiche:** `npm run typecheck`, `npm test`, `npm run build:android`, poi
@@ -275,7 +275,7 @@ compare quando arriva la risposta):
 
 **Prova manuale sul telefono** (da fare a mano, NFC non emulabile):
 
-1. Con NFC Tools scrivi `krumiro://timbra` su un tag (senza bloccarlo, per le prove).
+1. Con NFC Tools scrivi `sbeggio://timbra` su un tag (senza bloccarlo, per le prove).
 2. App chiusa (tolta dalle recenti), giornata non iniziata: avvicina il tag → Krumiro si apre su Oggi,
    vibra, "Entrata alle …" con *Annulla*.
 3. Tocca *Annulla* → l'entrata sparisce; riavvicina subito il tag → timbra di nuovo.
