@@ -201,8 +201,8 @@ describe('opzioni della notifica', () => {
 describe('cache e chiave VAPID', () => {
   it('la voce della cache è la stessa nella pagina e nel service worker', () => {
     expect(CACHE_AVVISI).toBe('krumiro-avvisi');
-    expect(chiaveCache('https://ricky79.github.io/krumiro2.0/', 'abc-pausa')).toBe(
-      'https://ricky79.github.io/krumiro2.0/avvisi/abc-pausa',
+    expect(chiaveCache('https://sbeggio.app/', 'abc-pausa')).toBe(
+      'https://sbeggio.app/avvisi/abc-pausa',
     );
   });
 
@@ -230,7 +230,7 @@ describe('cache e chiave VAPID', () => {
 });
 
 describe('riprogrammazione dopo un cambio di iscrizione push', () => {
-  const SCOPE = 'https://ricky79.github.io/krumiro2.0/';
+  const SCOPE = 'https://sbeggio.app/';
   const voce = (id: string, orario: string): [string, unknown] => [chiaveCache(SCOPE, id), { titolo: 't', testo: 'x', orario }];
 
   it('riprende dalla Cache gli avvisi ancora futuri, con id e orario', () => {

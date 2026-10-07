@@ -17,7 +17,7 @@ vi.mock('../src/storage/store', () => ({
 }));
 
 const BASE = 'https://krumiro-notifiche.oliosi-riccardo.workers.dev';
-const SCOPE = 'https://ricky79.github.io/krumiro2.0/';
+const SCOPE = 'https://sbeggio.app/';
 const CHIAVE = 'timbrature-avvisi-push';
 const UA_ANDROID =
   'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36';

@@ -1,4 +1,4 @@
-package io.github.ricky79.krumiro;
+package app.sbeggio;
 
 import android.content.Intent;
 import android.nfc.NfcAdapter;

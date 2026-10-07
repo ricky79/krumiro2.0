@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "io.github.ricky79.krumiro"
+    namespace = "app.sbeggio"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "io.github.ricky79.krumiro"
+        applicationId "app.sbeggio"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // La CI passa la versione di package.json e il versionCode che ne deriva

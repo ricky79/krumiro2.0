@@ -3,7 +3,7 @@ import { inApp } from './app';
 
 /**
  * Tag NFC dell'app Android. Il plugin `Nfc` è nel progetto Android
- * (`android/app/src/main/java/io/github/ricky79/krumiro/NfcPlugin.java`): un tag con l'URI
+ * (`android/app/src/main/java/app/sbeggio/NfcPlugin.java`): un tag con l'URI
  * sbeggio://timbra apre l'app e arriva qui come evento "tag".
  */
 interface PluginNfc {

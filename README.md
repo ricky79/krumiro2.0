@@ -4,7 +4,7 @@ Web app installabile (PWA) per registrare le timbrature di lavoro da iPhone o An
 a che ora si può uscire. Funziona offline, non ha backend: **i dati restano sul telefono**
 (localStorage del browser).
 
-App pubblicata: **https://ricky79.github.io/krumiro2.0/**
+App pubblicata: **https://sbeggio.app/**
 
 ## Installare l'app
 
@@ -22,7 +22,7 @@ Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.ap
 
 ### Android (Chrome)
 
-1. Apri **Chrome** e vai su `https://ricky79.github.io/krumiro2.0/`.
+1. Apri **Chrome** e vai su `https://sbeggio.app/`.
 2. Tocca il menu **⋮** (in alto a destra).
 3. Scegli **Installa app** (su alcune versioni la voce è **Aggiungi a schermata Home**,
    poi **Installa**). Se compare in basso il banner "Installa Krumiro", puoi usare quello.
@@ -212,10 +212,10 @@ Con `npm run dev` il service worker non c'è e gli avvisi risultano "non disponi
 
 ```bash
 npm run build
-npx vite preview --port 5173   # il backend accetta richieste solo da questa porta e da GitHub Pages
+npx vite preview --port 5173   # il backend accetta richieste solo da questa porta e dal sito pubblicato
 ```
 
-Poi apri `http://localhost:5173/krumiro2.0/`, autorizza gli avvisi e timbra. In Chrome, DevTools →
+Poi apri `http://localhost:5173/`, autorizza gli avvisi e timbra. In Chrome, DevTools →
 Application → Service workers → *Push* simula un push senza passare dal backend.
 
 ### Deploy su GitHub Pages
@@ -226,7 +226,7 @@ e pubblica `dist/` su GitHub Pages. Va configurato una volta sola:
 1. Su GitHub apri **Settings → Pages**.
 2. In **Build and deployment → Source** scegli **GitHub Actions**.
 
-Il `base` in `vite.config.ts` è `/krumiro2.0/`. Se rinomini il repository, aggiornalo.
+Il `base` in `vite.config.ts` è `/`: il sito è servito dalla radice del dominio `sbeggio.app`.
 
 ### App Android
 
@@ -265,7 +265,7 @@ base64 -w0 krumiro-firma.jks   # valore del secret KRUMIRO_KEYSTORE_BASE64
 Conserva keystore e password fuori dal repository (sono già esclusi da `.gitignore`): se li perdi,
 le nuove versioni non si installano sopra quelle esistenti. La stessa chiave serve anche per il
 Play Store. Il numero di versione viene da
-`package.json`. L'`appId` (`io.github.ricky79.krumiro`) non si può più cambiare dopo la
+`package.json`. L'`appId` (`app.sbeggio`) non si può più cambiare dopo la
 pubblicazione. Icone e schermata di avvio sono le stesse della PWA: `npm run icone` le rigenera tutte
 (PWA e Android) da `scripts/genera-icone.mjs`.
 
