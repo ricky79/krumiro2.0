@@ -48,12 +48,12 @@ function righeImpostazioni(imp: Impostazioni): string[] {
 
 /** Link `mailto:` con oggetto e testo già pronti; l'utente li rivede nell'app di posta prima di inviare. */
 export function linkSegnalazione(tipo: TipoSegnalazione, c: ContestoApp, imp: Impostazioni): string {
-  const versione = [`Versione: Krumiro v${c.versione}`, `Piattaforma: ${c.piattaforma}`];
+  const versione = [`Versione: Sbeggio v${c.versione}`, `Piattaforma: ${c.piattaforma}`];
   const [oggetto, righe] =
     tipo === 'suggerimento'
-      ? ['Krumiro: suggerimento', ['Il tuo suggerimento:', '', '', '', '—', ...versione]]
+      ? ['Sbeggio: suggerimento', ['Il tuo suggerimento:', '', '', '', '—', ...versione]]
       : [
-          'Krumiro: segnalazione di un problema',
+          'Sbeggio: segnalazione di un problema',
           [
             'Cosa è successo:',
             '',

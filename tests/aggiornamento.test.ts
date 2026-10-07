@@ -13,23 +13,23 @@ const stato = (s: Partial<StatoAggiornamento> = {}): StatoAggiornamento => ({ co
 
 describe('versioneRilascio', () => {
   it('legge la versione dal tag dell\'ultima release con l\'APK', () => {
-    const release = { tag_name: 'v1.12.0', assets: [{ name: 'krumiro-1.12.0.apk' }, { name: 'krumiro.apk' }] };
+    const release = { tag_name: 'v1.12.0', assets: [{ name: 'sbeggio-1.12.0.apk' }, { name: 'sbeggio.apk' }] };
     expect(versioneRilascio(release)).toBe('1.12.0');
     // I tag storici non hanno la "v".
-    expect(versioneRilascio({ tag_name: '1.7.0', assets: [{ name: 'krumiro.apk' }] })).toBe('1.7.0');
+    expect(versioneRilascio({ tag_name: '1.7.0', assets: [{ name: 'sbeggio.apk' }] })).toBe('1.7.0');
   });
 
   it('ignora la release finché l\'APK non è allegato', () => {
     // android.yml crea la release e solo dopo ci carica l'APK: nel frattempo il link di download non funziona.
     expect(versioneRilascio({ tag_name: 'v1.12.0', assets: [] })).toBeNull();
-    expect(versioneRilascio({ tag_name: 'v1.12.0', assets: [{ name: 'krumiro-1.12.0.apk' }] })).toBeNull();
+    expect(versioneRilascio({ tag_name: 'v1.12.0', assets: [{ name: 'sbeggio-1.12.0.apk' }] })).toBeNull();
   });
 
   it('risposte inattese non sono una versione', () => {
     expect(versioneRilascio(null)).toBeNull();
     expect(versioneRilascio('v1.12.0')).toBeNull();
     expect(versioneRilascio({ message: 'API rate limit exceeded' })).toBeNull();
-    expect(versioneRilascio({ tag_name: 'ultima', assets: [{ name: 'krumiro.apk' }] })).toBeNull();
+    expect(versioneRilascio({ tag_name: 'ultima', assets: [{ name: 'sbeggio.apk' }] })).toBeNull();
   });
 });
 

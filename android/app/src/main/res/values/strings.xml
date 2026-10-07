@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Krumiro</string>
-    <string name="title_activity_main">Krumiro</string>
-    <string name="package_name">io.github.ricky79.krumiro</string>
-    <string name="custom_url_scheme">io.github.ricky79.krumiro</string>
+    <string name="app_name">Sbeggio</string>
+    <string name="title_activity_main">Sbeggio</string>
+    <string name="package_name">app.sbeggio</string>
+    <string name="custom_url_scheme">app.sbeggio</string>
 </resources>

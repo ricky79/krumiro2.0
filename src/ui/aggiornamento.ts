@@ -7,7 +7,7 @@ import { el } from './dom';
  * quella attuale e i dati restano, perché ogni APK è firmato con la stessa chiave (android.yml).
  */
 
-export const URL_APK = 'https://github.com/ricky79/krumiro2.0/releases/latest/download/krumiro.apk';
+export const URL_APK = 'https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk';
 const URL_ULTIMA_RELEASE = 'https://api.github.com/repos/ricky79/krumiro2.0/releases/latest';
 /** Le release escono di rado, e senza login l'API di GitHub concede 60 richieste l'ora per indirizzo IP. */
 export const INTERVALLO_CONTROLLO = 6 * 60 * 60 * 1000;
@@ -46,7 +46,7 @@ export function versioneRilascio(release: unknown): string | null {
   if (typeof release !== 'object' || release === null) return null;
   const { tag_name: tag, assets } = release as { tag_name?: unknown; assets?: unknown };
   if (typeof tag !== 'string' || !Array.isArray(assets)) return null;
-  const conApk = assets.some((a: unknown) => typeof a === 'object' && a !== null && 'name' in a && a.name === 'krumiro.apk');
+  const conApk = assets.some((a: unknown) => typeof a === 'object' && a !== null && 'name' in a && a.name === 'sbeggio.apk');
   const v = leggiVersione(tag);
   return conApk && v ? v.join('.') : null;
 }

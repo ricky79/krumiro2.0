@@ -27,7 +27,6 @@ export const SEZIONI_AIUTO = [
   'Dati e backup',
   'Avvisi',
   'Installazione',
-  'Informazioni',
 ] as const;
 
 export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
@@ -199,7 +198,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'I bottoni',
       domanda: 'Timbrare con un tag NFC (app Android)',
       testo: [
-        'Nell\'app per Android puoi timbrare avvicinando il telefono a un tag NFC di Krumiro, per esempio quello vicino ai tornelli, anche ad app chiusa: Krumiro si apre e registra l\'azione del bottone principale.',
+        'Nell\'app per Android puoi timbrare avvicinando il telefono a un tag NFC di Sbeggio, per esempio quello vicino ai tornelli, anche ad app chiusa: Sbeggio si apre e registra l\'azione del bottone principale.',
         '• Giornata non iniziata: Entrata.',
         `• Al lavoro senza pausa: Inizio pausa. Dopo le ${fineFascia}, finita la fascia pranzo, ti chiede se è Inizio pausa o Uscita.`,
         '• In pausa: Fine pausa.',
@@ -213,12 +212,12 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
     {
       id: 'tag-nfc-preparare',
       sezione: 'I bottoni',
-      domanda: 'Come preparo un tag NFC per Krumiro?',
+      domanda: 'Come preparo un tag NFC per Sbeggio?',
       testo: [
         'Serve un tag NFC qualsiasi (va bene un NTAG213, adesivo o portachiavi) e un\'app per scriverlo, per esempio NFC Tools:',
         '• in Scrivi aggiungi un record "URL / URI personalizzato" con il testo sbeggio://timbra e scrivilo sul tag;',
         '• prova che funzioni, poi, se il tag va in un posto pubblico come i tornelli, bloccalo in sola lettura (in NFC Tools: Altro → Blocca il tag), altrimenti chiunque può cancellarlo. Il blocco è definitivo.',
-        'Lo stesso tag va bene per tutti i colleghi che hanno l\'app Krumiro per Android; sugli altri telefoni non succede nulla.',
+        'Lo stesso tag va bene per tutti i colleghi che hanno l\'app Sbeggio per Android; sugli altri telefoni non succede nulla.',
       ],
     },
 
@@ -363,10 +362,10 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         '• Se hai attivato "Non disturbare" o una modalità Focus, le notifiche vengono silenziate.',
         'Nell\'app per Android:',
         '• Su Android 12 e successivi concedi anche "Sveglie e promemoria" all\'app: senza, gli avvisi possono ritardare di qualche minuto.',
-        '• Nelle impostazioni di Android (App → Krumiro) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
+        '• Nelle impostazioni di Android (App → Sbeggio) togli le limitazioni della batteria: alcune marche (Xiaomi, Huawei, Samsung in risparmio energetico) bloccano le notifiche delle app chiuse.',
         'Nella PWA:',
         '• Quando timbri serve internet: se manca, l\'avviso viene programmato appena torni online con l\'app aperta.',
-        '• Le notifiche del sito devono essere permesse: in Chrome da ⋮ → Impostazioni → Privacy e sicurezza → Impostazioni sito → Notifiche; su iPhone da Impostazioni → Notifiche → Krumiro.',
+        '• Le notifiche del sito devono essere permesse: in Chrome da ⋮ → Impostazioni → Privacy e sicurezza → Impostazioni sito → Notifiche; su iPhone da Impostazioni → Notifiche → Sbeggio.',
         '• Su iPhone apri l\'app dall\'icona sulla schermata Home, non da Safari.',
         '• Sul computer il browser deve restare aperto (anche ridotto a icona).',
       ],
@@ -401,7 +400,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Installazione',
       domanda: 'C\'è un\'app per Android con gli avvisi?',
       testo: [
-        `• Dal telefono [clicca qui](${URL_APK}): il browser scarica l'app (krumiro.apk).`,
+        `• Dal telefono [clicca qui](${URL_APK}): il browser scarica l'app (sbeggio.apk).`,
         '• Aprilo: Android chiede di consentire l\'installazione da questa fonte. Conferma e installa.',
         '• Alla prima apertura autorizza le notifiche (Impostazioni → Avvisi → Autorizza gli avvisi).',
         'Rispetto alla PWA, nell\'app gli avvisi funzionano anche senza internet e senza passare da un server.',
@@ -417,20 +416,9 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'Nella PWA (dal sito o dall\'icona sulla schermata Home) si aggiorna da sola: quando c\'è una nuova versione viene scaricata in background e usata dall\'apertura successiva.',
         'Nell\'app per Android l\'aggiornamento va installato a mano:',
         '• Quando esce una nuova versione compare un riquadro in basso: tocca "Scarica".',
-        '• Apri il file scaricato (krumiro.apk) e tocca "Aggiorna" o "Installa".',
+        '• Apri il file scaricato (sbeggio.apk) e tocca "Aggiorna" o "Installa".',
         `Se hai chiuso il riquadro, l'ultima versione si scarica sempre [da qui](${URL_APK}). La versione installata è scritta in fondo alle Impostazioni.`,
         'In tutti e due i casi i dati non vengono toccati.',
-      ],
-    },
-
-    // --- Informazioni
-    {
-      id: 'nome',
-      sezione: 'Informazioni',
-      domanda: 'Perché si chiama Krumiro?',
-      testo: [
-        'Anni fa, nel nostro gruppo di lavoro, esisteva una webapp per segnare le ore di lavoro: si chiamava Krumiro.',
-        'Da lì è nata l\'idea di questa app, che ne porta il nome. Grazie, Leo Olmi!',
       ],
     },
   ];

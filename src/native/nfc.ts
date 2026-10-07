@@ -3,7 +3,7 @@ import { inApp } from './app';
 
 /**
  * Tag NFC dell'app Android. Il plugin `Nfc` è nel progetto Android
- * (`android/app/src/main/java/io/github/ricky79/krumiro/NfcPlugin.java`): un tag con l'URI
+ * (`android/app/src/main/java/app/sbeggio/NfcPlugin.java`): un tag con l'URI
  * sbeggio://timbra apre l'app e arriva qui come evento "tag".
  */
 interface PluginNfc {
@@ -47,7 +47,7 @@ export async function vibra(): Promise<void> {
 }
 
 /**
- * Chiama `gestore` a ogni lettura di un tag di Krumiro. All'avvio a freddo l'evento è trattenuto dal
+ * Chiama `gestore` a ogni lettura di un tag di Sbeggio. All'avvio a freddo l'evento è trattenuto dal
  * plugin finché non c'è un listener, quindi arriva anche se questa funzione è chiamata dopo l'apertura.
  */
 export function ascoltaTag(gestore: () => void): void {

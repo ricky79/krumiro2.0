@@ -57,7 +57,7 @@ function interruttore(valore: boolean, onCambio: (v: boolean) => void, aria: str
 
 const TESTO_PERMESSI_APP: Record<StatoPermessi, string> = {
   concessi: 'Notifiche autorizzate.',
-  negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Krumiro → Notifiche).',
+  negati: 'Notifiche bloccate: abilitale dalle impostazioni di Android (App → Sbeggio → Notifiche).',
   'da-chiedere': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
   // Solo PWA: nell'app non capitano.
   'da-attivare': 'Per ricevere gli avvisi serve il permesso di mostrare notifiche.',
@@ -127,7 +127,7 @@ function sezioneTagNfc(): HTMLElement {
     'div',
     { class: 'scheda' },
     el('h2', { class: 'titolo-sezione' }, 'Tag NFC'),
-    el('p', { class: 'nota' }, 'Avvicina il tag NFC di Krumiro (per esempio quello ai tornelli) per timbrare l\'azione del pulsante principale, anche ad app chiusa.'),
+    el('p', { class: 'nota' }, 'Avvicina il tag NFC di Sbeggio (per esempio quello ai tornelli) per timbrare l\'azione del pulsante principale, anche ad app chiusa.'),
     nota,
     apri,
     linkAiuto('Come funziona il tag NFC?', 'tag-nfc'),
@@ -339,6 +339,6 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
         fileInput,
       ),
     ),
-    el('p', { class: 'versione' }, `Krumiro v${__VERSIONE_APP__}`),
+    el('p', { class: 'versione' }, `Sbeggio v${__VERSIONE_APP__}`),
   );
 }

@@ -33,7 +33,7 @@ describe('aiuto', () => {
     // Sul computer il browser deve essere aperto; il percorso dei permessi vale anche nell'app installata.
     expect(avvisi).toMatch(/sul computer/i);
     expect(problemi).toContain('Impostazioni sito');
-    expect(problemi).toContain('Impostazioni → Notifiche → Krumiro');
+    expect(problemi).toContain('Impostazioni → Notifiche → Sbeggio');
     expect(problemi).not.toContain('a sinistra dell\'indirizzo');
   });
 
@@ -106,13 +106,6 @@ describe('aiuto', () => {
     expect(testo('ore-coperte')).toContain('multiplo di 30 min');
     expect(testo('pausa')).toContain('12:15');
     expect(testo('uscita-prevista')).toContain('permesso in uscita');
-  });
-
-  it('il nome rende omaggio al Krumiro originale di Leo Olmi', () => {
-    const nome = voci.find((v) => v.id === 'nome')!;
-    expect(nome.sezione).toBe('Informazioni');
-    expect(nome.testo.join(' ')).toContain('Leo Olmi');
-    expect(filtraAiuto(voci, 'olmi').map((v) => v.id)).toEqual(['nome']);
   });
 
   it('la ricerca ignora maiuscole e accenti e richiede tutte le parole', () => {
