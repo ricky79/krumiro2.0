@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!-- In coordinate assolute, così fuori dal riquadro (tela adattiva Android) il colore prosegue. -->
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100">
+      <stop offset="0" stop-color="#7fd65c"/>
+      <stop offset="1" stop-color="#249a4c"/>
+    </linearGradient>
+    <radialGradient id="alone" cx="0.5" cy="0.47" r="0.42">
+      <stop offset="0" stop-color="#c4f29a"/>
+      <stop offset="0.75" stop-color="#a6e57a"/>
+      <stop offset="1" stop-color="#a6e57a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="-100" y="-100" width="300" height="300" fill="url(#g)"/>
+  <circle cx="50" cy="47" r="42" fill="url(#alone)"/>
+</svg>

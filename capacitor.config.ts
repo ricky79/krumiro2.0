@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     LocalNotifications: {
-      iconColor: '#0f766e',
+      iconColor: '#249a4c',
     },
   },
 };

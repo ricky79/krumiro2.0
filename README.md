@@ -183,7 +183,7 @@ npm run dev        # server di sviluppo
 npm test           # test Vitest del modulo di calcolo
 npm run build      # typecheck + build statica in dist/
 npm run preview    # anteprima della build
-npm run icone      # rigenera le icone PNG di PWA e app Android (script senza dipendenze)
+npm run icone      # rigenera le icone PNG di PWA e app Android dal logo SVG in scripts/logo/
 ```
 
 Struttura:
