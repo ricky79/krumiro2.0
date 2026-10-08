@@ -43,7 +43,7 @@ La PWA ha gli stessi tre avvisi dell'app Android (uscita prevista, rientro dal p
 sigaretta) come **notifiche push**. Si attivano in *Impostazioni → Avvisi → Autorizza gli avvisi*.
 
 - Il browser non può programmare notifiche da solo: a ogni timbratura la PWA invia l'orario
-  dell'avviso a un piccolo server (Cloudflare Worker, repository `krumiro2.0_backend`), che allo
+  dell'avviso a un piccolo server (Cloudflare Worker, repository `sbeggio-notifiche`), che allo
   scadere manda la notifica. Al server arrivano solo l'orario e il tipo di ogni avviso e l'indirizzo
   per le notifiche del browser; timbrature e testi restano sul dispositivo.
 - Serve internet quando si timbra (senza, l'avviso parte appena si torna online con l'app aperta);
