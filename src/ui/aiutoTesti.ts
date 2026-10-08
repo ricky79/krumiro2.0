@@ -1,4 +1,5 @@
 import { DURATA_PAUSA_PROPOSTA, OFFSET_PAUSA_PROPOSTA } from '../core/pausaPranzo';
+import { RAGGIO_UFFICIO } from '../core/posizione';
 import type { Azione } from '../core/statoGiornata';
 import { formattaDurata, formattaOra } from '../core/tempo';
 import type { Impostazioni } from '../core/tipi';
@@ -192,6 +193,18 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       azione: 'RIAPRI',
       domanda: 'Riapri giornata',
       testo: ['Elimina l\'ultima uscita (normale o anticipata) e riporta la giornata allo stato "Al lavoro". Utile se hai timbrato l\'uscita per sbaglio.'],
+    },
+    {
+      id: 'smart',
+      sezione: 'I bottoni',
+      domanda: 'Casa o ufficio: segnare lo smart working',
+      testo: [
+        'In alto a destra, accanto alla data, ci sono due simboli: 🏠 vuol dire che quel giorno lavori da casa (smart working), 🏢 che lavori in sede. Se non tocchi nulla la giornata è in sede.',
+        'Puoi cambiarlo quando vuoi, anche per un giorno passato: apri il giorno dallo Storico e tocca il simbolo giusto. Non cambia il calcolo delle ore.',
+        `Se in Impostazioni → Sede di lavoro salvi la posizione dell'ufficio (mentre ci sei), quando apri l'app Sbeggio la legge e propone da solo: 🏢 entro ${RAGGIO_UFFICIO} m dall'ufficio, 🏠 altrove. Sotto i simboli compare "📍 dalla posizione". La proposta diventa definitiva alla prima timbratura; se tocchi tu un simbolo, la tua scelta vale e la posizione non la cambia più.`,
+        'La posizione si legge solo con l\'app aperta, una volta al giorno finché non hai scelto, e resta sul telefono: non viene inviata a nessuno. La prima volta il telefono chiede il permesso; se lo neghi resta la sede e scegli a mano. Al chiuso la posizione può essere imprecisa: se non basta per decidere, Sbeggio non propone nulla.',
+        'Nello Storico i giorni da casa hanno 🏠 Smart sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
+      ],
     },
     {
       id: 'tag-nfc',

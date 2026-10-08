@@ -85,6 +85,26 @@ describe('migrazioni', () => {
     expect(permesso('30')).toBe(0);
   });
 
+  it('luogo della giornata: smart o sede, altri valori scartati', () => {
+    const luogo = (v: unknown) =>
+      migra({ version: 1, giornate: { '2026-10-01': { data: '2026-10-01', permessoInizioMinuti: 0, luogo: v, eventi: [] } } })
+        .giornate['2026-10-01']!.luogo;
+    expect(luogo('smart')).toBe('smart');
+    expect(luogo('sede')).toBe('sede');
+    expect(luogo(undefined)).toBeUndefined();
+    expect(luogo('casa')).toBeUndefined();
+    expect(luogo(true)).toBeUndefined();
+  });
+
+  it('posizione dell\'ufficio: predefinita assente, coordinate non valide scartate', () => {
+    const ufficio = (v: unknown) => migra({ version: 1, impostazioni: { ufficio: v } }).impostazioni.ufficio;
+    expect(migra({}).impostazioni.ufficio).toBeNull();
+    expect(ufficio({ lat: 45.07, lon: 7.68 })).toEqual({ lat: 45.07, lon: 7.68 });
+    expect(ufficio({ lat: 91, lon: 7 })).toBeNull();
+    expect(ufficio({ lat: '45', lon: 7 })).toBeNull();
+    expect(ufficio('Torino')).toBeNull();
+  });
+
   it('tipo di sigaretta: predefinito normale, valori sconosciuti scartati', () => {
     const tipo = (v: unknown) => migra({ version: 1, impostazioni: { tipoSigaretta: v } }).impostazioni.tipoSigaretta;
     expect(migra({}).impostazioni.tipoSigaretta).toBe('normale');

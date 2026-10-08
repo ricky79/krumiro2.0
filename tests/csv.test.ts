@@ -34,10 +34,10 @@ describe('CSV', () => {
     expect(csv.startsWith('\uFEFF')).toBe(true);
     const righe = csv.slice(1).trimEnd().split('\r\n');
     expect(righe[0]).toBe(
-      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Eventi',
+      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Luogo;Eventi',
     );
     expect(righe[1]).toBe(
-      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;10:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:45 Uscita',
+      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;Sede;10:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:45 Uscita',
     );
     expect(righe[2]).toContain('14:30 Rientro da permesso (pausa 45)');
   });
@@ -54,6 +54,18 @@ describe('CSV', () => {
         g.eventi.map(({ tipo, minuti, pausaConfermata }) => ({ tipo, minuti, pausaConfermata })),
       );
     }
+  });
+
+  it('il luogo (smart o sede) si esporta e si reimporta', () => {
+    const d = dati();
+    d['2026-10-02']!.luogo = 'smart';
+    const csv = esportaCsv(d, imp, oggi);
+    expect(csv).toContain(';Smart;08:30 Entrata');
+    const i = importaCsv(csv);
+    expect(i['2026-10-02']!.luogo).toBe('smart');
+    expect(i['2026-10-01']!.luogo).toBe('sede');
+    // CSV di versioni precedenti, senza la colonna: tutto in sede.
+    expect(importaCsv('Data;Eventi\r\n2026-10-02;08:30 Entrata\r\n')['2026-10-02']!.luogo).toBeUndefined();
   });
 
   it('giornata con solo il permesso in uscita: esportata e reimportata', () => {
@@ -113,6 +125,24 @@ describe('riepilogo mensile', () => {
   it('una giornata con solo il permesso in uscita ha contenuto', () => {
     expect(haContenuto(giornata([], { permessoUscita: 30 }))).toBe(true);
     expect(haContenuto(giornata([]))).toBe(false);
+    expect(haContenuto({ ...giornata([]), luogo: 'smart' })).toBe(true);
+    // In sede senza timbrature non è una giornata lavorata.
+    expect(haContenuto({ ...giornata([]), luogo: 'sede' })).toBe(false);
+  });
+
+  it('conta i giorni da casa (smart) del mese', () => {
+    const d = dati();
+    d['2026-10-01']!.luogo = 'smart';
+    const s = giornata([], { data: '2026-09-30' });
+    s.luogo = 'smart';
+    d[s.data] = s; // altro mese: non conta
+    const r = riepilogoMese(d, imp, '2026-10', oggi);
+    expect(r.giorniSmart).toBe(1);
+    expect(r.giorni.map((g) => [g.data, g.smart])).toEqual([
+      ['2026-10-02', false],
+      ['2026-10-01', true],
+    ]);
+    expect(riepilogoMese(dati(), imp, '2026-10', oggi).giorniSmart).toBe(0);
   });
 
   it('somma lavorate, permessi e saldo del mese', () => {

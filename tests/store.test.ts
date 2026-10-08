@@ -31,6 +31,39 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe('luogo della giornata', () => {
+  it('una giornata segnata in smart si salva anche senza timbrature', async () => {
+    const { store } = await carica();
+    store.modificaGiornata(GIOVEDI, (g) => void (g.luogo = 'smart'));
+    expect(store.giornate[GIOVEDI]?.luogo).toBe('smart');
+    expect(JSON.parse(memoria.get('timbrature')!).giornate[GIOVEDI].luogo).toBe('smart');
+    // Anche la sede scelta a mano resta: la posizione non deve più cambiarla.
+    store.modificaGiornata(GIOVEDI, (g) => void (g.luogo = 'sede'));
+    expect(store.giornate[GIOVEDI]?.luogo).toBe('sede');
+  });
+
+  it('alla prima timbratura il luogo proposto diventa quello della giornata', async () => {
+    const { store } = await carica();
+    store.proponiLuogo((data) => (data === GIOVEDI ? 'smart' : null));
+    store.modificaGiornata(GIOVEDI, (g) => void g.eventi.push({ id: 'x', tipo: 'ENTRATA', minuti: 510 }));
+    expect(store.giornate[GIOVEDI]?.luogo).toBe('smart');
+  });
+
+  it('la proposta non sostituisce una scelta fatta a mano', async () => {
+    const { store } = await carica();
+    store.proponiLuogo(() => 'smart');
+    store.modificaGiornata(GIOVEDI, (g) => void (g.luogo = 'sede'));
+    store.modificaGiornata(GIOVEDI, (g) => void g.eventi.push({ id: 'x', tipo: 'ENTRATA', minuti: 510 }));
+    expect(store.giornate[GIOVEDI]?.luogo).toBe('sede');
+  });
+
+  it('senza proposta e senza scelta la giornata resta senza luogo (in sede)', async () => {
+    const { store } = await carica();
+    store.modificaGiornata(GIOVEDI, (g) => void g.eventi.push({ id: 'x', tipo: 'ENTRATA', minuti: 510 }));
+    expect(store.giornate[GIOVEDI]?.luogo).toBeUndefined();
+  });
+});
+
 describe('più schede aperte', () => {
   it('quando un\'altra scheda salva, rilegge i dati e avvisa chi ascolta', async () => {
     const { store, seguiAltreSchede } = await carica();

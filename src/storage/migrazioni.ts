@@ -27,6 +27,7 @@ export function clonaImpostazioni(i: Impostazioni): Impostazioni {
     minutiDovuti: { predefinito: i.minutiDovuti.predefinito, perGiorno: [...i.minutiDovuti.perGiorno] },
     pranzo: { ...i.pranzo },
     avvisi: { ...i.avvisi },
+    ufficio: i.ufficio ? { ...i.ufficio } : null,
   };
 }
 
@@ -106,6 +107,12 @@ export function normalizzaImpostazioni(v: unknown): Impostazioni {
       pranzoMinuti: intIn(a.pranzoMinuti, 1, 240) ?? p.avvisi.pranzoMinuti,
     };
   }
+  if (isObj(v.ufficio)) {
+    const { lat, lon } = v.ufficio;
+    if (typeof lat === 'number' && typeof lon === 'number' && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      imp.ufficio = { lat, lon };
+    }
+  }
   return imp;
 }
 
@@ -127,10 +134,12 @@ function normalizzaGiornata(g: unknown, chiave: string): Giornata | null {
       eventi.push(ev);
     }
   }
-  return {
+  const giornata: Giornata = {
     data,
     permessoInizioMinuti: intIn(g.permessoInizioMinuti, 0, 1440) ?? 0,
     permessoUscitaMinuti: intIn(g.permessoUscitaMinuti, 0, 1440) ?? 0,
     eventi,
   };
+  if (g.luogo === 'smart' || g.luogo === 'sede') giornata.luogo = g.luogo;
+  return giornata;
 }
