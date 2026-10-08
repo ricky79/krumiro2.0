@@ -7,8 +7,8 @@ import { el } from './dom';
  * quella attuale e i dati restano, perché ogni APK è firmato con la stessa chiave (android.yml).
  */
 
-export const URL_APK = 'https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk';
-const URL_ULTIMA_RELEASE = 'https://api.github.com/repos/ricky79/krumiro2.0/releases/latest';
+export const URL_APK = 'https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk';
+const URL_ULTIMA_RELEASE = 'https://api.github.com/repos/ricky79/sbeggio/releases/latest';
 /** Le release escono di rado, e senza login l'API di GitHub concede 60 richieste l'ora per indirizzo IP. */
 export const INTERVALLO_CONTROLLO = 6 * 60 * 60 * 1000;
 
