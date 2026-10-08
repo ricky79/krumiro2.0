@@ -6,6 +6,7 @@ import { apriFoglio } from './dialoghi';
 import { el } from './dom';
 import type { Adesso } from './giorno';
 import { esportaCsvCondividi } from './dati';
+import { iconaCasa } from './luogo';
 
 export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: string) => void, apriGiorno: (data: string) => void): HTMLElement {
   const rm = riepilogoMese(store.giornate, store.impostazioni, mese, adesso);
@@ -43,6 +44,15 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
         `${rm.giorni.length} ${rm.giorni.length === 1 ? 'giorno registrato' : 'giorni registrati'} · saldo esatto del mese `,
         el('strong', { class: rm.saldo > 0 ? 'positivo' : rm.saldo < 0 ? 'negativo' : '' }, formattaSaldo(rm.saldo)),
       ),
+      el(
+        'p',
+        { class: 'nota riepilogo-smart' },
+        iconaCasa(),
+        rm.giorniSmart === 0
+          ? 'Nessun giorno da casa'
+          : `${rm.giorniSmart} ${rm.giorniSmart === 1 ? 'giorno' : 'giorni'} da casa (smart)`,
+        rm.giorni.length > rm.giorniSmart ? ` · ${rm.giorni.length - rm.giorniSmart} in sede` : null,
+      ),
       rm.giorniDaCorreggere > 0
         ? el('p', { class: 'nota negativo' }, `⚠︎ ${rm.giorniDaCorreggere} ${rm.giorniDaCorreggere === 1 ? 'giornata da correggere' : 'giornate da correggere'}`)
         : null,
@@ -55,7 +65,7 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
         : el(
             'ul',
             { class: 'elenco-giorni' },
-            rm.giorni.map(({ data, risultato: r, ore }) => {
+            rm.giorni.map(({ data, smart, risultato: r, ore }) => {
               const inCorso = data === adesso.data && r.stato !== 'CHIUSA';
               const mancano = !inCorso && !r.daCorreggere && r.saldo < 0 ? -r.saldo : 0;
               const nota = r.daCorreggere ? 'Da correggere' : inCorso ? 'In corso' : r.stato !== 'CHIUSA' ? statoLeggibile(r) : null;
@@ -65,7 +75,12 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
                 el(
                   'button',
                   { type: 'button', class: `giorno ${r.daCorreggere ? 'giorno-errato' : ''}`, onclick: () => apriGiorno(data) },
-                  el('span', { class: 'giorno-data' }, formattaDataBreve(data)),
+                  el(
+                    'span',
+                    { class: 'giorno-data' },
+                    el('span', { class: 'giorno-data-testo' }, formattaDataBreve(data)),
+                    smart ? el('span', { class: 'giorno-smart', title: 'Da casa (smart)' }, iconaCasa(), 'Smart') : null,
+                  ),
                   cella('Lavoro', ore.lavoro),
                   cella('Straord.', ore.straordinario, 'positivo'),
                   cella('Permesso', ore.permesso),

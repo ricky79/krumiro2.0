@@ -58,7 +58,7 @@ Oltre alla PWA esiste un'app Android vera (costruita con [Capacitor](https://cap
 dallo stesso codice) che ricorda le scadenze con **notifiche** anche ad app chiusa:
 - **uscita prevista**: quando puoi andare via;
 - **rientro dal pranzo**: 30 minuti dopo l'inizio della pausa (durata configurabile);
-- **rientro dalla pausa sigaretta**: 1 minuto prima della fine della tolleranza (anticipo configurabile, 0 = allo scadere).
+- **rientro dalla pausa sigaretta**: 2 minuti prima della fine della tolleranza (anticipo configurabile, 0 = allo scadere).
 
 Ogni avviso si attiva o disattiva in *Impostazioni → Avvisi*. Le notifiche sono programmate sul
 telefono: nessun server, nessun dato fuori dal dispositivo. Anche la PWA ha gli stessi avvisi, ma
@@ -128,6 +128,15 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
+- **Casa o ufficio**: in alto a destra della giornata un controllo con 🏠 (da casa, smart working) e
+  🏢 (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
+  calcolo delle ore. Nello Storico i giorni da casa hanno 🏠 e il riepilogo conta i giorni
+  da casa e in sede del mese. Il CSV ha la colonna *Luogo* (Sede/Smart).
+  Con *Impostazioni → Sede di lavoro* salvi la posizione dell'ufficio: all'apertura, se per oggi
+  non hai ancora scelto, l'app legge la posizione e propone 🏢 entro 300 m dall'ufficio e 🏠
+  altrove ("📍 dalla posizione"); la proposta diventa definitiva alla prima timbratura e una
+  scelta fatta a mano vale sempre. La posizione si legge solo ad app aperta e non lascia il
+  telefono (nell'app Android servono i permessi di posizione).
 - **Storico**: per ogni giorno del mese, tre voci ben separate: **Lavoro**, **Straordinario** e
   **Permesso** (un trattino significa zero). Lo straordinario e il permesso sono a blocchi da
   30 minuti: 20 minuti di extra non contano, 50 minuti valgono 30. Se mancano ore compare
@@ -158,7 +167,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
 | Permessi | ogni permesso vale un multiplo di 30 min (1h23 → 1h30); i minuti in più non contano come lavorate, il saldo non cambia |
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
-| Permesso che copre la fascia pranzo (12:00–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
+| Permesso che copre la fascia pranzo (12:15–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
 
 Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
 l'app non va in crash: segnala la giornata come **da correggere**, spiega il problema

@@ -104,6 +104,79 @@ button {
   margin: 2px 0 0;
   color: var(--testo-2);
 }
+.intestazione-riga {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Casa/ufficio: controllo segmentato in alto a destra della giornata. */
+.luogo-contenitore {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.luogo-nota {
+  font-size: 11px;
+  color: var(--testo-2);
+}
+.luogo {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--superficie-2);
+}
+.luogo-opzione {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--testo-2);
+}
+.luogo-opzione[aria-pressed='true'] {
+  background: var(--superficie);
+  color: var(--accento);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+:root[data-tema='scuro'] .luogo-opzione[aria-pressed='true'] {
+  background: #48484a;
+}
+.icona-luogo {
+  font-size: 22px;
+  line-height: 1;
+}
+/* Emoji a colori: l'opzione non scelta resta più tenue. */
+.luogo-opzione[aria-pressed='false'] .icona-luogo {
+  opacity: 0.4;
+}
+.giorno-smart,
+.riepilogo-smart {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.giorno-smart {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accento);
+}
+.giorno-smart .icona-luogo {
+  font-size: 12px;
+}
+.riepilogo-smart .icona-luogo {
+  font-size: 15px;
+}
+
 .link-indietro {
   background: none;
   border: 0;
@@ -426,7 +499,10 @@ button {
 .giorno-data {
   font-weight: 600;
 }
-.giorno-data::first-letter {
+.giorno-data-testo {
+  display: block;
+}
+.giorno-data-testo::first-letter {
   text-transform: uppercase;
 }
 .giorno-cella {

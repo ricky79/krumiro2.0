@@ -42,6 +42,14 @@ export interface Evento {
   sigaretta?: true;
 }
 
+export type Luogo = 'smart' | 'sede';
+
+/** Posizione geografica in gradi decimali (WGS84). */
+export interface Coordinate {
+  lat: number;
+  lon: number;
+}
+
 export interface Giornata {
   /** 'YYYY-MM-DD' nel fuso Europe/Rome. */
   data: string;
@@ -49,6 +57,11 @@ export interface Giornata {
   permessoInizioMinuti: number;
   /** Permesso in uscita pianificato, in minuti: anticipa l'uscita prevista. */
   permessoUscitaMinuti: number;
+  /**
+   * Dove si lavora: da casa (smart working) o in sede. Assente = non ancora scelto; si mostra
+   * quello rilevato dalla posizione o, senza, la sede.
+   */
+  luogo?: Luogo;
   eventi: Evento[];
 }
 
@@ -87,17 +100,20 @@ export interface Impostazioni {
   /** Disegno della schermata della pausa: sigaretta normale o elettronica. */
   tipoSigaretta: TipoSigaretta;
   avvisi: Avvisi;
+  /** Posizione dell'ufficio, per proporre casa o sede all'apertura; null = non impostata. */
+  ufficio: Coordinate | null;
 }
 
 export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = {
   minutiDovuti: { predefinito: 480, perGiorno: [0, null, null, null, null, null, 0] },
-  pranzo: { inizio: 720, fine: 870 },
+  pranzo: { inizio: 735, fine: 870 },
   pausaDaScalare: 30,
   orarioMinimoConteggio: 510,
   pausaMinima: 30,
   tolleranzaSigaretta: 11,
   tipoSigaretta: 'normale',
-  avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 1, pranzo: true, pranzoMinuti: 30 },
+  ufficio: null,
+  avvisi: { uscita: true, sigaretta: true, sigarettaAnticipo: 2, pranzo: true, pranzoMinuti: 30 },
 };
 
 export type StatoGiornata = 'NON_INIZIATA' | 'AL_LAVORO' | 'IN_PAUSA' | 'IN_PERMESSO' | 'CHIUSA';
