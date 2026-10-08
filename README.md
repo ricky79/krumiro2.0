@@ -8,7 +8,7 @@ App pubblicata: **https://sbeggio.app/**
 
 ## Installare l'app
 
-Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk** dal telefono e segui le istruzioni per il tuo sistema.
+Apri **https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk** dal telefono e segui le istruzioni per il tuo sistema.
 
 ### iPhone (Safari)
 
@@ -66,8 +66,8 @@ passano da un server (vedi *Avvisi nella PWA*).
 
 #### Scaricare e installare l'APK
 
-**Link diretto all'ultima versione:** [https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk](https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk)
-(oppure la pagina [Release](https://github.com/ricky79/krumiro2.0/releases/latest), file `sbeggio-<versione>.apk`).
+**Link diretto all'ultima versione:** [https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk](https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk)
+(oppure la pagina [Release](https://github.com/ricky79/sbeggio/releases/latest), file `sbeggio-<versione>.apk`).
 
 1. Apri il link dal telefono Android: il browser scarica `sbeggio.apk`.
 2. Apri il file scaricato (dalla notifica del download o dall'app *File*).
@@ -83,7 +83,7 @@ banner in basso con il pulsante **Scarica**: apri il file scaricato e installalo
 Se hai chiuso il banner (ricompare con la versione successiva), scarica di nuovo dallo stesso link. Il
 numero di versione installato è in fondo alle *Impostazioni*.
 
-L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/krumiro2.0/releases/latest`)
+L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/sbeggio/releases/latest`)
 all'avvio e quando torna in primo piano, al massimo ogni 6 ore (`src/ui/aggiornamento.ts`). Conta solo
 una release che ha già `sbeggio.apk` allegato.
 
