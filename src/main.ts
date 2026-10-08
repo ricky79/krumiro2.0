@@ -3,6 +3,7 @@ import { adessoRoma } from './core/tempo';
 import { richiediPersistenza, seguiAltreSchede, store } from './storage/store';
 import { avviso } from './ui/dialoghi';
 import { el, monta } from './ui/dom';
+import { conTransizione, creaTabbar, SCHEDE, type Scheda } from './ui/tabbar';
 import { impostaOrologio, vistaGiorno, type Adesso } from './ui/giorno';
 import { riprendiPausaSigaretta } from './ui/sigaretta';
 import { vistaImpostazioni } from './ui/impostazioni';
@@ -18,8 +19,6 @@ import { inApp } from './native/app';
 import { avviaAvvisi as avviaAvvisiApp } from './native/avvisi';
 import { avviaAvvisi as avviaAvvisiPwa } from './web/avvisi';
 
-type Scheda = 'oggi' | 'storico' | 'impostazioni' | 'aiuto';
-
 const stato: { scheda: Scheda; mese: string; giornoAperto: string | null; aiuto: string | null } = {
   scheda: 'oggi',
   aiuto: null,
@@ -32,8 +31,8 @@ impostaOrologio(() => adessoRoma());
 
 const app = document.getElementById('app')!;
 const contenuto = el('main', { class: 'contenuto' });
-const tabbar = el('nav', { class: 'tabbar', 'aria-label': 'Sezioni' });
-app.append(contenuto, tabbar);
+const tabbar = creaTabbar((s) => vai(s));
+app.append(contenuto, tabbar.elemento);
 
 let ultimoRender = '';
 
@@ -59,9 +58,11 @@ function render(forza = true): void {
           render();
         }, (data) => {
           if (data === adesso.data) return vai('oggi');
-          stato.giornoAperto = data;
-          render();
-          window.scrollTo(0, 0);
+          conTransizione('avanti', () => {
+            stato.giornoAperto = data;
+            render();
+            window.scrollTo(0, 0);
+          });
         });
   } else if (stato.scheda === 'aiuto') {
     vista = vistaAiuto(stato.aiuto);
@@ -72,31 +73,22 @@ function render(forza = true): void {
   // Pausa sigaretta in corso (app riaperta o tornata in primo piano): ripresenta la schermata.
   riprendiPausaSigaretta(adesso.data);
 
-  monta(
-    tabbar,
-    ...(
-      [
-        ['oggi', 'Oggi', '◉'],
-        ['storico', 'Storico', '☰'],
-        ['impostazioni', 'Impostazioni', '⚙︎'],
-        ['aiuto', 'Aiuto', '?'],
-      ] as const
-    ).map(([id, testo, icona]) =>
-      el(
-        'button',
-        { type: 'button', class: `tab ${stato.scheda === id ? 'attiva' : ''}`, 'aria-current': stato.scheda === id ? 'page' : null, onclick: () => vai(id) },
-        el('span', { class: 'tab-icona', 'aria-hidden': 'true' }, icona),
-        el('span', {}, testo),
-      ),
-    ),
-  );
+  tabbar.aggiorna(stato.scheda);
 }
 
 function vai(scheda: Scheda): void {
-  if (scheda !== stato.scheda || scheda === 'storico') stato.giornoAperto = null;
-  stato.scheda = scheda;
-  render();
-  window.scrollTo(0, 0);
+  // Verso una scheda più a destra si va "avanti"; tornare allo Storico da un giorno è "indietro".
+  const da = SCHEDE.indexOf(stato.scheda);
+  const a = SCHEDE.indexOf(scheda);
+  const direzione = a > da ? 'avanti' : 'indietro';
+  const cambia = () => {
+    if (scheda !== stato.scheda || scheda === 'storico') stato.giornoAperto = null;
+    stato.scheda = scheda;
+    render();
+    window.scrollTo(0, 0);
+  };
+  if (a === da && !(scheda === 'storico' && stato.giornoAperto)) cambia();
+  else conTransizione(direzione, cambia);
 }
 
 store.ascolta(() => render());
