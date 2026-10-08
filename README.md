@@ -128,9 +128,9 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
-- **Casa o ufficio**: in alto a destra della giornata un controllo con la casa (smart working) e
-  l'ufficio (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
-  calcolo delle ore. Nello Storico i giorni da casa hanno la casetta e il riepilogo conta i giorni
+- **Casa o ufficio**: in alto a destra della giornata un controllo con 🏠 (da casa, smart working) e
+  🏢 (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
+  calcolo delle ore. Nello Storico i giorni da casa hanno 🏠 e il riepilogo conta i giorni
   da casa e in sede del mese. Il CSV ha la colonna *Luogo* (Sede/Smart).
 - **Storico**: per ogni giorno del mese, tre voci ben separate: **Lavoro**, **Straordinario** e
   **Permesso** (un trattino significa zero). Lo straordinario e il permesso sono a blocchi da

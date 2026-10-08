@@ -141,13 +141,12 @@ button {
   background: #48484a;
 }
 .icona-luogo {
-  display: inline-flex;
-  width: 22px;
-  height: 22px;
+  font-size: 22px;
+  line-height: 1;
 }
-.icona-luogo svg {
-  width: 100%;
-  height: 100%;
+/* Emoji a colori: l'opzione non scelta resta più tenue. */
+.luogo-opzione[aria-pressed='false'] .icona-luogo {
+  opacity: 0.4;
 }
 .giorno-smart,
 .riepilogo-smart {
@@ -161,13 +160,10 @@ button {
   color: var(--accento);
 }
 .giorno-smart .icona-luogo {
-  width: 13px;
-  height: 13px;
+  font-size: 12px;
 }
 .riepilogo-smart .icona-luogo {
-  width: 16px;
-  height: 16px;
-  color: var(--accento);
+  font-size: 15px;
 }
 
 .link-indietro {

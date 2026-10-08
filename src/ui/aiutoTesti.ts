@@ -198,9 +198,9 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'I bottoni',
       domanda: 'Casa o ufficio: segnare lo smart working',
       testo: [
-        'In alto a destra, accanto alla data, ci sono due simboli: la casa vuol dire che quel giorno lavori da casa (smart working), l\'ufficio che lavori in sede. Se non tocchi nulla la giornata è in sede.',
+        'In alto a destra, accanto alla data, ci sono due simboli: 🏠 vuol dire che quel giorno lavori da casa (smart working), 🏢 che lavori in sede. Se non tocchi nulla la giornata è in sede.',
         'Puoi cambiarlo quando vuoi, anche per un giorno passato: apri il giorno dallo Storico e tocca il simbolo giusto. Non cambia il calcolo delle ore.',
-        'Nello Storico i giorni da casa hanno la casetta sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
+        'Nello Storico i giorni da casa hanno 🏠 Smart sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
       ],
     },
     {
