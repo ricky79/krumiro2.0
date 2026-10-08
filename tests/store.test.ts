@@ -31,6 +31,17 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe('giornata in smart', () => {
+  it('una giornata segnata in smart si salva anche senza timbrature e si toglie tornando in sede', async () => {
+    const { store } = await carica();
+    store.modificaGiornata(GIOVEDI, (g) => void (g.smart = true));
+    expect(store.giornate[GIOVEDI]?.smart).toBe(true);
+    expect(JSON.parse(memoria.get('timbrature')!).giornate[GIOVEDI].smart).toBe(true);
+    store.modificaGiornata(GIOVEDI, (g) => void delete g.smart);
+    expect(store.giornate[GIOVEDI]).toBeUndefined();
+  });
+});
+
 describe('più schede aperte', () => {
   it('quando un\'altra scheda salva, rilegge i dati e avvisa chi ascolta', async () => {
     const { store, seguiAltreSchede } = await carica();

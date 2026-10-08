@@ -85,6 +85,16 @@ describe('migrazioni', () => {
     expect(permesso('30')).toBe(0);
   });
 
+  it('giornata in smart: conservata solo se vale true', () => {
+    const smart = (v: unknown) =>
+      migra({ version: 1, giornate: { '2026-10-01': { data: '2026-10-01', permessoInizioMinuti: 0, smart: v, eventi: [] } } })
+        .giornate['2026-10-01']!.smart;
+    expect(smart(true)).toBe(true);
+    expect(smart(undefined)).toBeUndefined();
+    expect(smart('si')).toBeUndefined();
+    expect(smart(1)).toBeUndefined();
+  });
+
   it('tipo di sigaretta: predefinito normale, valori sconosciuti scartati', () => {
     const tipo = (v: unknown) => migra({ version: 1, impostazioni: { tipoSigaretta: v } }).impostazioni.tipoSigaretta;
     expect(migra({}).impostazioni.tipoSigaretta).toBe('normale');

@@ -194,6 +194,16 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: ['Elimina l\'ultima uscita (normale o anticipata) e riporta la giornata allo stato "Al lavoro". Utile se hai timbrato l\'uscita per sbaglio.'],
     },
     {
+      id: 'smart',
+      sezione: 'I bottoni',
+      domanda: 'Casa o ufficio: segnare lo smart working',
+      testo: [
+        'In alto a destra, accanto alla data, ci sono due simboli: la casa vuol dire che quel giorno lavori da casa (smart working), l\'ufficio che lavori in sede. Se non tocchi nulla la giornata è in sede.',
+        'Puoi cambiarlo quando vuoi, anche per un giorno passato: apri il giorno dallo Storico e tocca il simbolo giusto. Non cambia il calcolo delle ore.',
+        'Nello Storico i giorni da casa hanno la casetta sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
+      ],
+    },
+    {
       id: 'tag-nfc',
       sezione: 'I bottoni',
       domanda: 'Timbrare con un tag NFC (app Android)',

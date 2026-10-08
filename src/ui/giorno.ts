@@ -8,6 +8,7 @@ import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { linkAiuto } from './aiuto';
+import { controlloLuogo } from './luogo';
 import { confermaRipartizione, editorEvento, editorPermessoInizio, editorPermessoUscita } from './editor';
 import { riquadroPausaSaltata } from './pausaSaltata';
 import { avviaPausaSigaretta } from './sigaretta';
@@ -31,8 +32,12 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
       'header',
       { class: 'intestazione' },
       onIndietro ? el('button', { type: 'button', class: 'link-indietro', onclick: onIndietro }, '‹ Storico') : null,
-      el('h1', {}, oggi ? 'Oggi' : 'Giornata'),
-      el('p', { class: 'sottotitolo' }, formattaDataLunga(data)),
+      el(
+        'div',
+        { class: 'intestazione-riga' },
+        el('div', {}, el('h1', {}, oggi ? 'Oggi' : 'Giornata'), el('p', { class: 'sottotitolo' }, formattaDataLunga(data))),
+        controlloLuogo(data),
+      ),
     ),
     schedaRiepilogo(r, giornata.eventi, oggi, adesso.minuti),
     r.daCorreggere ? boxProblemi(r.problemi) : null,

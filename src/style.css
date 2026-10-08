@@ -104,6 +104,72 @@ button {
   margin: 2px 0 0;
   color: var(--testo-2);
 }
+.intestazione-riga {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Casa/ufficio: controllo segmentato in alto a destra della giornata. */
+.luogo {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--superficie-2);
+}
+.luogo-opzione {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--testo-2);
+}
+.luogo-opzione[aria-pressed='true'] {
+  background: var(--superficie);
+  color: var(--accento);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+:root[data-tema='scuro'] .luogo-opzione[aria-pressed='true'] {
+  background: #48484a;
+}
+.icona-luogo {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+}
+.icona-luogo svg {
+  width: 100%;
+  height: 100%;
+}
+.giorno-smart,
+.riepilogo-smart {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.giorno-smart {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accento);
+}
+.giorno-smart .icona-luogo {
+  width: 13px;
+  height: 13px;
+}
+.riepilogo-smart .icona-luogo {
+  width: 16px;
+  height: 16px;
+  color: var(--accento);
+}
+
 .link-indietro {
   background: none;
   border: 0;
@@ -426,7 +492,10 @@ button {
 .giorno-data {
   font-weight: 600;
 }
-.giorno-data::first-letter {
+.giorno-data-testo {
+  display: block;
+}
+.giorno-data-testo::first-letter {
   text-transform: uppercase;
 }
 .giorno-cella {

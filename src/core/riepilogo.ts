@@ -24,6 +24,8 @@ export function oreGiorno(r: RisultatoGiornata): OreGiorno {
 
 export interface GiornoRiepilogo {
   data: string;
+  /** Giornata lavorata da casa. */
+  smart: boolean;
   risultato: RisultatoGiornata;
   ore: OreGiorno;
 }
@@ -39,6 +41,8 @@ export interface RiepilogoMese {
   /** Saldo esatto del mese (coperte − dovute), senza arrotondamenti. */
   saldo: number;
   giorniDaCorreggere: number;
+  /** Giornate del mese lavorate da casa (smart working). */
+  giorniSmart: number;
 }
 
 /**
@@ -56,6 +60,7 @@ export function riepilogoMese(
     .sort((a, b) => b.data.localeCompare(a.data))
     .map((g) => ({
       data: g.data,
+      smart: g.smart === true,
       risultato: calcolaGiornata(g, imp, g.data === oggi.data ? oggi.minuti : null),
     }))
     .map((x) => ({ ...x, ore: oreGiorno(x.risultato) }));
@@ -65,17 +70,20 @@ export function riepilogoMese(
   let permesso = 0;
   let saldo = 0;
   let giorniDaCorreggere = 0;
-  for (const { data, risultato, ore } of giorni) {
+  let giorniSmart = 0;
+  for (const { data, smart, risultato, ore } of giorni) {
     lavoro += ore.lavoro;
     straordinario += ore.straordinario;
     permesso += ore.permesso;
     // La giornata in corso non è ancora chiusa: il suo saldo non entra nel mese.
     if (data !== oggi.data || risultato.stato === 'CHIUSA') saldo += risultato.saldo;
     if (risultato.daCorreggere) giorniDaCorreggere++;
+    if (smart) giorniSmart++;
   }
-  return { mese, giorni, lavoro, straordinario, permesso, saldo, giorniDaCorreggere };
+  return { mese, giorni, lavoro, straordinario, permesso, saldo, giorniDaCorreggere, giorniSmart };
 }
 
+/** Una giornata con timbrature, permessi pianificati o segnata in smart: si salva e compare nello storico. */
 export function haContenuto(g: Giornata): boolean {
-  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0;
+  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0 || g.smart === true;
 }

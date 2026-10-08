@@ -49,6 +49,8 @@ export interface Giornata {
   permessoInizioMinuti: number;
   /** Permesso in uscita pianificato, in minuti: anticipa l'uscita prevista. */
   permessoUscitaMinuti: number;
+  /** Giornata lavorata da casa (smart working); assente = in sede. */
+  smart?: true;
   eventi: Evento[];
 }
 

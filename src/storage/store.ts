@@ -1,3 +1,4 @@
+import { haContenuto } from '../core/riepilogo';
 import type { Giornata, Impostazioni } from '../core/tipi';
 import { datiVuoti, migra, type DatiSalvati } from './migrazioni';
 
@@ -79,7 +80,7 @@ class Store {
   modificaGiornata(data: string, modifica: (g: Giornata) => void): void {
     const g = structuredClone(this.giornata(data));
     modifica(g);
-    if (g.eventi.length === 0 && g.permessoInizioMinuti === 0 && g.permessoUscitaMinuti === 0) delete this.dati.giornate[data];
+    if (!haContenuto(g)) delete this.dati.giornate[data];
     else this.dati.giornate[data] = g;
     this.salva();
   }
