@@ -21,10 +21,12 @@
   --sicuro-basso: env(safe-area-inset-bottom, 0px);
   --sicuro-sx: env(safe-area-inset-left, 0px);
   --sicuro-dx: env(safe-area-inset-right, 0px);
-  --altezza-tab: 56px;
-  /* Barra delle schede a colori invertiti: testi e accento presi dal tema opposto. */
-  --tab-testo: #a1a1a6;
-  --tab-attiva: #2dd4bf;
+  /* Barra delle schede flottante: 64px di pillola più 10px di distacco dal fondo. */
+  --altezza-tab: 74px;
+  --tab-vetro: rgba(255, 255, 255, 0.72);
+  --tab-bordo: rgba(0, 0, 0, 0.06);
+  --tab-capsula: rgba(118, 118, 128, 0.14);
+  --tab-ombra: 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* data-tema è impostato da src/ui/tema.ts (e dallo script in index.html). */
@@ -46,8 +48,10 @@
   --pausa: #fbbf24;
   --permesso: #c4b5fd;
   --ombra: none;
-  --tab-testo: #6c6c70;
-  --tab-attiva: #0f766e;
+  --tab-vetro: rgba(30, 30, 32, 0.72);
+  --tab-bordo: rgba(255, 255, 255, 0.1);
+  --tab-capsula: rgba(118, 118, 128, 0.3);
+  --tab-ombra: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 *,
@@ -732,36 +736,162 @@ input:disabled {
 /* Barra delle schede: colori invertiti rispetto al tema, per staccarla dal contenuto. */
 .tabbar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: calc(var(--sicuro-sx) + 12px);
+  right: calc(var(--sicuro-dx) + 12px);
+  /* Come in iOS: la pillola galleggia sopra l'indicatore Home, un po' dentro l'area sicura. */
+  bottom: calc(var(--sicuro-basso) / 2 + 10px);
   display: flex;
   justify-content: center;
-  padding: 0 var(--sicuro-dx) var(--sicuro-basso) var(--sicuro-sx);
-  background: var(--testo);
   z-index: 10;
+  pointer-events: none;
+}
+/* Vetro: il contenuto scorre sotto, sfocato e saturato. */
+.tabbar-vetro {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  max-width: 440px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 32px;
+  background: var(--tab-vetro);
+  border: 0.5px solid var(--tab-bordo);
+  box-shadow: var(--tab-ombra);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  pointer-events: auto;
+  /* Il nome va qui e non sulla <nav>: un elemento con view-transition-name ferma il backdrop-filter
+     dei suoi discendenti, che non vedrebbero più il contenuto da sfocare. */
+  view-transition-name: tabbar;
+}
+/* Capsula della scheda attiva: scorre con un piccolo rimbalzo quando si cambia scheda. */
+.tab-capsula {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 4);
+  border-radius: 28px;
+  background: var(--tab-capsula);
+  transform: translateX(calc(var(--indice, 0) * 100%));
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.5, 1);
 }
 .tab {
-  flex: 1;
-  max-width: 180px;
-  height: var(--altezza-tab);
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
+  min-width: 0;
   border: 0;
+  border-radius: 28px;
   background: none;
-  color: var(--tab-testo);
-  font-size: 11px;
+  color: var(--testo);
+  font-size: 10.5px;
   font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.25s;
+}
+.tab-testo {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tab-icona {
-  font-size: 22px;
-  line-height: 1;
+  position: relative;
+  width: 26px;
+  height: 26px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+.tab-icona svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.2s;
+}
+/* Dettagli delle icone piene "ritagliati" col colore della barra. */
+.tab-icona .ritaglio {
+  stroke: var(--superficie);
+}
+.tab .icona-piena,
+.tab.attiva .icona-vuota {
+  opacity: 0;
+}
+.tab.attiva .icona-piena {
+  opacity: 1;
 }
 .tab.attiva {
-  color: var(--tab-attiva);
+  color: var(--accento);
+  font-weight: 600;
+}
+.tab:active .tab-icona {
+  transform: scale(0.86);
+}
+.tab.attiva .tab-icona {
+  animation: tab-salto 0.4s cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+@keyframes tab-salto {
+  40% {
+    transform: scale(1.14);
+  }
+}
+
+/* Cambio di schermata (View Transitions, src/ui/tabbar.ts): il contenuto scorre e sfuma nella
+   direzione della scheda scelta; la barra resta ferma e solo la capsula si sposta. */
+.contenuto {
+  view-transition-name: contenuto;
+}
+::view-transition-old(tabbar) {
+  display: none;
+}
+::view-transition-new(tabbar) {
+  animation: none;
+}
+::view-transition-old(contenuto),
+::view-transition-new(contenuto) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.3, 1);
+  animation-fill-mode: both;
+}
+::view-transition-old(contenuto) {
+  animation-name: esce-sinistra;
+}
+::view-transition-new(contenuto) {
+  animation-name: entra-destra;
+}
+:root[data-direzione='indietro']::view-transition-old(contenuto) {
+  animation-name: esce-destra;
+}
+:root[data-direzione='indietro']::view-transition-new(contenuto) {
+  animation-name: entra-sinistra;
+}
+@keyframes esce-sinistra {
+  to {
+    opacity: 0;
+    transform: translateX(-24%);
+  }
+}
+@keyframes esce-destra {
+  to {
+    opacity: 0;
+    transform: translateX(24%);
+  }
+}
+@keyframes entra-destra {
+  from {
+    opacity: 0;
+    transform: translateX(24%);
+  }
+}
+@keyframes entra-sinistra {
+  from {
+    opacity: 0;
+    transform: translateX(-24%);
+  }
 }
 
 /* Toast. È un popover nel top layer (src/ui/dialoghi.ts): top, right, margin, border, overflow e
