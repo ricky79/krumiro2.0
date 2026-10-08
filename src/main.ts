@@ -13,6 +13,7 @@ import { avviaTema } from './ui/tema';
 import { avviaBannerInstallazione } from './ui/installa';
 import { avviaControlloAggiornamenti } from './ui/aggiornamento';
 import { avviaTagNfc } from './ui/tagNfc';
+import { avviaProposteLuogo, rilevaLuogo } from './ui/posizione';
 import { inApp } from './native/app';
 import { avviaAvvisi as avviaAvvisiApp } from './native/avvisi';
 import { avviaAvvisi as avviaAvvisiPwa } from './web/avvisi';
@@ -100,16 +101,23 @@ function vai(scheda: Scheda): void {
 
 store.ascolta(() => render());
 seguiAltreSchede();
+avviaProposteLuogo();
 window.addEventListener(EVENTO_APRI_AIUTO, (e) => {
   stato.aiuto = (e as CustomEvent<string | undefined>).detail ?? null;
   vai('aiuto');
 });
 render();
 
+// Casa o ufficio: all'apertura (e al ritorno in primo piano) la posizione propone il luogo di oggi.
+const proponiLuogo = () => void rilevaLuogo(adessoRoma().data, () => render());
+proponiLuogo();
+
 // Aggiorna l'orario ogni 15 s e quando l'app torna in primo piano.
 setInterval(() => render(false), 15_000);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') render(false);
+  if (document.visibilityState !== 'visible') return;
+  render(false);
+  proponiLuogo();
 });
 
 void richiediPersistenza();

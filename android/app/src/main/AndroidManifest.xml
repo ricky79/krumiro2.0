@@ -47,6 +47,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Casa o ufficio: la posizione si legge solo ad app aperta (navigator.geolocation nella WebView). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Non obbligatorio: l'app resta installabile sui telefoni senza NFC. -->
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 </manifest>

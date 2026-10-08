@@ -1,5 +1,7 @@
+import type { Luogo } from '../core/tipi';
 import { store } from '../storage/store';
 import { el } from './dom';
+import { luogoRilevato } from './posizione';
 
 /** Emoji di casa e ufficio, a colori come nel resto dell'app (🚬). */
 const CASA = '🏠';
@@ -11,35 +13,42 @@ function icona(emoji: string, classe = 'icona-luogo'): HTMLElement {
 
 export const iconaCasa = (classe?: string): HTMLElement => icona(CASA, classe);
 
-/** Segna la giornata come lavorata da casa (smart) o in sede. */
-export function impostaSmart(data: string, smart: boolean): void {
-  if ((store.giornata(data).smart === true) === smart) return;
-  store.modificaGiornata(data, (g) => {
-    if (smart) g.smart = true;
-    else delete g.smart;
-  });
+/** Segna la giornata come lavorata da casa (smart) o in sede: è una scelta, la posizione non la cambia più. */
+export function impostaLuogo(data: string, luogo: Luogo): void {
+  if (store.giornata(data).luogo === luogo) return;
+  store.modificaGiornata(data, (g) => void (g.luogo = luogo));
 }
 
-/** Controllo segmentato casa/ufficio: dove si lavora nella giornata (predefinito: in sede). */
+/**
+ * Controllo segmentato casa/ufficio. Mostra il luogo scelto; se non c'è, quello rilevato dalla
+ * posizione; altrimenti la sede.
+ */
 export function controlloLuogo(data: string): HTMLElement {
-  const smart = store.giornata(data).smart === true;
-  const opzione = (valore: boolean, etichetta: string, emoji: string) =>
+  const scelto = store.giornata(data).luogo;
+  const rilevato = scelto ? null : luogoRilevato(data);
+  const attuale = scelto ?? rilevato ?? 'sede';
+  const opzione = (valore: Luogo, etichetta: string, emoji: string) =>
     el(
       'button',
       {
         type: 'button',
         class: 'luogo-opzione',
-        'aria-pressed': String(valore === smart),
+        'aria-pressed': String(valore === attuale),
         'aria-label': etichetta,
-        title: etichetta,
-        onclick: () => impostaSmart(data, valore),
+        title: valore === rilevato ? `${etichetta}: rilevato dalla posizione` : etichetta,
+        onclick: () => impostaLuogo(data, valore),
       },
       icona(emoji),
     );
   return el(
     'div',
-    { class: 'luogo', role: 'group', 'aria-label': 'Dove lavori' },
-    opzione(true, 'Da casa (smart)', CASA),
-    opzione(false, 'In sede', UFFICIO),
+    { class: 'luogo-contenitore' },
+    el(
+      'div',
+      { class: 'luogo', role: 'group', 'aria-label': 'Dove lavori' },
+      opzione('smart', 'Da casa (smart)', CASA),
+      opzione('sede', 'In sede', UFFICIO),
+    ),
+    rilevato ? el('small', { class: 'luogo-nota' }, '📍 dalla posizione') : null,
   );
 }

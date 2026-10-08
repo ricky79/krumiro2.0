@@ -1,5 +1,5 @@
-import { haContenuto } from '../core/riepilogo';
-import type { Giornata, Impostazioni } from '../core/tipi';
+import { haTimbrature } from '../core/riepilogo';
+import type { Giornata, Impostazioni, Luogo } from '../core/tipi';
 import { datiVuoti, migra, type DatiSalvati } from './migrazioni';
 
 const CHIAVE = 'timbrature';
@@ -10,6 +10,8 @@ type Ascoltatore = () => void;
 class Store {
   private dati: DatiSalvati;
   private ascoltatori = new Set<Ascoltatore>();
+  /** Luogo proposto per una data (rilevato dalla posizione), fissato alla prima timbratura. */
+  private luogoProposto: (data: string) => Luogo | null = () => null;
   /** Messaggio di errore di caricamento, se i dati salvati erano illeggibili. */
   erroreCaricamento: string | null = null;
 
@@ -80,9 +82,18 @@ class Store {
   modificaGiornata(data: string, modifica: (g: Giornata) => void): void {
     const g = structuredClone(this.giornata(data));
     modifica(g);
-    if (!haContenuto(g)) delete this.dati.giornate[data];
+    // Alla prima timbratura la proposta (casa o sede dalla posizione) diventa il luogo della giornata.
+    if (g.luogo === undefined && haTimbrature(g)) {
+      const proposto = this.luogoProposto(data);
+      if (proposto) g.luogo = proposto;
+    }
+    if (!haTimbrature(g) && g.luogo === undefined) delete this.dati.giornate[data];
     else this.dati.giornate[data] = g;
     this.salva();
+  }
+
+  proponiLuogo(f: (data: string) => Luogo | null): void {
+    this.luogoProposto = f;
   }
 
   modificaImpostazioni(modifica: (i: Impostazioni) => void): void {

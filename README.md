@@ -132,6 +132,11 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   🏢 (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
   calcolo delle ore. Nello Storico i giorni da casa hanno 🏠 e il riepilogo conta i giorni
   da casa e in sede del mese. Il CSV ha la colonna *Luogo* (Sede/Smart).
+  Con *Impostazioni → Sede di lavoro* salvi la posizione dell'ufficio: all'apertura, se per oggi
+  non hai ancora scelto, l'app legge la posizione e propone 🏢 entro 300 m dall'ufficio e 🏠
+  altrove ("📍 dalla posizione"); la proposta diventa definitiva alla prima timbratura e una
+  scelta fatta a mano vale sempre. La posizione si legge solo ad app aperta e non lascia il
+  telefono (nell'app Android servono i permessi di posizione).
 - **Storico**: per ogni giorno del mese, tre voci ben separate: **Lavoro**, **Straordinario** e
   **Permesso** (un trattino significa zero). Lo straordinario e il permesso sono a blocchi da
   30 minuti: 20 minuti di extra non contano, 50 minuti valgono 30. Se mancano ore compare

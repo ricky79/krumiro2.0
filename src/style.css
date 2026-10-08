@@ -112,6 +112,17 @@ button {
 }
 
 /* Casa/ufficio: controllo segmentato in alto a destra della giornata. */
+.luogo-contenitore {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.luogo-nota {
+  font-size: 11px;
+  color: var(--testo-2);
+}
 .luogo {
   display: inline-flex;
   flex: none;

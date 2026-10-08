@@ -58,14 +58,14 @@ describe('CSV', () => {
 
   it('il luogo (smart o sede) si esporta e si reimporta', () => {
     const d = dati();
-    d['2026-10-02']!.smart = true;
+    d['2026-10-02']!.luogo = 'smart';
     const csv = esportaCsv(d, imp, oggi);
     expect(csv).toContain(';Smart;08:30 Entrata');
     const i = importaCsv(csv);
-    expect(i['2026-10-02']!.smart).toBe(true);
-    expect(i['2026-10-01']!.smart).toBeUndefined();
+    expect(i['2026-10-02']!.luogo).toBe('smart');
+    expect(i['2026-10-01']!.luogo).toBe('sede');
     // CSV di versioni precedenti, senza la colonna: tutto in sede.
-    expect(importaCsv('Data;Eventi\r\n2026-10-02;08:30 Entrata\r\n')['2026-10-02']!.smart).toBeUndefined();
+    expect(importaCsv('Data;Eventi\r\n2026-10-02;08:30 Entrata\r\n')['2026-10-02']!.luogo).toBeUndefined();
   });
 
   it('giornata con solo il permesso in uscita: esportata e reimportata', () => {
@@ -125,14 +125,16 @@ describe('riepilogo mensile', () => {
   it('una giornata con solo il permesso in uscita ha contenuto', () => {
     expect(haContenuto(giornata([], { permessoUscita: 30 }))).toBe(true);
     expect(haContenuto(giornata([]))).toBe(false);
-    expect(haContenuto({ ...giornata([]), smart: true })).toBe(true);
+    expect(haContenuto({ ...giornata([]), luogo: 'smart' })).toBe(true);
+    // In sede senza timbrature non è una giornata lavorata.
+    expect(haContenuto({ ...giornata([]), luogo: 'sede' })).toBe(false);
   });
 
   it('conta i giorni da casa (smart) del mese', () => {
     const d = dati();
-    d['2026-10-01']!.smart = true;
+    d['2026-10-01']!.luogo = 'smart';
     const s = giornata([], { data: '2026-09-30' });
-    s.smart = true;
+    s.luogo = 'smart';
     d[s.data] = s; // altro mese: non conta
     const r = riepilogoMese(d, imp, '2026-10', oggi);
     expect(r.giorniSmart).toBe(1);

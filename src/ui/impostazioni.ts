@@ -14,6 +14,8 @@ import * as avvisiApp from '../native/avvisi';
 import * as avvisiPwa from '../web/avvisi';
 import type { StatoPermessi } from '../core/avvisi';
 import { apriImpostazioniNfc, statoNfc, type StatoNfc } from '../native/nfc';
+import { PRECISIONE_MASSIMA, RAGGIO_UFFICIO } from '../core/posizione';
+import { leggiPosizione } from './posizione';
 
 /** Lunedì → domenica, come in un calendario italiano. */
 const ORDINE_GIORNI = [1, 2, 3, 4, 5, 6, 0];
@@ -113,6 +115,62 @@ function sezioneAvvisi(): HTMLElement {
     riga('Rientro dalla sigaretta', interruttore(avvisi.sigaretta, (v) => cambia((a) => void (a.sigaretta = v)), 'Avviso di rientro dalla pausa sigaretta'), 'prima della fine della tolleranza, vedi sotto'),
     riga('Anticipo sigaretta (min)', inputMinuti(avvisi.sigarettaAnticipo, (v) => cambia((a) => void (a.sigarettaAnticipo = v)), 'Anticipo dell\'avviso della pausa sigaretta in minuti', 30, 1), '0 = allo scadere della tolleranza'),
     linkAiuto('Come funzionano gli avvisi?', 'avvisi'),
+  );
+}
+
+/** Sezione Sede di lavoro: posizione dell'ufficio per proporre 🏠 o 🏢 all'apertura. */
+function sezioneSede(): HTMLElement {
+  const ufficio = store.impostazioni.ufficio;
+  const salva = el(
+    'button',
+    { type: 'button', class: 'btn btn-secondario' },
+    ufficio ? '📍 Aggiorna con la posizione attuale' : '📍 Sono in ufficio: salva la posizione',
+  );
+  salva.addEventListener('click', () => {
+    salva.disabled = true;
+    leggiPosizione()
+      .then((p) => {
+        if (p.precisione > PRECISIONE_MASSIMA) {
+          toast(`Posizione troppo imprecisa (±${Math.round(p.precisione)} m): riprova all'aperto o con il GPS attivo`);
+          return;
+        }
+        store.modificaImpostazioni((i) => void (i.ufficio = { lat: p.lat, lon: p.lon }));
+        toast(`Posizione dell'ufficio salvata (±${Math.round(p.precisione)} m)`);
+      })
+      .catch((e: Error) => toast(e.message))
+      .finally(() => (salva.disabled = false));
+  });
+  return el(
+    'div',
+    { class: 'scheda' },
+    el('h2', { class: 'titolo-sezione' }, 'Sede di lavoro'),
+    el(
+      'p',
+      { class: 'nota' },
+      ufficio
+        ? `Posizione dell'ufficio salvata. Quando apri l'app, se per oggi non hai ancora scelto, Sbeggio propone 🏢 entro ${RAGGIO_UFFICIO} m dall'ufficio e 🏠 altrove.`
+        : 'Salva la posizione mentre sei in ufficio: quando apri l\'app Sbeggio proporrà da solo 🏠 o 🏢. La posizione resta solo su questo telefono.',
+    ),
+    el(
+      'div',
+      { class: 'riga-pulsanti' },
+      salva,
+      ufficio
+        ? el(
+            'button',
+            {
+              type: 'button',
+              class: 'btn btn-secondario',
+              onclick: () => {
+                store.modificaImpostazioni((i) => void (i.ufficio = null));
+                toast('Posizione dell\'ufficio eliminata');
+              },
+            },
+            'Elimina la posizione',
+          )
+        : null,
+    ),
+    linkAiuto('Come funziona?', 'smart'),
   );
 }
 
@@ -293,6 +351,7 @@ export function vistaImpostazioni(adesso: Adesso): HTMLElement {
       }, 'Tolleranza della pausa sigaretta in minuti', 60, 1), 'entro questo tempo la pausa non viene conteggiata'),
       linkAiuto('Come funziona la pausa sigaretta?', 'pausa-sigaretta'),
     ),
+    sezioneSede(),
     sezioneAvvisi(),
     inApp() ? sezioneTagNfc() : null,
     el(

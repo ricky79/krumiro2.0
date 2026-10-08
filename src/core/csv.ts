@@ -60,7 +60,7 @@ export function esportaCsv(
         statoLeggibile(r),
         String(g.permessoInizioMinuti),
         String(g.permessoUscitaMinuti),
-        g.smart ? 'Smart' : 'Sede',
+        g.luogo === 'smart' ? 'Smart' : 'Sede',
         eventiInTesto(g.eventi),
       ]
         .map(quota)
@@ -155,7 +155,8 @@ export function importaCsv(testo: string): Record<string, Giornata> {
       eventi.push(ev);
     }
     const g: Giornata = { data, permessoInizioMinuti: permesso, permessoUscitaMinuti: permessoUscita, eventi };
-    if (iLuogo >= 0 && (r[iLuogo] ?? '').trim().toLowerCase() === 'smart') g.smart = true;
+    const luogo = iLuogo >= 0 ? (r[iLuogo] ?? '').trim().toLowerCase() : '';
+    if (luogo === 'smart' || luogo === 'sede') g.luogo = luogo;
     giornate[data] = g;
   });
   return giornate;

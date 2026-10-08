@@ -60,7 +60,7 @@ export function riepilogoMese(
     .sort((a, b) => b.data.localeCompare(a.data))
     .map((g) => ({
       data: g.data,
-      smart: g.smart === true,
+      smart: g.luogo === 'smart',
       risultato: calcolaGiornata(g, imp, g.data === oggi.data ? oggi.minuti : null),
     }))
     .map((x) => ({ ...x, ore: oreGiorno(x.risultato) }));
@@ -83,7 +83,12 @@ export function riepilogoMese(
   return { mese, giorni, lavoro, straordinario, permesso, saldo, giorniDaCorreggere, giorniSmart };
 }
 
-/** Una giornata con timbrature, permessi pianificati o segnata in smart: si salva e compare nello storico. */
+/** Una giornata con timbrature, permessi pianificati o segnata in smart: compare nello storico e nel CSV. */
 export function haContenuto(g: Giornata): boolean {
-  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0 || g.smart === true;
+  return haTimbrature(g) || g.luogo === 'smart';
+}
+
+/** Timbrature o permessi pianificati: la giornata è iniziata davvero. */
+export function haTimbrature(g: Giornata): boolean {
+  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0;
 }
