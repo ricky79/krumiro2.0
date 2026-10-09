@@ -49,12 +49,14 @@ export function leggiPosizione(): Promise<Posizione> {
 let inCorso = false;
 
 /**
- * All'apertura dell'app: se l'ufficio è impostato e per oggi non c'è ancora un luogo (né scelto né
- * rilevato), legge la posizione e propone casa o sede. `aggiorna` ridisegna la vista.
+ * All'apertura dell'app (e al ritorno in primo piano): se l'ufficio è impostato e il luogo di oggi
+ * non è ancora fissato (né scelto a mano né dalla prima timbratura), legge la posizione e propone
+ * casa o sede. La proposta si aggiorna a ogni lettura: aperta a casa e poi in ufficio, propone la
+ * sede. `aggiorna` ridisegna la vista.
  */
 export async function rilevaLuogo(data: string, aggiorna: () => void): Promise<void> {
   const ufficio = store.impostazioni.ufficio;
-  if (!ufficio || inCorso || store.giornata(data).luogo || luogoRilevato(data)) return;
+  if (!ufficio || inCorso || store.giornata(data).luogo) return;
   // Permesso negato: niente richieste a ogni apertura (dove l'API dei permessi c'è).
   try {
     if ((await navigator.permissions?.query({ name: 'geolocation' }))?.state === 'denied') return;
@@ -64,7 +66,7 @@ export async function rilevaLuogo(data: string, aggiorna: () => void): Promise<v
   inCorso = true;
   try {
     const luogo = luogoDaPosizione(await leggiPosizione(), ufficio);
-    if (!luogo || store.giornata(data).luogo) return;
+    if (!luogo || store.giornata(data).luogo || luogo === luogoRilevato(data)) return;
     salvaRilevato(data, luogo);
     aggiorna();
   } catch {

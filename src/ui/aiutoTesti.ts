@@ -202,7 +202,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'In alto a destra, accanto alla data, ci sono due simboli: 🏠 vuol dire che quel giorno lavori da casa (smart working), 🏢 che lavori in sede. Se non tocchi nulla la giornata è in sede.',
         'Puoi cambiarlo quando vuoi, anche per un giorno passato: apri il giorno dallo Storico e tocca il simbolo giusto. Non cambia il calcolo delle ore.',
         `Se in Impostazioni → Sede di lavoro salvi la posizione dell'ufficio (mentre ci sei), quando apri l'app Sbeggio la legge e propone da solo: 🏢 entro ${RAGGIO_UFFICIO} m dall'ufficio, 🏠 altrove. Sotto i simboli compare "📍 dalla posizione". La proposta diventa definitiva alla prima timbratura; se tocchi tu un simbolo, la tua scelta vale e la posizione non la cambia più.`,
-        'La posizione si legge solo con l\'app aperta, una volta al giorno finché non hai scelto, e resta sul telefono: non viene inviata a nessuno. La prima volta il telefono chiede il permesso; se lo neghi resta la sede e scegli a mano. Al chiuso la posizione può essere imprecisa: se non basta per decidere, Sbeggio non propone nulla.',
+        'La posizione si legge solo con l\'app aperta, a ogni apertura finché non timbri o scegli tu (se apri l’app a casa e poi in ufficio, la proposta passa a 🏢), e resta sul telefono: non viene inviata a nessuno. La prima volta il telefono chiede il permesso; se lo neghi resta la sede e scegli a mano. Al chiuso la posizione può essere imprecisa: se non basta per decidere, Sbeggio lascia la proposta com’era.',
         'Nello Storico i giorni da casa hanno 🏠 Smart sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
       ],
     },
