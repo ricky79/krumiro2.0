@@ -1,12 +1,26 @@
 import { calcolaGiornata } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import { BLOCCO_PERMESSO, permessoABlocchi } from '../core/permessi';
-import { formattaDurata } from '../core/tempo';
+import {
+  aggiungiSigarettaNonConteggiata,
+  eliminaSigarettaNonConteggiata,
+  modificaSigarettaNonConteggiata,
+} from '../core/sigaretta';
+import { formattaDurata, formattaOra } from '../core/tempo';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type Evento, type Ripartizione, type TipoEvento } from '../core/tipi';
 import { store } from '../storage/store';
 import { campoDurata, campoOra } from './campi';
 import { apriFoglio, conferma, type PulsanteFoglio } from './dialoghi';
 import { el } from './dom';
+
+/** Voce del tipo, solo in aggiunta: la sigaretta non conteggiata non è un evento e non entra nel calcolo. */
+const SIGARETTA = 'SIGARETTA';
+
+/** Durata proposta per una sigaretta non conteggiata aggiunta a mano (minuti). */
+const DURATA_SIGARETTA_PROPOSTA = 5;
+
+/** Durata di una sigaretta non conteggiata: a passi di un minuto. */
+const campoDurataSigaretta = (minuti: number) => campoDurata('Durata', minuti, { passo: 1, min: 1, max: 12 * 60 });
 
 /** Aggiunge (evento = null) o modifica un evento della giornata. */
 export async function editorEvento(data: string, evento: Evento | null, minutiProposti: number): Promise<void> {
@@ -15,9 +29,14 @@ export async function editorEvento(data: string, evento: Evento | null, minutiPr
     'select',
     {},
     TIPI_EVENTO.map((t) => el('option', { value: t, selected: evento?.tipo === t }, ETICHETTE_EVENTO[t])),
+    nuovo ? el('option', { value: SIGARETTA }, '🚬 Pausa sigaretta (non conteggiata)') : null,
   );
   if (nuovo) selTipo.value = 'ENTRATA';
   const ora = campoOra('Orario', evento?.minuti ?? minutiProposti);
+  const durata = campoDurataSigaretta(DURATA_SIGARETTA_PROPOSTA);
+  const aggiornaTipo = () => durata.elemento.toggleAttribute('hidden', selTipo.value !== SIGARETTA);
+  selTipo.addEventListener('change', aggiornaTipo);
+  aggiornaTipo();
   const errore = el('p', { class: 'errore', role: 'alert' });
 
   // Ripartizione pausa/permesso, solo per i rientri da permesso a ridosso del pranzo.
@@ -45,6 +64,7 @@ export async function editorEvento(data: string, evento: Evento | null, minutiPr
     { class: 'modulo' },
     el('label', { class: 'campo' }, el('span', {}, 'Tipo'), selTipo),
     ora.elemento,
+    durata.elemento,
     boxPausa,
     errore,
   );
@@ -59,6 +79,10 @@ export async function editorEvento(data: string, evento: Evento | null, minutiPr
         if (minuti === null) {
           errore.textContent = 'Inserisci un orario valido.';
           return false;
+        }
+        if (selTipo.value === SIGARETTA) {
+          store.modificaGiornata(data, (g) => aggiungiSigarettaNonConteggiata(g, minuti, durata.leggi()));
+          return true;
         }
         const tipo = selTipo.value as TipoEvento;
         store.modificaGiornata(data, (g) => {
@@ -91,6 +115,40 @@ export async function editorEvento(data: string, evento: Evento | null, minutiPr
     const ok = await conferma('Eliminare la timbratura?', `${ETICHETTE_EVENTO[evento.tipo]} verrà eliminata.`, 'Elimina', true);
     if (ok) store.modificaGiornata(data, (g) => void (g.eventi = g.eventi.filter((x) => x.id !== evento.id)));
   }
+}
+
+/** Modifica o elimina la sigaretta non conteggiata in posizione `indice`: orario e durata, mai il tipo. */
+export async function editorSigarettaNonConteggiata(data: string, indice: number): Promise<void> {
+  const sigaretta = store.giornata(data).sigaretteNonConteggiate?.[indice];
+  if (!sigaretta) return;
+  const ora = campoOra('Orario', sigaretta.minuti);
+  const durata = campoDurataSigaretta(sigaretta.durata);
+  const contenuto = el(
+    'div',
+    { class: 'modulo' },
+    el('p', { class: 'nota' }, 'Rientrata entro la tolleranza: si vede tra le timbrature ma non conta nelle ore.'),
+    ora.elemento,
+    durata.elemento,
+  );
+  let elimina = false;
+  await apriFoglio('🚬 Pausa sigaretta', contenuto, [
+    {
+      etichetta: 'Salva',
+      stile: 'primario',
+      azione: () =>
+        store.modificaGiornata(data, (g) => modificaSigarettaNonConteggiata(g, indice, ora.leggi() ?? sigaretta.minuti, durata.leggi())),
+    },
+    { etichetta: 'Elimina', stile: 'pericolo', azione: () => void (elimina = true) },
+    { etichetta: 'Annulla' },
+  ]);
+  if (!elimina) return;
+  const ok = await conferma(
+    'Eliminare la pausa sigaretta?',
+    `La pausa sigaretta delle ${formattaOra(sigaretta.minuti)} verrà eliminata.`,
+    'Elimina',
+    true,
+  );
+  if (ok) store.modificaGiornata(data, (g) => eliminaSigarettaNonConteggiata(g, indice));
 }
 
 function trovaRipartizione(data: string, eventoId: string): Ripartizione | undefined {
