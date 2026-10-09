@@ -1,8 +1,10 @@
 import { anteprimaSigaretta } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import {
+  annullaSigarettaNonConteggiata,
   BLOCCO_PERMESSO_SIGARETTA,
   countdown,
+  durataSigaretta,
   esitoRientroSigaretta,
   type FaseSigaretta,
   istanteDaMinuti,
@@ -173,8 +175,8 @@ function rientra(data: string, uscita: Evento, inizio: number, annulla?: () => v
   const { minuti } = adessoRoma();
   cancellaInizioSigaretta();
   if (esitoRientroSigaretta(trascorsi, store.impostazioni.tolleranzaSigaretta) === 'annulla') {
-    store.modificaGiornata(data, (g) => void (g.eventi = g.eventi.filter((e) => e.id !== uscita.id)));
-    toast(`Pausa sigaretta di ${formattaDurata(Math.max(1, Math.round(trascorsi / 60_000)))}: non conteggiata`, annulla);
+    store.modificaGiornata(data, (g) => annullaSigarettaNonConteggiata(g, uscita, trascorsi));
+    toast(`Pausa sigaretta di ${formattaDurata(durataSigaretta(trascorsi))}: non conteggiata`, annulla);
     return;
   }
   const permesso = anteprimaSigaretta(store.giornata(data), store.impostazioni, minuti)?.permesso ?? BLOCCO_PERMESSO_SIGARETTA;

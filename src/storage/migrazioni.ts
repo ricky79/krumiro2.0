@@ -6,6 +6,7 @@ import {
   type Evento,
   type Giornata,
   type Impostazioni,
+  type SigarettaNonConteggiata,
   type TipoEvento,
 } from '../core/tipi';
 
@@ -141,5 +142,15 @@ function normalizzaGiornata(g: unknown, chiave: string): Giornata | null {
     eventi,
   };
   if (g.luogo === 'smart' || g.luogo === 'sede') giornata.luogo = g.luogo;
+  const sigarette: SigarettaNonConteggiata[] = [];
+  if (Array.isArray(g.sigaretteNonConteggiate)) {
+    for (const s of g.sigaretteNonConteggiate) {
+      if (!isObj(s)) continue;
+      const minuti = intIn(s.minuti, 0, 1439);
+      const durata = intIn(s.durata, 1, 1440);
+      if (minuti !== undefined && durata !== undefined) sigarette.push({ minuti, durata });
+    }
+  }
+  if (sigarette.length > 0) giornata.sigaretteNonConteggiate = sigarette;
   return giornata;
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  annullaSigarettaNonConteggiata,
   countdown,
   esitoRientroSigaretta,
   istanteDaMinuti,
@@ -9,7 +10,8 @@ import {
   spegnimentoDaAnimare,
   testoTimer,
 } from '../src/core/sigaretta';
-import { giornata, h } from './helpers';
+import { calcolaGiornata } from '../src/core/calcolo';
+import { giornata, h, impostazioni } from './helpers';
 
 describe('permesso a blocchi', () => {
   it('arrotonda alla mezz\'ora successiva, almeno un blocco', () => {
@@ -158,5 +160,43 @@ describe('schermata da riaprire da sola', () => {
     g.eventi[2]!.sigaretta = true;
     expect(sigarettaInCorso(g)?.id).toBe(g.eventi[2]!.id);
     expect(sigarettaDaRiprendere(g)).toBeNull();
+  });
+});
+
+describe('sigarette non conteggiate', () => {
+  const inPausa = () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA_PERMESSO', '10:05'],
+    ]);
+    g.eventi[1]!.sigaretta = true;
+    return g;
+  };
+
+  it('il rientro entro la tolleranza toglie l’uscita e registra la sigaretta', () => {
+    const g = inPausa();
+    annullaSigarettaNonConteggiata(g, g.eventi[1]!, 7 * 60_000 + 20_000);
+    expect(g.eventi.map((e) => e.tipo)).toEqual(['ENTRATA']);
+    expect(g.sigaretteNonConteggiate).toEqual([{ minuti: h('10:05'), durata: 7 }]);
+  });
+
+  it('la durata è almeno un minuto e le sigarette si accodano', () => {
+    const g = inPausa();
+    g.sigaretteNonConteggiate = [{ minuti: h('09:10'), durata: 5 }];
+    annullaSigarettaNonConteggiata(g, g.eventi[1]!, 15_000);
+    expect(g.sigaretteNonConteggiate).toEqual([
+      { minuti: h('09:10'), durata: 5 },
+      { minuti: h('10:05'), durata: 1 },
+    ]);
+  });
+
+  it('non cambiano il calcolo della giornata', () => {
+    const g = giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA', '17:30'],
+    ]);
+    const prima = calcolaGiornata(g, impostazioni(), null);
+    g.sigaretteNonConteggiate = [{ minuti: h('10:05'), durata: 8 }];
+    expect(calcolaGiornata(g, impostazioni(), null)).toEqual(prima);
   });
 });
