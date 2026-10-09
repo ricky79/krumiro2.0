@@ -1,12 +1,25 @@
 import { esportaCsv, importaCsv } from '../core/csv';
 import { haContenuto } from '../core/riepilogo';
+import { inApp } from '../native/app';
+import { salvaFile } from '../native/file';
 import { migra } from '../storage/migrazioni';
 import { store } from '../storage/store';
 import { avviso, conferma, toast } from './dialoghi';
 import type { Adesso } from './giorno';
 
-/** Condivide un file con la Web Share API (foglio di condivisione iOS) o lo scarica. */
+/**
+ * Condivide un file con la Web Share API (foglio di condivisione iOS) o lo scarica. Nell'app Android
+ * nessuno dei due funziona nella WebView: lo salva il plugin nativo con "Salva con nome".
+ */
 async function condividiFile(nome: string, contenuto: string, tipo: string): Promise<void> {
+  if (inApp()) {
+    try {
+      if (await salvaFile(nome, contenuto, tipo)) toast('File salvato');
+    } catch (e) {
+      await avviso('Esportazione non riuscita', e instanceof Error ? e.message : String(e));
+    }
+    return;
+  }
   const blob = new Blob([contenuto], { type: tipo });
   const file = new File([blob], nome, { type: tipo });
   if (navigator.canShare?.({ files: [file] })) {
