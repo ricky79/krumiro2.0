@@ -2,14 +2,20 @@ import { calcolaGiornata, propostaRientro } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import { analizzaGiornata, azioniDisponibili, ETICHETTE_AZIONE, type Azione } from '../core/statoGiornata';
 import { formattaDataLunga, formattaDurata, formattaOra, formattaSaldo } from '../core/tempo';
-import { testoPausa, testoSigaretteNonConteggiate } from '../core/testi';
+import { dettaglioSigarettaNonConteggiata, testoPausa } from '../core/testi';
 import { ETICHETTE_EVENTO, type Evento, type Giornata, type RisultatoGiornata } from '../core/tipi';
 import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { linkAiuto } from './aiuto';
 import { controlloLuogo } from './luogo';
-import { confermaRipartizione, editorEvento, editorPermessoInizio, editorPermessoUscita } from './editor';
+import {
+  confermaRipartizione,
+  editorEvento,
+  editorPermessoInizio,
+  editorPermessoUscita,
+  editorSigarettaNonConteggiata,
+} from './editor';
 import { riquadroPausaSaltata } from './pausaSaltata';
 import { avviaPausaSigaretta } from './sigaretta';
 
@@ -78,8 +84,6 @@ function schedaRiepilogo(r: RisultatoGiornata, giornata: Giornata, oggi: boolean
   const testo = testoPausa(r);
   const pausa = stat('Pausa pranzo', testo.valore);
   if (testo.nota) pausa.querySelector('dd')!.append(el('small', { class: 'stat-nota' }, testo.nota));
-  // Le pause sigaretta rientrate entro la tolleranza non contano: si vedono solo qui.
-  const sigarette = testoSigaretteNonConteggiate(giornata);
   return el(
     'div',
     { class: 'scheda scheda-principale' },
@@ -95,7 +99,6 @@ function schedaRiepilogo(r: RisultatoGiornata, giornata: Giornata, oggi: boolean
       pausa,
       stat('Permesso', formattaDurata(r.permesso)),
     ),
-    sigarette ? el('p', { class: 'nota riepilogo-sigarette' }, sigarette) : null,
   );
 }
 
@@ -290,6 +293,8 @@ function timeline(
       vocePermesso('Permesso a inizio giornata', `${formattaDurata(r.permessoInizio)}${dichiarati}`, () => void editorPermessoInizio(data, null)),
     );
   }
+  // Timbrature e sigarette non conteggiate insieme, in ordine di orario.
+  const conOrario: { minuti: number; voce: HTMLElement }[] = [];
   for (const e of ordinati) {
     const rip = r.ripartizioni.find((x) => x.eventoRientroId === e.id);
     const sig = r.sigarette.find((x) => x.eventoRientroId === e.id);
@@ -305,8 +310,9 @@ function timeline(
             : e.tipo === 'USCITA_PERMESSO' && e.sigaretta
               ? '🚬 pausa sigaretta'
               : null;
-    voci.push(
-      el(
+    conOrario.push({
+      minuti: e.minuti,
+      voce: el(
         'li',
         {},
         el(
@@ -321,8 +327,26 @@ function timeline(
           el('span', { class: 'voce-freccia', 'aria-hidden': 'true' }, '›'),
         ),
       ),
-    );
+    });
   }
+  // Le pause sigaretta rientrate entro la tolleranza: si vedono qui ma non entrano nel calcolo.
+  (giornata.sigaretteNonConteggiate ?? []).forEach((s, indice) =>
+    conOrario.push({
+      minuti: s.minuti,
+      voce: el(
+        'li',
+        {},
+        el(
+          'button',
+          { type: 'button', class: 'voce voce-sigaretta', onclick: () => void editorSigarettaNonConteggiata(data, indice) },
+          el('span', { class: 'voce-ora' }, formattaOra(s.minuti)),
+          el('span', { class: 'voce-testo' }, '🚬 Pausa sigaretta', el('small', {}, dettaglioSigarettaNonConteggiata(s))),
+          el('span', { class: 'voce-freccia', 'aria-hidden': 'true' }, '›'),
+        ),
+      ),
+    }),
+  );
+  voci.push(...conOrario.sort((a, b) => a.minuti - b.minuti).map((x) => x.voce));
   const pianificato = giornata.permessoUscitaMinuti;
   if (pianificato > 0) {
     const dettaglio =
