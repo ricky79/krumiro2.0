@@ -1,6 +1,6 @@
 import { ETICHETTE_STATO } from './statoGiornata';
 import { formattaDurata } from './tempo';
-import type { Giornata, RisultatoGiornata } from './tipi';
+import type { RisultatoGiornata, SigarettaNonConteggiata } from './tipi';
 
 export function statoLeggibile(r: RisultatoGiornata): string {
   return r.daCorreggere ? 'Da correggere' : ETICHETTE_STATO[r.stato];
@@ -18,11 +18,7 @@ export function testoPausa(r: RisultatoGiornata): { valore: string; nota: string
   };
 }
 
-/** Riga del riepilogo con le pause sigaretta non conteggiate ("🚬 2 sigarette non conteggiate · 14 min"); null se non ce ne sono. */
-export function testoSigaretteNonConteggiate(g: Giornata): string | null {
-  const sigarette = g.sigaretteNonConteggiate ?? [];
-  if (sigarette.length === 0) return null;
-  const totale = sigarette.reduce((s, x) => s + x.durata, 0);
-  const quante = sigarette.length === 1 ? '1 sigaretta non conteggiata' : `${sigarette.length} sigarette non conteggiate`;
-  return `🚬 ${quante} · ${formattaDurata(totale)}`;
+/** Dettaglio della pausa sigaretta non conteggiata nelle timbrature ("7 min · non conteggiata"). */
+export function dettaglioSigarettaNonConteggiata(s: SigarettaNonConteggiata): string {
+  return `${formattaDurata(s.durata)} · non conteggiata`;
 }

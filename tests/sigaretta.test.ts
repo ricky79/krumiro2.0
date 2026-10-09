@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  aggiungiSigarettaNonConteggiata,
   annullaSigarettaNonConteggiata,
   countdown,
+  eliminaSigarettaNonConteggiata,
   esitoRientroSigaretta,
   istanteDaMinuti,
+  modificaSigarettaNonConteggiata,
   permessoSigaretta,
   sigarettaDaRiprendere,
   sigarettaInCorso,
@@ -197,6 +200,64 @@ describe('sigarette non conteggiate', () => {
     ]);
     const prima = calcolaGiornata(g, impostazioni(), null);
     g.sigaretteNonConteggiate = [{ minuti: h('10:05'), durata: 8 }];
+    expect(calcolaGiornata(g, impostazioni(), null)).toEqual(prima);
+  });
+});
+
+describe('sigarette non conteggiate tra le timbrature', () => {
+  const base = () =>
+    giornata([
+      ['ENTRATA', '08:30'],
+      ['USCITA', '17:30'],
+    ]);
+
+  it('si aggiungono in ordine di orario, durata almeno un minuto', () => {
+    const g = base();
+    aggiungiSigarettaNonConteggiata(g, h('15:20'), 6);
+    aggiungiSigarettaNonConteggiata(g, h('10:05'), 0);
+    expect(g.sigaretteNonConteggiate).toEqual([
+      { minuti: h('10:05'), durata: 1 },
+      { minuti: h('15:20'), durata: 6 },
+    ]);
+  });
+
+  it('si modificano orario e durata, riordinando', () => {
+    const g = base();
+    g.sigaretteNonConteggiate = [
+      { minuti: h('10:05'), durata: 7 },
+      { minuti: h('15:20'), durata: 6 },
+    ];
+    modificaSigarettaNonConteggiata(g, 0, h('16:00'), 9);
+    expect(g.sigaretteNonConteggiate).toEqual([
+      { minuti: h('15:20'), durata: 6 },
+      { minuti: h('16:00'), durata: 9 },
+    ]);
+  });
+
+  it('eliminando l’ultima il campo sparisce', () => {
+    const g = base();
+    g.sigaretteNonConteggiate = [
+      { minuti: h('10:05'), durata: 7 },
+      { minuti: h('15:20'), durata: 6 },
+    ];
+    eliminaSigarettaNonConteggiata(g, 0);
+    expect(g.sigaretteNonConteggiate).toEqual([{ minuti: h('15:20'), durata: 6 }]);
+    eliminaSigarettaNonConteggiata(g, 0);
+    expect(g.sigaretteNonConteggiate).toBeUndefined();
+  });
+
+  it('un indice inesistente non cambia niente', () => {
+    const g = base();
+    g.sigaretteNonConteggiate = [{ minuti: h('10:05'), durata: 7 }];
+    modificaSigarettaNonConteggiata(g, 3, h('11:00'), 5);
+    eliminaSigarettaNonConteggiata(g, 3);
+    expect(g.sigaretteNonConteggiate).toEqual([{ minuti: h('10:05'), durata: 7 }]);
+  });
+
+  it('anche oltre la tolleranza non cambiano il calcolo', () => {
+    const g = base();
+    const prima = calcolaGiornata(g, impostazioni(), null);
+    aggiungiSigarettaNonConteggiata(g, h('10:05'), 45);
     expect(calcolaGiornata(g, impostazioni(), null)).toEqual(prima);
   });
 });

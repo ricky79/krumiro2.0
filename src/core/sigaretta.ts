@@ -1,7 +1,7 @@
 import { BLOCCO_PERMESSO, permessoABlocchi } from './permessi';
 import { analizzaGiornata } from './statoGiornata';
 import { adessoRoma } from './tempo';
-import type { Evento, Giornata } from './tipi';
+import type { Evento, Giornata, SigarettaNonConteggiata } from './tipi';
 
 /** Oltre la tolleranza la pausa sigaretta diventa permesso a blocchi di questa durata (minuti). */
 export const BLOCCO_PERMESSO_SIGARETTA = BLOCCO_PERMESSO;
@@ -91,6 +91,33 @@ export function annullaSigarettaNonConteggiata(giornata: Giornata, uscita: Event
     ...(giornata.sigaretteNonConteggiate ?? []),
     { minuti: uscita.minuti, durata: durataSigaretta(trascorsiMs) },
   ];
+}
+
+/**
+ * Sigaretta non conteggiata inserita o corretta a mano: si mostra tra le timbrature ma, salvata
+ * fuori dagli eventi, non entra mai nel calcolo, qualunque sia la durata. Resta in ordine di orario.
+ */
+export function aggiungiSigarettaNonConteggiata(giornata: Giornata, minuti: number, durata: number): void {
+  salvaSigarette(giornata, [...(giornata.sigaretteNonConteggiate ?? []), { minuti, durata: Math.max(1, durata) }]);
+}
+
+/** Cambia orario e durata della sigaretta in posizione `indice`; un indice inesistente non fa niente. */
+export function modificaSigarettaNonConteggiata(giornata: Giornata, indice: number, minuti: number, durata: number): void {
+  const sigarette = giornata.sigaretteNonConteggiate ?? [];
+  if (!sigarette[indice]) return;
+  salvaSigarette(giornata, sigarette.map((s, i) => (i === indice ? { minuti, durata: Math.max(1, durata) } : s)));
+}
+
+/** Toglie la sigaretta in posizione `indice`; senza più sigarette il campo sparisce. */
+export function eliminaSigarettaNonConteggiata(giornata: Giornata, indice: number): void {
+  const sigarette = giornata.sigaretteNonConteggiate ?? [];
+  if (!sigarette[indice]) return;
+  salvaSigarette(giornata, sigarette.filter((_, i) => i !== indice));
+}
+
+function salvaSigarette(giornata: Giornata, sigarette: SigarettaNonConteggiata[]): void {
+  if (sigarette.length === 0) delete giornata.sigaretteNonConteggiate;
+  else giornata.sigaretteNonConteggiate = [...sigarette].sort((a, b) => a.minuti - b.minuti);
 }
 
 /** L'uscita della pausa sigaretta in corso (giornata in permesso aperto da una sigaretta), o null. */

@@ -258,10 +258,6 @@ button {
   margin: 0;
   text-align: left;
 }
-.riepilogo-sigarette {
-  margin-top: 10px;
-  text-align: left;
-}
 .stat dt {
   font-size: 13px;
   color: var(--testo-2);
@@ -463,6 +459,15 @@ button {
 .voce-uscita_anticipata::before {
   background: var(--permesso);
 }
+/* Sigaretta non conteggiata: attenuata, pallino vuoto perché non pesa sulle ore. */
+.voce-sigaretta {
+  color: var(--testo-2);
+}
+.voce-sigaretta::before {
+  background: none;
+  border: 2px solid var(--permesso);
+  box-sizing: border-box;
+}
 .voce-errata {
   color: var(--negativo);
 }
@@ -645,6 +650,9 @@ input:disabled {
 .campo {
   display: grid;
   gap: 6px;
+}
+.campo[hidden] {
+  display: none;
 }
 .campo > span {
   font-size: 14px;

@@ -113,8 +113,9 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
-  Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella dalle timbrature ma
-  resta nel riepilogo del giorno (🚬 quante sigarette non conteggiate e la durata totale);
+  Se rientri entro la tolleranza (11 min, configurabile) la pausa non conta nelle ore ma resta tra
+  le timbrature come «🚬 Pausa sigaretta» con la durata e «non conteggiata»: si può modificare,
+  eliminare o aggiungere a mano (in «Aggiungi timbratura») e non entra mai nel calcolo;
   altrimenti diventa permesso a blocchi di 30 min.
 - **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
   `sbeggio://timbra` (per esempio vicino ai tornelli) Sbeggio si apre e registra l'azione del bottone

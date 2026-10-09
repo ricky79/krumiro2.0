@@ -158,7 +158,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         `Registra un'uscita in permesso e apre una schermata con il conto alla rovescia di ${tolleranza}: la sigaretta si consuma mentre il tempo passa. Quando torni tocca "Rientro".`,
         `Negli ultimi 30 secondi lo schermo lampeggia di rosso; oltre la tolleranza ${fineSigaretta} e lo sfondo resta rosso finché non rientri.`,
-        `• Rientri entro ${tolleranza}: la pausa viene cancellata e non resta nessuna timbratura. Nel riepilogo della giornata, sotto le ore, trovi quante sigarette non conteggiate hai fatto e quanto sono durate in tutto.`,
+        `• Rientri entro ${tolleranza}: la pausa non conta nelle ore. Resta tra le timbrature come "🚬 Pausa sigaretta" con la durata e "non conteggiata": toccala per cambiarne orario e durata o per eliminarla. Puoi aggiungerne una a mano da "Aggiungi timbratura"; anche se è lunga non entra mai nel calcolo.`,
         '• Rientri dopo: la pausa diventa permesso a blocchi di 30 min (fino a 30 min → 30 min, fino a 1h → 1h, e così via).',
         'Le ore coperte e l\'uscita prevista non cambiano: il tempo del blocco oltre la pausa reale passa dalle ore lavorate al permesso.',
         'Esempio: pausa di 15 min → 30 min di permesso e 15 min in meno di lavorate; pausa di 42 min → 1h di permesso.',
