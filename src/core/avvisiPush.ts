@@ -8,7 +8,7 @@ import type { StatoPermessi, TipoAvviso } from './avvisi';
 
 const TIPI: readonly TipoAvviso[] = ['uscita', 'pausa', 'sigaretta'];
 
-/** Backend degli avvisi (Cloudflare Worker, repository `krumiro2.0_backend`). */
+/** Backend degli avvisi (Cloudflare Worker, repository `sbeggio-notifiche`). */
 export const URL_NOTIFICHE = 'https://notifiche.sbeggio.app';
 /** Chiave pubblica VAPID del backend (`VAPID_PUBLIC_KEY` in wrangler.jsonc): cambia solo con la coppia di chiavi. */
 export const CHIAVE_VAPID = 'BDMM0_ITU0dc_OrEyil6M1IliUYEiKma7ANcCiK5CVxVIM8LxBWnycBd0NJG_PQpBTadDsQctWsx2z6dMzZb0iA';

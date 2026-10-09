@@ -8,7 +8,7 @@ App pubblicata: **https://sbeggio.app/**
 
 ## Installare l'app
 
-Apri **https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk** dal telefono e segui le istruzioni per il tuo sistema.
+Apri **https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk** dal telefono e segui le istruzioni per il tuo sistema.
 
 ### iPhone (Safari)
 
@@ -43,7 +43,7 @@ La PWA ha gli stessi tre avvisi dell'app Android (uscita prevista, rientro dal p
 sigaretta) come **notifiche push**. Si attivano in *Impostazioni → Avvisi → Autorizza gli avvisi*.
 
 - Il browser non può programmare notifiche da solo: a ogni timbratura la PWA invia l'orario
-  dell'avviso a un piccolo server (Cloudflare Worker, repository `krumiro2.0_backend`), che allo
+  dell'avviso a un piccolo server (Cloudflare Worker, repository `sbeggio-notifiche`), che allo
   scadere manda la notifica. Al server arrivano solo l'orario e il tipo di ogni avviso e l'indirizzo
   per le notifiche del browser; timbrature e testi restano sul dispositivo.
 - Serve internet quando si timbra (senza, l'avviso parte appena si torna online con l'app aperta);
@@ -66,8 +66,8 @@ passano da un server (vedi *Avvisi nella PWA*).
 
 #### Scaricare e installare l'APK
 
-**Link diretto all'ultima versione:** [https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk](https://github.com/ricky79/krumiro2.0/releases/latest/download/sbeggio.apk)
-(oppure la pagina [Release](https://github.com/ricky79/krumiro2.0/releases/latest), file `sbeggio-<versione>.apk`).
+**Link diretto all'ultima versione:** [https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk](https://github.com/ricky79/sbeggio/releases/latest/download/sbeggio.apk)
+(oppure la pagina [Release](https://github.com/ricky79/sbeggio/releases/latest), file `sbeggio-<versione>.apk`).
 
 1. Apri il link dal telefono Android: il browser scarica `sbeggio.apk`.
 2. Apri il file scaricato (dalla notifica del download o dall'app *File*).
@@ -83,7 +83,7 @@ banner in basso con il pulsante **Scarica**: apri il file scaricato e installalo
 Se hai chiuso il banner (ricompare con la versione successiva), scarica di nuovo dallo stesso link. Il
 numero di versione installato è in fondo alle *Impostazioni*.
 
-L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/krumiro2.0/releases/latest`)
+L'app chiede a GitHub l'ultima release (`api.github.com/repos/ricky79/sbeggio/releases/latest`)
 all'avvio e quando torna in primo piano, al massimo ogni 6 ore (`src/ui/aggiornamento.ts`). Conta solo
 una release che ha già `sbeggio.apk` allegato.
 
@@ -106,18 +106,19 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 ## Come si usa
 
 - **Oggi**: il bottone grande propone l'azione più probabile
-  (Entrata → Inizio pausa → Fine pausa → Uscita). Sotto trovi le azioni secondarie:
+  (Entrata → Inizio pausa pranzo → Fine pausa pranzo → Uscita). Sotto trovi le azioni secondarie:
   *Pausa sigaretta*, *Esco in permesso*, *Rientro da permesso*, *Uscita anticipata*, *Entro dopo*
   (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte, il saldo e la
   durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima).
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
-  Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
-  permesso a blocchi di 30 min.
+  Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella dalle timbrature ma
+  resta nel riepilogo del giorno (🚬 quante sigarette non conteggiate e la durata totale);
+  altrimenti diventa permesso a blocchi di 30 min.
 - **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
   `sbeggio://timbra` (per esempio vicino ai tornelli) Sbeggio si apre e registra l'azione del bottone
-  grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa* o *Uscita*. Il
+  grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa pranzo* o *Uscita*. Il
   messaggio ha *Annulla* per 5 secondi. Il tag si prepara una volta con un'app come NFC Tools (record
   "URL / URI personalizzato") e, se sta in un posto pubblico, si blocca in sola lettura: vedi *Aiuto →
   Come preparo un tag NFC per Sbeggio?*.
@@ -134,7 +135,8 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   da casa e in sede del mese. Il CSV ha la colonna *Luogo* (Sede/Smart).
   Con *Impostazioni → Sede di lavoro* salvi la posizione dell'ufficio: all'apertura, se per oggi
   non hai ancora scelto, l'app legge la posizione e propone 🏢 entro 300 m dall'ufficio e 🏠
-  altrove ("📍 dalla posizione"); la proposta diventa definitiva alla prima timbratura e una
+  altrove ("📍 dalla posizione"); finché non timbri la posizione si rilegge a ogni apertura (aperta
+  a casa e poi in ufficio, la proposta passa a 🏢), alla prima timbratura diventa definitiva e una
   scelta fatta a mano vale sempre. La posizione si legge solo ad app aperta e non lascia il
   telefono (nell'app Android servono i permessi di posizione).
 - **Storico**: per ogni giorno del mese, tre voci ben separate: **Lavoro**, **Straordinario** e
@@ -169,7 +171,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
 | Permesso che copre la fascia pranzo (12:15–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
 
-Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
+Se la sequenza degli eventi è incoerente (per esempio *Fine pausa pranzo* senza *Inizio pausa pranzo*),
 l'app non va in crash: segnala la giornata come **da correggere**, spiega il problema
 e calcola i totali ignorando gli eventi incoerenti.
 
@@ -315,7 +317,7 @@ Sbeggio aprirebbe il Play Store.
   se l'app è riaperta dalle recenti; metodi `stato()`, `apriImpostazioniNfc()`, `vibra()`.
   `MainActivity` non riconsegna il tag quando Android ricrea l'activity.
 - `src/core/tagNfc.ts` (puro, con test): quale azione registrare (dopo la fascia pranzo senza pausa
-  chiede *Inizio pausa* o *Uscita*) e quando ignorare la lettura (entro un minuto da una timbratura
+  chiede *Inizio pausa pranzo* o *Uscita*) e quando ignorare la lettura (entro un minuto da una timbratura
   col tag, con una finestra aperta, a giornata chiusa).
 - `src/ui/tagNfc.ts`: esegue l'azione come il tocco, con *Annulla* nel messaggio per 5 secondi.
 

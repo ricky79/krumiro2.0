@@ -12,6 +12,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // I plugin locali vanno registrati prima di super.onCreate.
         registerPlugin(NfcPlugin.class);
+        registerPlugin(FilePlugin.class);
         // Activity ricreata dal sistema (es. cambio della dimensione dei caratteri): il tag dell'intent
         // di avvio è già stato timbrato e BridgeActivity.load() lo riconsegnerebbe.
         Intent intent = getIntent();

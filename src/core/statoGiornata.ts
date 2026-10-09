@@ -90,7 +90,7 @@ function descriviIncoerenza(stato: StatoGiornata, e: Evento, etichetta: string):
       return `${etichetta} alle ${ora} durante il permesso (manca il rientro?).`;
     case 'AL_LAVORO':
       if (e.tipo === 'ENTRATA') return `Entrata doppia alle ${ora}.`;
-      if (e.tipo === 'FINE_PAUSA') return `Fine pausa alle ${ora} senza inizio pausa.`;
+      if (e.tipo === 'FINE_PAUSA') return `Fine pausa pranzo alle ${ora} senza inizio pausa pranzo.`;
       if (e.tipo === 'RIENTRO_PERMESSO') return `Rientro da permesso alle ${ora} senza uscita in permesso.`;
       return `${etichetta} alle ${ora} non è coerente.`;
   }
@@ -106,8 +106,8 @@ export type Azione =
 
 export const ETICHETTE_AZIONE: Record<Azione, string> = {
   ENTRATA: 'Entrata',
-  INIZIO_PAUSA: 'Inizio pausa',
-  FINE_PAUSA: 'Fine pausa',
+  INIZIO_PAUSA: 'Inizio pausa pranzo',
+  FINE_PAUSA: 'Fine pausa pranzo',
   USCITA_PERMESSO: 'Esco in permesso',
   RIENTRO_PERMESSO: 'Rientro da permesso',
   USCITA: 'Uscita',

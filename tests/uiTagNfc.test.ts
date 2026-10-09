@@ -137,6 +137,25 @@ describe('lettura del tag', () => {
     expect(finto.giornate[OGGI]!.eventi).toHaveLength(2);
   });
 
+  it('Annulla di un rientro breve dalla sigaretta la toglie dalle non conteggiate', async () => {
+    const g = giornata([['ENTRATA', '08:30'], ['USCITA_PERMESSO', '09:55']], { data: OGGI });
+    g.eventi[1]!.sigaretta = true;
+    finto.giornate[OGGI] = g;
+    azioni.rientroSigarettaDaTag.mockImplementation((data: string) => {
+      finto.giornate[data] = {
+        ...finto.giornate[data]!,
+        eventi: finto.giornate[data]!.eventi.slice(0, 1),
+        sigaretteNonConteggiate: [{ minuti: 595, durata: 4 }],
+      };
+    });
+    const { gestisciTag } = await carica();
+    await gestisciTag(vi.fn());
+    const annulla = azioni.rientroSigarettaDaTag.mock.calls[0]![1] as () => void;
+    annulla();
+    expect(finto.giornate[OGGI]!.eventi).toHaveLength(2);
+    expect(finto.giornate[OGGI]!.sigaretteNonConteggiate).toBeUndefined();
+  });
+
   it('a fascia pranzo finita senza pausa chiede: Uscita timbra l\'uscita', async () => {
     vi.setSystemTime(new Date('2026-10-01T15:30:00Z')); // 17:30 a Roma
     finto.giornate[OGGI] = giornata([['ENTRATA', '08:30']], { data: OGGI });
@@ -154,7 +173,7 @@ describe('lettura del tag', () => {
     const { gestisciTag } = await carica();
     await gestisciTag(vi.fn());
     expect(azioni.eseguiAzione).not.toHaveBeenCalled();
-    finto.sceltaFoglio = 'Inizio pausa';
+    finto.sceltaFoglio = 'Inizio pausa pranzo';
     await gestisciTag(vi.fn());
     expect(azioni.eseguiAzione).toHaveBeenCalledWith('INIZIO_PAUSA', OGGI, expect.any(Function));
   });

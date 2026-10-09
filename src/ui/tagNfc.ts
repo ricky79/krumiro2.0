@@ -42,7 +42,12 @@ export async function gestisciTag(mostraOggi: () => void): Promise<void> {
   const annulla = () => {
     // Prima l'inizio: la modifica allo store ridisegna e riapre la schermata della sigaretta, che lo legge.
     if (sigaretta && inizio !== null) salvaInizioSigaretta({ data, eventoId: sigaretta.id, inizio });
-    store.modificaGiornata(data, (g) => void (g.eventi = structuredClone(prima.eventi)));
+    store.modificaGiornata(data, (g) => {
+      g.eventi = structuredClone(prima.eventi);
+      // Annullare il rientro da una sigaretta breve la toglie anche dalle non conteggiate.
+      if (prima.sigaretteNonConteggiate) g.sigaretteNonConteggiate = structuredClone(prima.sigaretteNonConteggiate);
+      else delete g.sigaretteNonConteggiate;
+    });
     ultimaTimbratura = null;
     toast('Timbratura annullata');
   };
@@ -65,7 +70,7 @@ export async function gestisciTag(mostraOggi: () => void): Promise<void> {
 async function sceltaPausaOUscita(): Promise<'INIZIO_PAUSA' | 'USCITA' | null> {
   let scelta: 'INIZIO_PAUSA' | 'USCITA' | null = null;
   await apriFoglio('Cosa timbri?', el('p', { class: 'testo-foglio' }, 'La fascia pranzo è finita e la pausa non è registrata.'), [
-    { etichetta: 'Inizio pausa', stile: 'primario', azione: () => void (scelta = 'INIZIO_PAUSA') },
+    { etichetta: 'Inizio pausa pranzo', stile: 'primario', azione: () => void (scelta = 'INIZIO_PAUSA') },
     { etichetta: 'Uscita', azione: () => void (scelta = 'USCITA') },
     { etichetta: 'Annulla' },
   ]);

@@ -2,7 +2,7 @@ import { calcolaGiornata, propostaRientro } from '../core/calcolo';
 import { nuovoId } from '../core/id';
 import { analizzaGiornata, azioniDisponibili, ETICHETTE_AZIONE, type Azione } from '../core/statoGiornata';
 import { formattaDataLunga, formattaDurata, formattaOra, formattaSaldo } from '../core/tempo';
-import { testoPausa } from '../core/testi';
+import { testoPausa, testoSigaretteNonConteggiate } from '../core/testi';
 import { ETICHETTE_EVENTO, type Evento, type Giornata, type RisultatoGiornata } from '../core/tipi';
 import { store } from '../storage/store';
 import { conferma, toast } from './dialoghi';
@@ -39,7 +39,7 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
         controlloLuogo(data),
       ),
     ),
-    schedaRiepilogo(r, giornata.eventi, oggi, adesso.minuti),
+    schedaRiepilogo(r, giornata, oggi, adesso.minuti),
     r.daCorreggere ? boxProblemi(r.problemi) : null,
     oggi ? pulsantiAzione(data, r, adesso.minuti) : null,
     oggi ? riquadroPausaSaltata(data, adesso.minuti) : null,
@@ -47,12 +47,12 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
   );
 }
 
-function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, adesso: number): HTMLElement {
+function schedaRiepilogo(r: RisultatoGiornata, giornata: Giornata, oggi: boolean, adesso: number): HTMLElement {
   let etichetta: string;
   let valore: string;
   let nota: string | null = null;
 
-  const ultimo = [...eventi].sort((a, b) => b.minuti - a.minuti)[0];
+  const ultimo = [...giornata.eventi].sort((a, b) => b.minuti - a.minuti)[0];
   if (r.uscitaPrevista !== null) {
     const passata = r.uscitaPrevista <= adesso;
     etichetta = passata ? 'Ore completate alle' : 'Uscita prevista';
@@ -76,8 +76,10 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
   const percentuale = r.dovuti > 0 ? Math.min(100, Math.round((r.coperti / r.dovuti) * 100)) : 100;
   // Sotto il valore, in piccolo, la pausa fatta davvero se è scattata la pausa minima.
   const testo = testoPausa(r);
-  const pausa = stat('Pausa', testo.valore);
+  const pausa = stat('Pausa pranzo', testo.valore);
   if (testo.nota) pausa.querySelector('dd')!.append(el('small', { class: 'stat-nota' }, testo.nota));
+  // Le pause sigaretta rientrate entro la tolleranza non contano: si vedono solo qui.
+  const sigarette = testoSigaretteNonConteggiate(giornata);
   return el(
     'div',
     { class: 'scheda scheda-principale' },
@@ -93,6 +95,7 @@ function schedaRiepilogo(r: RisultatoGiornata, eventi: Evento[], oggi: boolean, 
       pausa,
       stat('Permesso', formattaDurata(r.permesso)),
     ),
+    sigarette ? el('p', { class: 'nota riepilogo-sigarette' }, sigarette) : null,
   );
 }
 

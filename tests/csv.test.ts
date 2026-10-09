@@ -37,7 +37,7 @@ describe('CSV', () => {
       'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Luogo;Eventi',
     );
     expect(righe[1]).toBe(
-      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;Sede;10:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:45 Uscita',
+      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;Sede;10:30 Entrata, 12:30 Inizio pausa pranzo, 13:30 Fine pausa pranzo, 17:45 Uscita',
     );
     expect(righe[2]).toContain('14:30 Rientro da permesso (pausa 45)');
   });
@@ -105,6 +105,12 @@ describe('CSV', () => {
     const csv = 'Data;Eventi\r\n2026-10-02;08:30 Entrata (sigaretta), 10:05 Uscita in permesso (sigaretta)\r\n';
     const i = importaCsv(csv)['2026-10-02']!;
     expect(i.eventi.map((e) => e.sigaretta)).toEqual([undefined, true]);
+  });
+
+  it('importa anche le etichette di prima ("Inizio pausa", "Fine pausa")', () => {
+    const csv = 'Data;Eventi\r\n2026-10-02;08:30 Entrata, 12:30 Inizio pausa, 13:30 Fine pausa, 17:30 Uscita\r\n';
+    const i = importaCsv(csv)['2026-10-02']!;
+    expect(i.eventi.map((e) => e.tipo)).toEqual(['ENTRATA', 'INIZIO_PAUSA', 'FINE_PAUSA', 'USCITA']);
   });
 
   it('parser con campi tra virgolette', () => {

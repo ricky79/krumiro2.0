@@ -51,7 +51,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Primi passi',
       domanda: 'Come funziona l\'app?',
       testo: [
-        'Ogni volta che timbri al lavoro, tocca il bottone grande nella schermata Oggi: l\'app registra l\'orario attuale e ti propone già l\'azione successiva (Entrata → Inizio pausa → Fine pausa → Uscita).',
+        'Ogni volta che timbri al lavoro, tocca il bottone grande nella schermata Oggi: l\'app registra l\'orario attuale e ti propone già l\'azione successiva (Entrata → Inizio pausa pranzo → Fine pausa pranzo → Uscita).',
         'In alto vedi l\'ora di uscita prevista, le ore coperte rispetto a quelle dovute e il saldo della giornata.',
         'Sotto il bottone grande compaiono le azioni meno frequenti (permessi, uscita anticipata…), solo quando hanno senso in quel momento.',
       ],
@@ -82,7 +82,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       id: 'pausa',
       sezione: 'I bottoni',
       azione: 'INIZIO_PAUSA',
-      domanda: 'Inizio pausa / Fine pausa',
+      domanda: 'Inizio pausa pranzo / Fine pausa pranzo',
       testo: [
         'Servono per la pausa pranzo, che non conta come ore coperte.',
         `Se la pausa dura meno di ${pausaMin}, viene comunque conteggiata come ${pausaMin}.`,
@@ -158,7 +158,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         `Registra un'uscita in permesso e apre una schermata con il conto alla rovescia di ${tolleranza}: la sigaretta si consuma mentre il tempo passa. Quando torni tocca "Rientro".`,
         `Negli ultimi 30 secondi lo schermo lampeggia di rosso; oltre la tolleranza ${fineSigaretta} e lo sfondo resta rosso finché non rientri.`,
-        `• Rientri entro ${tolleranza}: la pausa viene cancellata e non resta nessuna timbratura.`,
+        `• Rientri entro ${tolleranza}: la pausa viene cancellata e non resta nessuna timbratura. Nel riepilogo della giornata, sotto le ore, trovi quante sigarette non conteggiate hai fatto e quanto sono durate in tutto.`,
         '• Rientri dopo: la pausa diventa permesso a blocchi di 30 min (fino a 30 min → 30 min, fino a 1h → 1h, e così via).',
         'Le ore coperte e l\'uscita prevista non cambiano: il tempo del blocco oltre la pausa reale passa dalle ore lavorate al permesso.',
         'Esempio: pausa di 15 min → 30 min di permesso e 15 min in meno di lavorate; pausa di 42 min → 1h di permesso.',
@@ -202,7 +202,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
         'In alto a destra, accanto alla data, ci sono due simboli: 🏠 vuol dire che quel giorno lavori da casa (smart working), 🏢 che lavori in sede. Se non tocchi nulla la giornata è in sede.',
         'Puoi cambiarlo quando vuoi, anche per un giorno passato: apri il giorno dallo Storico e tocca il simbolo giusto. Non cambia il calcolo delle ore.',
         `Se in Impostazioni → Sede di lavoro salvi la posizione dell'ufficio (mentre ci sei), quando apri l'app Sbeggio la legge e propone da solo: 🏢 entro ${RAGGIO_UFFICIO} m dall'ufficio, 🏠 altrove. Sotto i simboli compare "📍 dalla posizione". La proposta diventa definitiva alla prima timbratura; se tocchi tu un simbolo, la tua scelta vale e la posizione non la cambia più.`,
-        'La posizione si legge solo con l\'app aperta, una volta al giorno finché non hai scelto, e resta sul telefono: non viene inviata a nessuno. La prima volta il telefono chiede il permesso; se lo neghi resta la sede e scegli a mano. Al chiuso la posizione può essere imprecisa: se non basta per decidere, Sbeggio non propone nulla.',
+        'La posizione si legge solo con l\'app aperta, a ogni apertura finché non timbri o scegli tu (se apri l’app a casa e poi in ufficio, la proposta passa a 🏢), e resta sul telefono: non viene inviata a nessuno. La prima volta il telefono chiede il permesso; se lo neghi resta la sede e scegli a mano. Al chiuso la posizione può essere imprecisa: se non basta per decidere, Sbeggio lascia la proposta com’era.',
         'Nello Storico i giorni da casa hanno 🏠 Smart sotto la data e il riepilogo del mese conta quanti giorni hai lavorato da casa e quanti in sede.',
       ],
     },
@@ -213,8 +213,8 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         'Nell\'app per Android puoi timbrare avvicinando il telefono a un tag NFC di Sbeggio, per esempio quello vicino ai tornelli, anche ad app chiusa: Sbeggio si apre e registra l\'azione del bottone principale.',
         '• Giornata non iniziata: Entrata.',
-        `• Al lavoro senza pausa: Inizio pausa. Dopo le ${fineFascia}, finita la fascia pranzo, ti chiede se è Inizio pausa o Uscita.`,
-        '• In pausa: Fine pausa.',
+        `• Al lavoro senza pausa: Inizio pausa pranzo. Dopo le ${fineFascia}, finita la fascia pranzo, ti chiede se è Inizio pausa pranzo o Uscita.`,
+        '• In pausa: Fine pausa pranzo.',
         '• Al lavoro dopo la pausa: Uscita.',
         `• Pausa sigaretta in corso: Rientro, come con il tasto (entro ${tolleranza} la pausa non conta).`,
         '• In permesso: Rientro da permesso.',
@@ -291,7 +291,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       sezione: 'Correggere gli errori',
       domanda: 'Cosa significa "Giornata da correggere"?',
       testo: [
-        'La sequenza delle timbrature non è coerente: per esempio una "Fine pausa" senza "Inizio pausa", due entrate, o una giornata passata senza uscita.',
+        'La sequenza delle timbrature non è coerente: per esempio una "Fine pausa pranzo" senza "Inizio pausa pranzo", due entrate, o una giornata passata senza uscita.',
         'L\'app spiega il problema nel riquadro arancione e calcola i totali ignorando le timbrature incoerenti (evidenziate in rosso). Aggiungi, modifica o elimina le timbrature finché il riquadro sparisce.',
       ],
     },

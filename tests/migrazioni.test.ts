@@ -96,6 +96,19 @@ describe('migrazioni', () => {
     expect(luogo(true)).toBeUndefined();
   });
 
+  it('sigarette non conteggiate: conservate quelle valide, campo assente se non ce ne sono', () => {
+    const sigarette = (v: unknown) =>
+      migra({ version: 1, giornate: { '2026-10-01': { data: '2026-10-01', permessoInizioMinuti: 0, sigaretteNonConteggiate: v, eventi: [{ tipo: 'ENTRATA', minuti: 510 }] } } })
+        .giornate['2026-10-01']!.sigaretteNonConteggiate;
+    expect(sigarette([{ minuti: 605, durata: 6 }])).toEqual([{ minuti: 605, durata: 6 }]);
+    expect(sigarette([{ minuti: 605, durata: 6 }, { minuti: 2000, durata: 3 }, { minuti: 700, durata: 0 }, 'x'])).toEqual([
+      { minuti: 605, durata: 6 },
+    ]);
+    expect(sigarette(undefined)).toBeUndefined();
+    expect(sigarette([])).toBeUndefined();
+    expect(sigarette('tante')).toBeUndefined();
+  });
+
   it('posizione dell\'ufficio: predefinita assente, coordinate non valide scartate', () => {
     const ufficio = (v: unknown) => migra({ version: 1, impostazioni: { ufficio: v } }).impostazioni.ufficio;
     expect(migra({}).impostazioni.ufficio).toBeNull();

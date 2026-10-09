@@ -105,12 +105,19 @@ export function parseCsv(testo: string, sep = SEPARATORE): string[][] {
   return righe.filter((r) => r.some((c) => c.trim() !== ''));
 }
 
-const TIPO_DA_ETICHETTA = new Map<string, TipoEvento>(
-  TIPI_EVENTO.flatMap((t) => [
+/** Etichette dei CSV esportati dalle versioni precedenti, ancora importabili. */
+const ETICHETTE_PRECEDENTI: [string, TipoEvento][] = [
+  ['inizio pausa', 'INIZIO_PAUSA'],
+  ['fine pausa', 'FINE_PAUSA'],
+];
+
+const TIPO_DA_ETICHETTA = new Map<string, TipoEvento>([
+  ...TIPI_EVENTO.flatMap((t): [string, TipoEvento][] => [
     [ETICHETTE_EVENTO[t].toLowerCase(), t],
     [t.toLowerCase(), t],
   ]),
-);
+  ...ETICHETTE_PRECEDENTI,
+]);
 
 export class ErroreImportazione extends Error {}
 
