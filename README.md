@@ -106,18 +106,19 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 ## Come si usa
 
 - **Oggi**: il bottone grande propone l'azione più probabile
-  (Entrata → Inizio pausa → Fine pausa → Uscita). Sotto trovi le azioni secondarie:
+  (Entrata → Inizio pausa pranzo → Fine pausa pranzo → Uscita). Sotto trovi le azioni secondarie:
   *Pausa sigaretta*, *Esco in permesso*, *Rientro da permesso*, *Uscita anticipata*, *Entro dopo*
   (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte, il saldo e la
   durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima).
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
-  Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella; altrimenti diventa
-  permesso a blocchi di 30 min.
+  Se rientri entro la tolleranza (11 min, configurabile) la pausa si cancella dalle timbrature ma
+  resta nel riepilogo del giorno (🚬 quante sigarette non conteggiate e la durata totale);
+  altrimenti diventa permesso a blocchi di 30 min.
 - **Tag NFC (solo app Android)**: avvicinando il telefono sbloccato a un tag NFC con scritto
   `sbeggio://timbra` (per esempio vicino ai tornelli) Sbeggio si apre e registra l'azione del bottone
-  grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa* o *Uscita*. Il
+  grande; dopo la fascia pranzo, senza pausa registrata, chiede se è *Inizio pausa pranzo* o *Uscita*. Il
   messaggio ha *Annulla* per 5 secondi. Il tag si prepara una volta con un'app come NFC Tools (record
   "URL / URI personalizzato") e, se sta in un posto pubblico, si blocca in sola lettura: vedi *Aiuto →
   Come preparo un tag NFC per Sbeggio?*.
@@ -169,7 +170,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |
 | Permesso che copre la fascia pranzo (12:15–14:30) senza pausa registrata | fino a 30 min diventano pausa (configurabile); al rientro l'app mostra la ripartizione proposta (es. "30 min pausa + 2h permesso"), che puoi modificare prima di confermare |
 
-Se la sequenza degli eventi è incoerente (per esempio *Fine pausa* senza *Inizio pausa*),
+Se la sequenza degli eventi è incoerente (per esempio *Fine pausa pranzo* senza *Inizio pausa pranzo*),
 l'app non va in crash: segnala la giornata come **da correggere**, spiega il problema
 e calcola i totali ignorando gli eventi incoerenti.
 
@@ -315,7 +316,7 @@ Sbeggio aprirebbe il Play Store.
   se l'app è riaperta dalle recenti; metodi `stato()`, `apriImpostazioniNfc()`, `vibra()`.
   `MainActivity` non riconsegna il tag quando Android ricrea l'activity.
 - `src/core/tagNfc.ts` (puro, con test): quale azione registrare (dopo la fascia pranzo senza pausa
-  chiede *Inizio pausa* o *Uscita*) e quando ignorare la lettura (entro un minuto da una timbratura
+  chiede *Inizio pausa pranzo* o *Uscita*) e quando ignorare la lettura (entro un minuto da una timbratura
   col tag, con una finestra aperta, a giornata chiusa).
 - `src/ui/tagNfc.ts`: esegue l'azione come il tocco, con *Annulla* nel messaggio per 5 secondi.
 

@@ -76,6 +76,23 @@ export function istanteDaMinuti(minutiEvento: number, ora: Date): number {
   return ora.getTime() - ((minuti - minutiEvento) * 60 + ora.getSeconds()) * 1000 - ora.getMilliseconds();
 }
 
+/** Durata in minuti di una pausa sigaretta non conteggiata: arrotondata, almeno 1. */
+export function durataSigaretta(trascorsiMs: number): number {
+  return Math.max(1, Math.round(trascorsiMs / 60_000));
+}
+
+/**
+ * Rientro entro la tolleranza: l'uscita sparisce dalle timbrature (la pausa non conta)
+ * e la sigaretta resta tra quelle non conteggiate, per il riepilogo del giorno.
+ */
+export function annullaSigarettaNonConteggiata(giornata: Giornata, uscita: Evento, trascorsiMs: number): void {
+  giornata.eventi = giornata.eventi.filter((e) => e.id !== uscita.id);
+  giornata.sigaretteNonConteggiate = [
+    ...(giornata.sigaretteNonConteggiate ?? []),
+    { minuti: uscita.minuti, durata: durataSigaretta(trascorsiMs) },
+  ];
+}
+
 /** L'uscita della pausa sigaretta in corso (giornata in permesso aperto da una sigaretta), o null. */
 export function sigarettaInCorso(giornata: Giornata): Evento | null {
   const a = analizzaGiornata(giornata);

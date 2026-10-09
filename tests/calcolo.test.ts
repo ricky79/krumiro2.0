@@ -377,7 +377,7 @@ describe('eventi incoerenti', () => {
     ]);
     const r = calcolaGiornata(g, imp, null);
     expect(r.daCorreggere).toBe(true);
-    expect(r.problemi[0]).toMatch(/Fine pausa alle 13:30 senza inizio pausa/);
+    expect(r.problemi[0]).toMatch(/Fine pausa pranzo alle 13:30 senza inizio pausa pranzo/);
     expect(r.lavorati).toBe(540); // calcolo comunque "migliore possibile"
   });
 

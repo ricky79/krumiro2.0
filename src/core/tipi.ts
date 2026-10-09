@@ -20,8 +20,8 @@ export const TIPI_EVENTO: readonly TipoEvento[] = [
 
 export const ETICHETTE_EVENTO: Record<TipoEvento, string> = {
   ENTRATA: 'Entrata',
-  INIZIO_PAUSA: 'Inizio pausa',
-  FINE_PAUSA: 'Fine pausa',
+  INIZIO_PAUSA: 'Inizio pausa pranzo',
+  FINE_PAUSA: 'Fine pausa pranzo',
   USCITA_PERMESSO: 'Uscita in permesso',
   RIENTRO_PERMESSO: 'Rientro da permesso',
   USCITA: 'Uscita',
@@ -63,6 +63,19 @@ export interface Giornata {
    */
   luogo?: Luogo;
   eventi: Evento[];
+  /**
+   * Pause sigaretta rientrate entro la tolleranza: non contano nelle ore, si mostrano solo
+   * nel riepilogo del giorno. Assente se non ce ne sono.
+   */
+  sigaretteNonConteggiate?: SigarettaNonConteggiata[];
+}
+
+/** Pausa sigaretta cancellata al rientro perché entro la tolleranza. */
+export interface SigarettaNonConteggiata {
+  /** Ora dell'uscita, minuti dalla mezzanotte. */
+  minuti: number;
+  /** Durata in minuti (almeno 1). */
+  durata: number;
 }
 
 /** Avvisi (notifiche) dell'app Android: quali ricevere e dopo quanto avvisare del rientro dal pranzo. */
