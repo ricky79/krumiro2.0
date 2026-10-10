@@ -9,6 +9,8 @@ import { conferma, toast } from './dialoghi';
 import { el } from './dom';
 import { linkAiuto } from './aiuto';
 import { controlloLuogo } from './luogo';
+import { ICONA_FERIE, impostaFerie, schedaFerie } from './ferie';
+import { haTimbrature } from '../core/giornata';
 import {
   confermaRipartizione,
   editorEvento,
@@ -30,6 +32,8 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
   const giornata = store.giornata(data);
   const r = calcolaGiornata(giornata, store.impostazioni, oggi ? adesso.minuti : null);
   const analisi = analizzaGiornata(giornata);
+  // In ferie senza timbrature: solo la scheda delle ferie, niente pulsanti di timbratura.
+  const soloFerie = giornata.ferie === true && !haTimbrature(giornata);
 
   return el(
     'section',
@@ -42,14 +46,14 @@ export function vistaGiorno(data: string, adesso: Adesso, onIndietro: (() => voi
         'div',
         { class: 'intestazione-riga' },
         el('div', {}, el('h1', {}, oggi ? 'Oggi' : 'Giornata'), el('p', { class: 'sottotitolo' }, formattaDataLunga(data))),
-        controlloLuogo(data),
+        giornata.ferie ? null : controlloLuogo(data),
       ),
     ),
-    schedaRiepilogo(r, giornata, oggi, adesso.minuti),
+    soloFerie ? schedaFerie(data, r, oggi) : schedaRiepilogo(r, giornata, oggi, adesso.minuti),
     r.daCorreggere ? boxProblemi(r.problemi) : null,
-    oggi ? pulsantiAzione(data, r, adesso.minuti) : null,
-    oggi ? riquadroPausaSaltata(data, adesso.minuti) : null,
-    timeline(data, giornata, analisi.idScartati, r, oggi ? adesso.minuti : 9 * 60),
+    oggi && !soloFerie ? pulsantiAzione(data, r, adesso.minuti) : null,
+    oggi && !soloFerie ? riquadroPausaSaltata(data, adesso.minuti) : null,
+    soloFerie ? null : timeline(data, giornata, analisi.idScartati, r, oggi ? adesso.minuti : 9 * 60),
   );
 }
 
@@ -370,6 +374,12 @@ function timeline(
       pianificato === 0 && r.stato !== 'CHIUSA'
         ? el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void editorPermessoUscita(data) }, '+ Permesso in uscita')
         : null,
+      // Un giorno off: solo se non si è ancora timbrato (con le timbrature, per toglierle).
+      giornata.ferie
+        ? el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => impostaFerie(data, false) }, 'Togli le ferie')
+        : !haTimbrature(giornata) && r.dovuti > 0
+          ? el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => impostaFerie(data, true) }, `${ICONA_FERIE} In ferie questo giorno`)
+          : null,
     ),
   );
 }

@@ -62,6 +62,8 @@ export interface Giornata {
    * quello rilevato dalla posizione o, senza, la sede.
    */
   luogo?: Luogo;
+  /** Giornata di ferie: le ore dovute sono coperte dalle ferie. Assente = giornata normale. */
+  ferie?: true;
   eventi: Evento[];
   /**
    * Pause sigaretta rientrate entro la tolleranza: non contano nelle ore, si mostrano solo
@@ -191,6 +193,8 @@ export interface RisultatoGiornata {
   permessoIntermedio: number;
   permessoUscita: number;
   permesso: number;
+  /** Ore di ferie (minuti): in una giornata di ferie coprono le ore dovute. */
+  ferie: number;
   coperti: number;
   saldo: number;
   /** Minuti dalla mezzanotte; null se non applicabile. */

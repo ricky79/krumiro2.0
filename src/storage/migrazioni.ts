@@ -142,6 +142,7 @@ function normalizzaGiornata(g: unknown, chiave: string): Giornata | null {
     eventi,
   };
   if (g.luogo === 'smart' || g.luogo === 'sede') giornata.luogo = g.luogo;
+  if (g.ferie === true) giornata.ferie = true;
   const sigarette: SigarettaNonConteggiata[] = [];
   if (Array.isArray(g.sigaretteNonConteggiate)) {
     for (const s of g.sigaretteNonConteggiate) {

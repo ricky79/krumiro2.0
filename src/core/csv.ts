@@ -18,6 +18,7 @@ const INTESTAZIONE = [
   'Permesso inizio giornata (min)',
   'Permesso in uscita (min)',
   'Luogo',
+  'Ferie',
   'Eventi',
 ];
 
@@ -61,6 +62,7 @@ export function esportaCsv(
         String(g.permessoInizioMinuti),
         String(g.permessoUscitaMinuti),
         g.luogo === 'smart' ? 'Smart' : 'Sede',
+        g.ferie ? 'Sì' : '',
         eventiInTesto(g.eventi),
       ]
         .map(quota)
@@ -131,6 +133,7 @@ export function importaCsv(testo: string): Record<string, Giornata> {
   const iPermesso = intest.findIndex((c) => c.startsWith('permesso inizio giornata'));
   const iPermessoUscita = intest.findIndex((c) => c.startsWith('permesso in uscita'));
   const iLuogo = intest.indexOf('luogo');
+  const iFerie = intest.indexOf('ferie');
   if (iData < 0 || iEventi < 0) {
     throw new ErroreImportazione('Intestazione non riconosciuta: servono almeno le colonne "Data" ed "Eventi".');
   }
@@ -164,6 +167,8 @@ export function importaCsv(testo: string): Record<string, Giornata> {
     const g: Giornata = { data, permessoInizioMinuti: permesso, permessoUscitaMinuti: permessoUscita, eventi };
     const luogo = iLuogo >= 0 ? (r[iLuogo] ?? '').trim().toLowerCase() : '';
     if (luogo === 'smart' || luogo === 'sede') g.luogo = luogo;
+    const ferie = iFerie >= 0 ? (r[iFerie] ?? '').trim().toLowerCase() : '';
+    if (ferie === 'sì' || ferie === 'si') g.ferie = true;
     giornate[data] = g;
   });
   return giornate;

@@ -7,10 +7,13 @@ import { el } from './dom';
 import type { Adesso } from './giorno';
 import { esportaCsvCondividi } from './dati';
 import { iconaCasa } from './luogo';
+import { editorFerie, ICONA_FERIE } from './ferie';
 
 export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: string) => void, apriGiorno: (data: string) => void): HTMLElement {
   const rm = riepilogoMese(store.giornate, store.impostazioni, mese, adesso);
   const meseCorrente = adesso.data.slice(0, 7);
+  // Si va avanti fino al mese corrente, o fino all'ultimo con delle ferie già segnate.
+  const ultimoMese = Object.keys(store.giornate).reduce((m, d) => (d.slice(0, 7) > m ? d.slice(0, 7) : m), meseCorrente);
 
   return el(
     'section',
@@ -23,7 +26,7 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
       el('h2', {}, nomeMese(mese)),
       el(
         'button',
-        { type: 'button', class: 'btn-tondo', 'aria-label': 'Mese successivo', disabled: mese >= meseCorrente, onclick: () => cambiaMese(spostaMese(mese, 1)) },
+        { type: 'button', class: 'btn-tondo', 'aria-label': 'Mese successivo', disabled: mese >= ultimoMese, onclick: () => cambiaMese(spostaMese(mese, 1)) },
         '›',
       ),
     ),
@@ -51,8 +54,16 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
         rm.giorniSmart === 0
           ? 'Nessun giorno da casa'
           : `${rm.giorniSmart} ${rm.giorniSmart === 1 ? 'giorno' : 'giorni'} da casa (smart)`,
-        rm.giorni.length > rm.giorniSmart ? ` · ${rm.giorni.length - rm.giorniSmart} in sede` : null,
+        rm.giorni.length - rm.giorniSmart - rm.giorniFerie > 0 ? ` · ${rm.giorni.length - rm.giorniSmart - rm.giorniFerie} in sede` : null,
       ),
+      rm.giorniFerie > 0
+        ? el(
+            'p',
+            { class: 'nota riepilogo-smart' },
+            el('span', { class: 'icona-luogo', 'aria-hidden': 'true' }, ICONA_FERIE),
+            `${rm.giorniFerie} ${rm.giorniFerie === 1 ? 'giorno' : 'giorni'} di ferie (${formattaDurata(rm.ferie)})`,
+          )
+        : null,
       rm.giorniDaCorreggere > 0
         ? el('p', { class: 'nota negativo' }, `⚠︎ ${rm.giorniDaCorreggere} ${rm.giorniDaCorreggere === 1 ? 'giornata da correggere' : 'giornate da correggere'}`)
         : null,
@@ -66,9 +77,18 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
             'ul',
             { class: 'elenco-giorni' },
             rm.giorni.map(({ data, smart, risultato: r, ore }) => {
-              const inCorso = data === adesso.data && r.stato !== 'CHIUSA';
+              const ferie = r.ferie > 0 && !r.daCorreggere;
+              const inCorso = !ferie && data === adesso.data && r.stato !== 'CHIUSA';
               const mancano = !inCorso && !r.daCorreggere && r.saldo < 0 ? -r.saldo : 0;
-              const nota = r.daCorreggere ? 'Da correggere' : inCorso ? 'In corso' : r.stato !== 'CHIUSA' ? statoLeggibile(r) : null;
+              const nota = r.daCorreggere
+                ? 'Da correggere'
+                : ferie
+                  ? `${ICONA_FERIE} Ferie · ${formattaDurata(r.ferie)}`
+                  : inCorso
+                    ? 'In corso'
+                    : r.stato !== 'CHIUSA'
+                      ? statoLeggibile(r)
+                      : null;
               return el(
                 'li',
                 {},
@@ -101,6 +121,7 @@ export function vistaStorico(mese: string, adesso: Adesso, cambiaMese: (m: strin
       'div',
       { class: 'riga-pulsanti' },
       el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void scegliGiorno(adesso.data, apriGiorno) }, '+ Giornata dimenticata'),
+      el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void editorFerie(adesso.data) }, `${ICONA_FERIE} Ferie`),
       el('button', { type: 'button', class: 'btn btn-secondario', onclick: () => void esportaCsvCondividi(adesso) }, 'Esporta CSV'),
     ),
   );

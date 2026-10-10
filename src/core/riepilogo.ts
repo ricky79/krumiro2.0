@@ -1,4 +1,5 @@
 import { calcolaGiornata } from './calcolo';
+import { haContenuto } from './giornata';
 import { straordinarioABlocchi } from './permessi';
 import type { Giornata, Impostazioni, RisultatoGiornata } from './tipi';
 
@@ -26,6 +27,8 @@ export interface GiornoRiepilogo {
   data: string;
   /** Giornata lavorata da casa. */
   smart: boolean;
+  /** Giornata di ferie. */
+  ferie: boolean;
   risultato: RisultatoGiornata;
   ore: OreGiorno;
 }
@@ -43,6 +46,9 @@ export interface RiepilogoMese {
   giorniDaCorreggere: number;
   /** Giornate del mese lavorate da casa (smart working). */
   giorniSmart: number;
+  /** Giornate di ferie del mese e ore di ferie (minuti). */
+  giorniFerie: number;
+  ferie: number;
 }
 
 /**
@@ -60,7 +66,8 @@ export function riepilogoMese(
     .sort((a, b) => b.data.localeCompare(a.data))
     .map((g) => ({
       data: g.data,
-      smart: g.luogo === 'smart',
+      smart: g.luogo === 'smart' && g.ferie !== true,
+      ferie: g.ferie === true,
       risultato: calcolaGiornata(g, imp, g.data === oggi.data ? oggi.minuti : null),
     }))
     .map((x) => ({ ...x, ore: oreGiorno(x.risultato) }));
@@ -71,6 +78,8 @@ export function riepilogoMese(
   let saldo = 0;
   let giorniDaCorreggere = 0;
   let giorniSmart = 0;
+  let giorniFerie = 0;
+  let ferie = 0;
   for (const { data, smart, risultato, ore } of giorni) {
     lavoro += ore.lavoro;
     straordinario += ore.straordinario;
@@ -79,16 +88,12 @@ export function riepilogoMese(
     if (data !== oggi.data || risultato.stato === 'CHIUSA') saldo += risultato.saldo;
     if (risultato.daCorreggere) giorniDaCorreggere++;
     if (smart) giorniSmart++;
+    if (risultato.ferie > 0) {
+      giorniFerie++;
+      ferie += risultato.ferie;
+    }
   }
-  return { mese, giorni, lavoro, straordinario, permesso, saldo, giorniDaCorreggere, giorniSmart };
+  return { mese, giorni, lavoro, straordinario, permesso, saldo, giorniDaCorreggere, giorniSmart, giorniFerie, ferie };
 }
 
-/** Una giornata con timbrature, permessi pianificati o segnata in smart: compare nello storico e nel CSV. */
-export function haContenuto(g: Giornata): boolean {
-  return haTimbrature(g) || g.luogo === 'smart';
-}
-
-/** Timbrature o permessi pianificati: la giornata è iniziata davvero. */
-export function haTimbrature(g: Giornata): boolean {
-  return g.eventi.length > 0 || g.permessoInizioMinuti > 0 || g.permessoUscitaMinuti > 0;
-}
+export { haContenuto, haTimbrature } from './giornata';

@@ -131,6 +131,11 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
+- **Ferie**: un giorno libero si segna dalla giornata ("🏖️ In ferie questo giorno", se non hai
+  ancora timbrato); più giorni, anche futuri, dallo Storico con *🏖️ Ferie* (Dal/Al, propone la
+  prossima settimana da lunedì a venerdì; salta i giorni senza ore dovute e quelli già timbrati).
+  Un giorno di ferie copre le ore dovute (saldo zero), Oggi mostra 🏖️ al posto dei bottoni e il
+  riepilogo del mese conta giorni e ore di ferie. Il CSV ha la colonna *Ferie*.
 - **Casa o ufficio**: in alto a destra della giornata un controllo con 🏠 (da casa, smart working) e
   🏢 (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
   calcolo delle ore. Nello Storico i giorni da casa hanno 🏠 e il riepilogo conta i giorni

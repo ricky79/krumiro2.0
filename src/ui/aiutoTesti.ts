@@ -197,6 +197,17 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: ['Elimina l\'ultima uscita (normale o anticipata) e riporta la giornata allo stato "Al lavoro". Utile se hai timbrato l\'uscita per sbaglio.'],
     },
     {
+      id: 'ferie',
+      sezione: 'I bottoni',
+      domanda: 'Ferie: un giorno libero o una settimana intera',
+      testo: [
+        '• Un giorno solo: apri la giornata (Oggi, o un giorno dallo Storico) e, se non hai ancora timbrato, tocca "🏖️ In ferie questo giorno".',
+        '• Più giorni, anche in anticipo: nello Storico tocca "🏖️ Ferie", scegli Dal e Al (propone la prossima settimana, da lunedì a venerdì) e tocca "Segna le ferie". I giorni senza ore dovute, come sabato e domenica, vengono saltati; quelli in cui hai già timbrato restano com\'erano.',
+        'Un giorno di ferie copre le ore dovute: il saldo resta a zero e Oggi mostra 🏖️ al posto dei bottoni. Nello Storico il giorno ha "🏖️ Ferie" e il riepilogo del mese conta i giorni e le ore di ferie. Puoi andare avanti anche nei mesi futuri in cui hai segnato delle ferie.',
+        'Per toglierle: "Togli le ferie" nella giornata, oppure lo stesso foglio dello Storico con "Togli le ferie" sulle date scelte. Se segni le ferie e poi timbri, la giornata risulta da correggere finché non togli le une o le altre.',
+      ],
+    },
+    {
       id: 'smart',
       sezione: 'I bottoni',
       domanda: 'Casa o ufficio: segnare lo smart working',
