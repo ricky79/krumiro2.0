@@ -120,14 +120,14 @@ describe('sincronizzazione con il backend', () => {
     expect(url).toBe(`${BASE}/avvisi/${id}`);
     expect(init.method).toBe('PUT');
     expect(init.headers).toEqual({ 'Content-Type': 'application/json' });
-    expect(JSON.parse(init.body as string)).toEqual({ contatto, orario: '2026-10-01T15:30:00.000Z' }); // 17:30 a Roma
+    expect(JSON.parse(init.body as string)).toEqual({ contatto, orario: '2026-10-01T15:00:00.000Z' }); // 17:00 a Roma (pausa minima inclusa)
 
     expect(s.endpoint).toBe(contatto.endpoint);
-    expect(s.inviati.uscita).toMatchObject({ orario: Date.parse('2026-10-01T15:30:00Z'), titolo: 'Puoi andare via' });
+    expect(s.inviati.uscita).toMatchObject({ orario: Date.parse('2026-10-01T15:00:00Z'), titolo: 'Puoi andare via' });
     expect(JSON.parse(cache.get(`${SCOPE}avvisi/${id}`)!)).toEqual({
       titolo: 'Puoi andare via',
-      testo: 'Le ore sono completate: uscita prevista alle 17:30.',
-      orario: '2026-10-01T15:30:00.000Z',
+      testo: 'Le ore sono completate: uscita prevista alle 17:00.',
+      orario: '2026-10-01T15:00:00.000Z',
     });
   });
 

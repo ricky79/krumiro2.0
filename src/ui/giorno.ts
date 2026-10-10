@@ -110,7 +110,7 @@ function notaUscitaPrevista(r: RisultatoGiornata, passata: boolean): string | nu
   const unisci = (...parti: (string | null)[]) => parti.filter((p) => p !== null).join(', ');
   if (r.stato === 'IN_PAUSA') return unisci('se rientri ora (pausa minima inclusa)', permesso);
   if (r.uscitaPrevistaConPausa) {
-    return unisci(permesso, `inclusa pausa pranzo di ${formattaDurata(store.impostazioni.pausaDaScalare)}`);
+    return unisci(permesso, `inclusa pausa pranzo di ${formattaDurata(store.impostazioni.pausaMinima)}`);
   }
   if (permesso) return permesso;
   return passata ? 'stai facendo straordinario' : null;
