@@ -499,7 +499,7 @@ button {
 }
 .giorno {
   display: grid;
-  grid-template-columns: 62px repeat(3, minmax(0, 1fr));
+  grid-template-columns: 70px repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 4px 8px;
   width: 100%;
@@ -546,6 +546,14 @@ button {
 .giorno-errato .giorno-data {
   color: var(--negativo);
 }
+/* Giornata di ferie: al posto del riepilogo e dei pulsanti di timbratura. */
+.scheda-ferie .grande {
+  margin: 4px 0;
+}
+.scheda-ferie .btn {
+  margin-top: 12px;
+}
+
 .badge {
   padding: 0 8px;
   border-radius: 10px;

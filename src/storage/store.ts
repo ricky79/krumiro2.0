@@ -1,4 +1,4 @@
-import { haTimbrature } from '../core/riepilogo';
+import { giornataVuota, haTimbrature } from '../core/giornata';
 import type { Giornata, Impostazioni, Luogo } from '../core/tipi';
 import { datiVuoti, migra, type DatiSalvati } from './migrazioni';
 
@@ -87,9 +87,23 @@ class Store {
       const proposto = this.luogoProposto(data);
       if (proposto) g.luogo = proposto;
     }
-    if (!haTimbrature(g) && g.luogo === undefined) delete this.dati.giornate[data];
-    else this.dati.giornate[data] = g;
+    this.applica(data, g);
     this.salva();
+  }
+
+  /** Come modificaGiornata, per più date con un solo salvataggio (es. una settimana di ferie). */
+  modificaGiornate(date: readonly string[], modifica: (g: Giornata) => void): void {
+    for (const data of date) {
+      const g = structuredClone(this.giornata(data));
+      modifica(g);
+      this.applica(data, g);
+    }
+    this.salva();
+  }
+
+  private applica(data: string, g: Giornata): void {
+    if (giornataVuota(g)) delete this.dati.giornate[data];
+    else this.dati.giornate[data] = g;
   }
 
   proponiLuogo(f: (data: string) => Luogo | null): void {

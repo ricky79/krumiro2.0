@@ -3,7 +3,8 @@ import { formattaDurata } from './tempo';
 import type { RisultatoGiornata, SigarettaNonConteggiata } from './tipi';
 
 export function statoLeggibile(r: RisultatoGiornata): string {
-  return r.daCorreggere ? 'Da correggere' : ETICHETTE_STATO[r.stato];
+  if (r.daCorreggere) return 'Da correggere';
+  return r.ferie > 0 ? 'Ferie' : ETICHETTE_STATO[r.stato];
 }
 
 /**

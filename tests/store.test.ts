@@ -31,6 +31,25 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe('ferie', () => {
+  it('una giornata di ferie si salva senza timbrature e sparisce togliendole', async () => {
+    const { store } = await carica();
+    store.modificaGiornata(GIOVEDI, (g) => void (g.ferie = true));
+    expect(store.giornate[GIOVEDI]?.ferie).toBe(true);
+    store.modificaGiornata(GIOVEDI, (g) => void delete g.ferie);
+    expect(store.giornate[GIOVEDI]).toBeUndefined();
+  });
+
+  it('più giorni in una volta sola, con un solo salvataggio', async () => {
+    const { store } = await carica();
+    const cambiato = vi.fn();
+    store.ascolta(cambiato);
+    store.modificaGiornate(['2026-10-12', '2026-10-13', '2026-10-14'], (g) => void (g.ferie = true));
+    expect(Object.keys(store.giornate).sort()).toEqual(['2026-10-12', '2026-10-13', '2026-10-14']);
+    expect(cambiato).toHaveBeenCalledOnce();
+  });
+});
+
 describe('luogo della giornata', () => {
   it('una giornata segnata in smart si salva anche senza timbrature', async () => {
     const { store } = await carica();

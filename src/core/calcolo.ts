@@ -1,5 +1,6 @@
 import { permessoABlocchi } from './permessi';
 import { permessoSigaretta } from './sigaretta';
+import { haTimbrature } from './giornata';
 import { analizzaGiornata } from './statoGiornata';
 import { giornoSettimana } from './tempo';
 import type { Giornata, Impostazioni, PermessoABlocchi, PermessoSigaretta, Ripartizione, RisultatoGiornata } from './tipi';
@@ -219,7 +220,13 @@ export function calcolaGiornata(
     permessoUscita = mancante + eccedenzaUscita;
     lavorati -= eccedenzaUscita;
   }
-  const coperti = lavorati + permessoInizio + permessoIntermedio + permessoUscita;
+  // Ferie: coprono quello che manca alle ore dovute. Con delle timbrature la giornata non torna.
+  const lavoroEPermessi = lavorati + permessoInizio + permessoIntermedio + permessoUscita;
+  const ferie = giornata.ferie ? Math.max(0, dovuti - lavoroEPermessi) : 0;
+  if (giornata.ferie && haTimbrature(giornata)) {
+    problemi.push('Giornata di ferie con delle timbrature: togli le ferie o le timbrature.');
+  }
+  const coperti = lavoroEPermessi + ferie;
   const pausaFatta = pausaRegistrata || pausaScalata > 0;
 
   // 5. Uscita prevista (anticipata dal permesso in uscita pianificato).
@@ -253,6 +260,7 @@ export function calcolaGiornata(
     permessoIntermedio,
     permessoUscita,
     permesso: permessoInizio + permessoIntermedio + permessoUscita,
+    ferie,
     coperti,
     saldo: coperti - dovuti,
     uscitaPrevista,
