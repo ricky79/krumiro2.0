@@ -6,9 +6,10 @@ import { giornata, h, impostazioni } from './helpers';
 
 // Pausa minima 30 min, pausa da scalare 60 (helpers): l'uscita prevista usa la minima.
 const imp = impostazioni();
-/** Venerdì dal quale la pausa obbligatoria si scala all'uscita; 8h dovute. */
+/** Lunedì dal quale la pausa obbligatoria si scala all'uscita; 8h dovute. */
 const DAL = INIZIO_PAUSA_OBBLIGATORIA;
-const PRIMA = '2026-10-08';
+/** Venerdì precedente, 8h dovute: la regola non vale ancora. */
+const PRIMA = '2026-10-09';
 const conDovuti = (minuti: number) =>
   impostazioni({ minutiDovuti: { predefinito: minuti, perGiorno: [null, null, null, null, null, null, null] } });
 
@@ -19,8 +20,8 @@ describe('quando la pausa pranzo è obbligatoria', () => {
     expect(pausaObbligatoria(480)).toBe(true);
   });
 
-  it('la regola vale dal 9 ottobre 2026', () => {
-    expect(INIZIO_PAUSA_OBBLIGATORIA).toBe('2026-10-09');
+  it('la regola vale dal 12 ottobre 2026', () => {
+    expect(INIZIO_PAUSA_OBBLIGATORIA).toBe('2026-10-12');
   });
 });
 
@@ -117,7 +118,7 @@ describe('giornata chiusa senza pausa', () => {
     expect(calcolaGiornata(g, imp, h('16:00')).pausaAutomatica).toBe(0);
   });
 
-  it('le giornate prima del 9 ottobre 2026 restano come erano', () => {
+  it('le giornate prima del 12 ottobre 2026 restano come erano', () => {
     const g = giornata([['ENTRATA', '08:30'], ['USCITA', '17:00']], { data: PRIMA });
     const r = calcolaGiornata(g, imp, null);
     expect(r.pausaAutomatica).toBe(0);

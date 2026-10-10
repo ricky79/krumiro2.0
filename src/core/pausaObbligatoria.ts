@@ -10,7 +10,7 @@ export const SOGLIA_PAUSA_OBBLIGATORIA = 6 * 60;
  * Prima giornata in cui una pausa obbligatoria non registrata si scala all'uscita: le giornate
  * precedenti restano con i saldi già visti.
  */
-export const INIZIO_PAUSA_OBBLIGATORIA = '2026-10-09';
+export const INIZIO_PAUSA_OBBLIGATORIA = '2026-10-12';
 
 /** True se con questi minuti dovuti la pausa pranzo è obbligatoria. */
 export function pausaObbligatoria(dovuti: number): boolean {

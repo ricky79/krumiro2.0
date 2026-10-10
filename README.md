@@ -171,7 +171,7 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Timbrature prima delle 08:30 | contano come 08:30 (in tutti i calcoli) |
 | Pausa più breve di 30 min | conta come 30 min (in tutti i calcoli) |
 | Pausa pranzo | non conta come coperta |
-| Pausa pranzo obbligatoria | con almeno 6h **dovute** (da Impostazioni, prima dei permessi: decisione del 2026-10-09, rivedibile); niente "No, l'ho saltata"; se esci dopo la fascia pranzo senza averla registrata si scala la pausa minima ("non registrata"), dalle giornate del 2026-10-09 in poi |
+| Pausa pranzo obbligatoria | con almeno 6h **dovute** (da Impostazioni, prima dei permessi: decisione del 2026-10-09, rivedibile); niente "No, l'ho saltata"; se esci dopo la fascia pranzo senza averla registrata si scala la pausa minima ("non registrata"), dalle giornate del 2026-10-12 in poi |
 | Permesso a metà giornata | conta come coperto |
 | Pausa sigaretta | entro la tolleranza (11 min) non conta e resta tra le timbrature come "non conteggiata"; oltre vale permesso a blocchi di 30 min (15 min → 30 min, 42 min → 1h), le ore coperte non cambiano e non diventa mai pausa pranzo |
 | Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
