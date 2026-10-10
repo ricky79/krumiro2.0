@@ -182,6 +182,11 @@ export interface RisultatoGiornata {
   pausa: number;
   /** Minuti aggiunti alle pause concluse più brevi della pausa minima (inclusi in `pausa`). */
   pausaAggiuntaMinima: number;
+  /**
+   * Pausa minima scalata all'uscita perché obbligatoria e non registrata (inclusa in `pausa`);
+   * 0 se non scalata.
+   */
+  pausaAutomatica: number;
   permessoInizio: number;
   /** Permesso a inizio giornata inserito; `permessoInizio` è il valore a blocchi. */
   permessoInizioDichiarato: number;

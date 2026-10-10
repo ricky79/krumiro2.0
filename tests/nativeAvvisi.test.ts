@@ -58,7 +58,7 @@ describe('programmazione delle notifiche', () => {
       id: 1,
       channelId: 'avvisi',
       isExactNotification: true,
-      schedule: { at: new Date('2026-10-01T15:30:00Z'), allowWhileIdle: true }, // 17:30 a Roma
+      schedule: { at: new Date('2026-10-01T15:00:00Z'), allowWhileIdle: true }, // 17:00 a Roma (pausa minima inclusa)
     });
   });
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calcolaGiornata } from '../src/core/calcolo';
+import { INIZIO_PAUSA_OBBLIGATORIA } from '../src/core/pausaObbligatoria';
 import { dettaglioSigarettaNonConteggiata, testoPausa } from '../src/core/testi';
 import { giornata, h, impostazioni } from './helpers';
 
@@ -28,6 +29,11 @@ describe('testo della pausa nel riepilogo', () => {
   it('la pausa ricavata da un permesso sul pranzo conta come pausa', () => {
     const g = giornata([['ENTRATA', '08:30'], ['USCITA_PERMESSO', '12:00'], ['RIENTRO_PERMESSO', '14:30']]);
     expect(testoPausa(calcolaGiornata(g, imp, h('15:00')))).toEqual({ valore: '1h', nota: null });
+  });
+
+  it('la pausa obbligatoria scalata all\'uscita dice che non è registrata', () => {
+    const g = giornata([['ENTRATA', '08:30'], ['USCITA', '17:00']], { data: INIZIO_PAUSA_OBBLIGATORIA });
+    expect(testoPausa(calcolaGiornata(g, imp, null))).toEqual({ valore: '30 min', nota: 'non registrata' });
   });
 });
 

@@ -1,3 +1,4 @@
+import { INIZIO_PAUSA_OBBLIGATORIA, pausaObbligatoria } from './pausaObbligatoria';
 import { permessoABlocchi } from './permessi';
 import { permessoSigaretta } from './sigaretta';
 import { haTimbrature } from './giornata';
@@ -54,6 +55,8 @@ export function calcolaGiornata(
   let anticipata = false;
   let uscitaNormale = false;
   let pausaRegistrata = false;
+  /** Orario reale dell'uscita che chiude la giornata. */
+  let uscitaReale: number | null = null;
 
   const chiudi = (a: number, extra: Partial<Intervallo> = {}) => {
     if (aperto) {
@@ -88,10 +91,12 @@ export function calcolaGiornata(
       case 'USCITA':
         chiudi(t);
         uscitaNormale = true;
+        uscitaReale = e.minuti;
         break;
       case 'USCITA_ANTICIPATA':
         chiudi(t);
         anticipata = true;
+        uscitaReale = e.minuti;
         break;
     }
   }
@@ -192,8 +197,22 @@ export function calcolaGiornata(
   let permessoInizio = permessoABlocchi(permessoInizioDichiarato);
   eccedenza += permessoInizio - permessoInizioDichiarato;
 
+  // Pausa obbligatoria non fatta (né registrata né scalata da un permesso) e uscita dopo la fascia
+  // pranzo: si scala la pausa minima, così saltarla non fa guadagnare tempo.
+  const dovuti = minutiDovuti(giornata.data, imp);
+  const obbligatoria = pausaObbligatoria(dovuti);
+  const pausaAutomatica =
+    obbligatoria &&
+    giornata.data >= INIZIO_PAUSA_OBBLIGATORIA &&
+    uscitaReale !== null &&
+    uscitaReale > imp.pranzo.fine &&
+    !pausaRegistrata &&
+    pausaScalata === 0
+      ? imp.pausaMinima
+      : 0;
+
   // L'eccedenza si toglie solo dal lavoro che c'è: le coperte non superano mai il tempo trascorso.
-  const lavoroNetto = Math.max(0, lavoroLordo - penalitaPausa);
+  const lavoroNetto = Math.max(0, lavoroLordo - penalitaPausa - pausaAutomatica);
   const eccedenzaApplicata = Math.min(eccedenza, lavoroNetto);
   let nonAssorbita = eccedenza - eccedenzaApplicata;
   const riduci = (v: number) => {
@@ -208,7 +227,6 @@ export function calcolaGiornata(
   // 4. Totali. Uscita anticipata, o uscita normale con un permesso pianificato: il permesso in
   //    uscita è quello che manca davvero, a blocchi (l'eccedenza esce dalle lavorate rimaste,
   //    le coperte arrivano alle dovute).
-  const dovuti = minutiDovuti(giornata.data, imp);
   const pianificato =
     Number.isFinite(giornata.permessoUscitaMinuti) && giornata.permessoUscitaMinuti > 0
       ? giornata.permessoUscitaMinuti
@@ -235,8 +253,9 @@ export function calcolaGiornata(
   if (adesso !== null && analisi.stato === 'AL_LAVORO') {
     const ora = conta(adesso);
     uscitaPrevista = ora + (dovuti - coperti - pianificato);
-    if (!pausaFatta && ora < imp.pranzo.fine && uscitaPrevista > imp.pranzo.fine) {
-      uscitaPrevista += imp.pausaDaScalare;
+    // Pausa obbligatoria ancora da fare: a qualunque ora, se l'uscita cade dopo la fascia pranzo.
+    if (obbligatoria && !pausaFatta && uscitaPrevista > imp.pranzo.fine) {
+      uscitaPrevista += imp.pausaMinima;
       uscitaPrevistaConPausa = true;
     }
   } else if (adesso !== null && analisi.stato === 'IN_PAUSA') {
@@ -253,8 +272,9 @@ export function calcolaGiornata(
     problemi,
     dovuti,
     lavorati,
-    pausa: pausaRegistrataMin + pausaScalata,
+    pausa: pausaRegistrataMin + pausaScalata + pausaAutomatica,
     pausaAggiuntaMinima: penalitaPausa,
+    pausaAutomatica,
     permessoInizio,
     permessoInizioDichiarato,
     permessoIntermedio,
