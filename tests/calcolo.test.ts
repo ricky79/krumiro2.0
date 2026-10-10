@@ -115,7 +115,7 @@ describe('orario minimo 08:30', () => {
     const g = giornata([['ENTRATA', '08:00']]);
     const r = calcolaGiornata(g, imp, h('08:15'));
     expect(r.lavorati).toBe(0);
-    expect(uscita(r)).toBe('17:30'); // 08:30 + 8h + 1h di pausa prevista
+    expect(uscita(r)).toBe('17:00'); // 08:30 + 8h + 30 min di pausa minima
   });
 
   it('l\'orario minimo è configurabile', () => {
@@ -180,16 +180,16 @@ describe('pausa minima 30 min', () => {
 });
 
 describe('uscita prevista prima della pausa', () => {
-  it('include la pausa da scalare se l\'uscita cade dopo la fascia pranzo', () => {
+  it('include la pausa minima se l\'uscita cade dopo la fascia pranzo', () => {
     const g = giornata([['ENTRATA', '08:30']]);
     const r = calcolaGiornata(g, imp, h('10:00'));
-    expect(uscita(r)).toBe('17:30');
+    expect(uscita(r)).toBe('17:00');
     expect(r.uscitaPrevistaConPausa).toBe(true);
   });
 
-  it('test 2 prima della pausa: 10:30 con 2h di permesso → 17:30', () => {
+  it('test 2 prima della pausa: 10:30 con 2h di permesso → 17:00 (pausa minima)', () => {
     const g = giornata([['ENTRATA', '10:30']], { permessoInizio: 120 });
-    expect(uscita(calcolaGiornata(g, imp, h('10:30')))).toBe('17:30');
+    expect(uscita(calcolaGiornata(g, imp, h('10:30')))).toBe('17:00');
   });
 
   it('non aggiunge la pausa se si esce prima della fascia pranzo', () => {
@@ -199,11 +199,11 @@ describe('uscita prevista prima della pausa', () => {
     expect(r.uscitaPrevistaConPausa).toBe(false);
   });
 
-  it('non aggiunge la pausa se la fascia pranzo è già passata', () => {
+  it('aggiunge la pausa minima anche a fascia pranzo passata, se non è fatta', () => {
     const g = giornata([['ENTRATA', '10:00']]);
     const r = calcolaGiornata(g, imp, h('15:00'));
-    expect(uscita(r)).toBe('18:00');
-    expect(r.uscitaPrevistaConPausa).toBe(false);
+    expect(uscita(r)).toBe('18:30');
+    expect(r.uscitaPrevistaConPausa).toBe(true);
   });
 
   it('ore già completate: uscita prevista nel passato, saldo positivo', () => {
@@ -691,7 +691,7 @@ describe('permesso in uscita pianificato', () => {
 
   it('con la pausa ancora da fare la pausa si aggiunge dopo la sottrazione', () => {
     const r = calcolaGiornata(giornata([['ENTRATA', '08:30']], { permessoUscita: 30 }), imp, h('10:00'));
-    expect(uscita(r)).toBe('17:00');
+    expect(uscita(r)).toBe('16:30');
     expect(r.uscitaPrevistaConPausa).toBe(true);
   });
 

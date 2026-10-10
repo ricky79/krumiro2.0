@@ -1,6 +1,6 @@
 import { nuovoId } from '../core/id';
-import { pausaDaProporre } from '../core/pausaPranzo';
-import { formattaOra } from '../core/tempo';
+import { pausaDaProporre, pausaSaltabile } from '../core/pausaPranzo';
+import { formattaDurata, formattaOra } from '../core/tempo';
 import { store } from '../storage/store';
 import { toast } from './dialoghi';
 import { el } from './dom';
@@ -26,13 +26,20 @@ function rifiuta(data: string): void {
 
 /** Riquadro "Non hai registrato la pausa pranzo" per la giornata di oggi, o null se non serve. */
 export function riquadroPausaSaltata(data: string, adesso: number): HTMLElement | null {
-  if (rifiutata(data)) return null;
-  const p = pausaDaProporre(store.giornata(data), store.impostazioni, adesso);
+  const giornata = store.giornata(data);
+  // Pausa obbligatoria: niente "l'ho saltata", e un rifiuto di prima non vale.
+  const saltabile = pausaSaltabile(giornata, store.impostazioni);
+  if (saltabile && rifiutata(data)) return null;
+  const p = pausaDaProporre(giornata, store.impostazioni, adesso);
   if (!p) return null;
+  const orari = `dalle ${formattaOra(p.inizio)} alle ${formattaOra(p.fine)}`;
+  const testo = saltabile
+    ? `Non hai registrato la pausa pranzo: la aggiungo ${orari}?`
+    : `La pausa pranzo è obbligatoria e non l'hai registrata: la aggiungo ${orari}? Se non la aggiungi, all'uscita conto ${formattaDurata(store.impostazioni.pausaMinima)} di pausa.`;
   const riquadro = el(
     'div',
     { class: 'scheda avviso-pausa', role: 'status' },
-    el('p', {}, `Non hai registrato la pausa pranzo: la aggiungo dalle ${formattaOra(p.inizio)} alle ${formattaOra(p.fine)}?`),
+    el('p', {}, testo),
     el(
       'div',
       { class: 'riga-pulsanti' },
@@ -53,18 +60,20 @@ export function riquadroPausaSaltata(data: string, adesso: number): HTMLElement 
         },
         'Aggiungi pausa',
       ),
-      el(
-        'button',
-        {
-          type: 'button',
-          class: 'btn btn-secondario',
-          onclick: () => {
-            rifiuta(data);
-            riquadro.remove();
-          },
-        },
-        'No, l\'ho saltata',
-      ),
+      saltabile
+        ? el(
+            'button',
+            {
+              type: 'button',
+              class: 'btn btn-secondario',
+              onclick: () => {
+                rifiuta(data);
+                riquadro.remove();
+              },
+            },
+            'No, l\'ho saltata',
+          )
+        : null,
     ),
   );
   return riquadro;

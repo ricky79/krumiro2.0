@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pausaDaProporre } from '../src/core/pausaPranzo';
+import { pausaDaProporre, pausaSaltabile } from '../src/core/pausaPranzo';
 import { giornata, h, impostazioni } from './helpers';
 
 const imp = impostazioni();
@@ -61,5 +61,19 @@ describe('pausa pranzo da proporre', () => {
 
   it('per le giornate passate non propone nulla', () => {
     expect(pausaDaProporre(mattina(), imp, null)).toBeNull();
+  });
+});
+
+describe('pausa saltabile', () => {
+  const conDovuti = (perGiorno: (number | null)[]) => impostazioni({ minutiDovuti: { predefinito: 480, perGiorno } });
+
+  it('con almeno 6 ore dovute la pausa è obbligatoria e non si può saltare', () => {
+    expect(pausaSaltabile(mattina(), imp)).toBe(false);
+    // Giovedì da 6h esatte: ancora obbligatoria.
+    expect(pausaSaltabile(mattina(), conDovuti([0, null, null, null, 360, null, 0]))).toBe(false);
+  });
+
+  it('sotto le 6 ore dovute si può saltare', () => {
+    expect(pausaSaltabile(mattina(), conDovuti([0, null, null, null, 359, null, 0]))).toBe(true);
   });
 });
