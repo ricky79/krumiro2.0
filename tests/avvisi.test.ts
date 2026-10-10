@@ -13,8 +13,8 @@ function conAvvisi(modifiche: Partial<typeof imp.avvisi>) {
 }
 
 describe('avviso di uscita prevista', () => {
-  it('al lavoro prima della pausa: include la pausa pranzo', () => {
-    expect(piano(giornata([['ENTRATA', '08:30']]), '09:00')).toEqual(['uscita 17:30']);
+  it('al lavoro prima della pausa: include la pausa minima', () => {
+    expect(piano(giornata([['ENTRATA', '08:30']]), '09:00')).toEqual(['uscita 17:00']);
   });
 
   it('dopo la pausa: uscita prevista dalle timbrature', () => {
@@ -34,7 +34,7 @@ describe('avviso di uscita prevista', () => {
 
   it('tiene conto del permesso a inizio giornata', () => {
     const g = giornata([['ENTRATA', '10:30']], { permessoInizio: 120 });
-    expect(piano(g, '10:30')).toEqual(['uscita 17:30']);
+    expect(piano(g, '10:30')).toEqual(['uscita 17:00']);
   });
 
   it('disattivato nelle impostazioni', () => {

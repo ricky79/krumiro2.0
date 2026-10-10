@@ -34,10 +34,10 @@ describe('CSV', () => {
     expect(csv.startsWith('\uFEFF')).toBe(true);
     const righe = csv.slice(1).trimEnd().split('\r\n');
     expect(righe[0]).toBe(
-      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Luogo;Eventi',
+      'Data;Giorno;Ore dovute;Ore lavorate;Ore permesso;Saldo;Stato;Permesso inizio giornata (min);Permesso in uscita (min);Luogo;Ferie;Eventi',
     );
     expect(righe[1]).toBe(
-      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;Sede;10:30 Entrata, 12:30 Inizio pausa pranzo, 13:30 Fine pausa pranzo, 17:45 Uscita',
+      '2026-10-01;Giovedì;8,00;6,25;2,00;0,25;Giornata chiusa;120;0;Sede;;10:30 Entrata, 12:30 Inizio pausa pranzo, 13:30 Fine pausa pranzo, 17:45 Uscita',
     );
     expect(righe[2]).toContain('14:30 Rientro da permesso (pausa 45)');
   });
@@ -60,12 +60,22 @@ describe('CSV', () => {
     const d = dati();
     d['2026-10-02']!.luogo = 'smart';
     const csv = esportaCsv(d, imp, oggi);
-    expect(csv).toContain(';Smart;08:30 Entrata');
+    expect(csv).toContain(';Smart;;08:30 Entrata');
     const i = importaCsv(csv);
     expect(i['2026-10-02']!.luogo).toBe('smart');
     expect(i['2026-10-01']!.luogo).toBe('sede');
     // CSV di versioni precedenti, senza la colonna: tutto in sede.
     expect(importaCsv('Data;Eventi\r\n2026-10-02;08:30 Entrata\r\n')['2026-10-02']!.luogo).toBeUndefined();
+  });
+
+  it('le ferie si esportano e si reimportano', () => {
+    const d = dati();
+    d['2026-10-07'] = { ...giornata([], { data: '2026-10-07' }), ferie: true };
+    const csv = esportaCsv(d, imp, oggi);
+    expect(csv).toContain('2026-10-07;Mercoledì;8,00;0,00;0,00;0,00;Ferie;0;0;Sede;Sì;');
+    const i = importaCsv(csv);
+    expect(i['2026-10-07']!.ferie).toBe(true);
+    expect(i['2026-10-01']!.ferie).toBeUndefined();
   });
 
   it('giornata con solo il permesso in uscita: esportata e reimportata', () => {

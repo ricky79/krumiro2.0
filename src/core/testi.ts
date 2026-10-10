@@ -3,19 +3,23 @@ import { formattaDurata } from './tempo';
 import type { RisultatoGiornata, SigarettaNonConteggiata } from './tipi';
 
 export function statoLeggibile(r: RisultatoGiornata): string {
-  return r.daCorreggere ? 'Da correggere' : ETICHETTE_STATO[r.stato];
+  if (r.daCorreggere) return 'Da correggere';
+  return r.ferie > 0 ? 'Ferie' : ETICHETTE_STATO[r.stato];
 }
 
 /**
- * Pausa per il riepilogo: il valore conteggiato ("—" se non c'è) e, se è scattata la pausa minima,
- * una nota con quella fatta davvero ("fatta 20 min").
+ * Pausa per il riepilogo: il valore conteggiato ("—" se non c'è) e una nota se è scattata la pausa
+ * minima ("fatta 20 min") o se la pausa obbligatoria è stata scalata all'uscita ("non registrata").
  */
 export function testoPausa(r: RisultatoGiornata): { valore: string; nota: string | null } {
   if (r.pausa <= 0) return { valore: '—', nota: null };
-  return {
-    valore: formattaDurata(r.pausa),
-    nota: r.pausaAggiuntaMinima > 0 ? `fatta ${formattaDurata(r.pausa - r.pausaAggiuntaMinima)}` : null,
-  };
+  const nota =
+    r.pausaAutomatica > 0
+      ? 'non registrata'
+      : r.pausaAggiuntaMinima > 0
+        ? `fatta ${formattaDurata(r.pausa - r.pausaAggiuntaMinima)}`
+        : null;
+  return { valore: formattaDurata(r.pausa), nota };
 }
 
 /** Dettaglio della pausa sigaretta non conteggiata nelle timbrature ("7 min · non conteggiata"). */

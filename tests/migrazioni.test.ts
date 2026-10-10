@@ -109,6 +109,15 @@ describe('migrazioni', () => {
     expect(sigarette('tante')).toBeUndefined();
   });
 
+  it('ferie della giornata: conservate solo se valgono true', () => {
+    const ferie = (v: unknown) =>
+      migra({ version: 1, giornate: { '2026-10-01': { data: '2026-10-01', permessoInizioMinuti: 0, ferie: v, eventi: [] } } })
+        .giornate['2026-10-01']!.ferie;
+    expect(ferie(true)).toBe(true);
+    expect(ferie(undefined)).toBeUndefined();
+    expect(ferie('si')).toBeUndefined();
+  });
+
   it('posizione dell\'ufficio: predefinita assente, coordinate non valide scartate', () => {
     const ufficio = (v: unknown) => migra({ version: 1, impostazioni: { ufficio: v } }).impostazioni.ufficio;
     expect(migra({}).impostazioni.ufficio).toBeNull();

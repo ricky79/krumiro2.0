@@ -109,7 +109,8 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   (Entrata → Inizio pausa pranzo → Fine pausa pranzo → Uscita). Sotto trovi le azioni secondarie:
   *Pausa sigaretta*, *Esco in permesso*, *Rientro da permesso*, *Uscita anticipata*, *Entro dopo*
   (permesso a inizio giornata). In alto vedi l'**uscita prevista**, le ore coperte, il saldo e la
-  durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima).
+  durata della **pausa pranzo** (con quella fatta davvero, se è più corta della pausa minima, o
+  "non registrata" se è obbligatoria e l'hai saltata).
 - **Pausa sigaretta**: registra un'uscita e apre una schermata con il conto alla rovescia e una
   sigaretta che si consuma (normale o elettronica, a scelta). Negli ultimi 30 secondi lo schermo
   lampeggia di rosso; allo scadere la sigaretta finisce nel posacenere e lo sfondo resta rosso.
@@ -130,6 +131,11 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
   riquadro che propone di aggiungerla (30 min, 12:15–12:45).
 - Tocca una timbratura nella timeline per **modificarla o eliminarla**. Con
   *+ Aggiungi timbratura* puoi inserirne una a mano, per esempio se l'hai dimenticata.
+- **Ferie**: un giorno libero si segna dalla giornata ("🏖️ In ferie questo giorno", se non hai
+  ancora timbrato); più giorni, anche futuri, dallo Storico con *🏖️ Ferie* (Dal/Al, propone la
+  prossima settimana da lunedì a venerdì; salta i giorni senza ore dovute e quelli già timbrati).
+  Un giorno di ferie copre le ore dovute (saldo zero), Oggi mostra 🏖️ al posto dei bottoni e il
+  riepilogo del mese conta giorni e ore di ferie. Il CSV ha la colonna *Ferie*.
 - **Casa o ufficio**: in alto a destra della giornata un controllo con 🏠 (da casa, smart working) e
   🏢 (in sede, il predefinito). Si può cambiare anche per i giorni passati; non cambia il
   calcolo delle ore. Nello Storico i giorni da casa hanno 🏠 e il riepilogo conta i giorni
@@ -161,12 +167,13 @@ un'altra chiave (per esempio una build di prova). Fai il backup JSON, disinstall
 | Ore dovute | 8h lun–ven, 0 sab–dom (configurabili per giorno) |
 | Ore coperte | ore lavorate + ore di permesso |
 | Saldo | coperte − dovute |
-| Uscita prevista (al lavoro) | adesso + (dovute − coperte); se la pausa non è ancora fatta e l'uscita cade dopo la fascia pranzo, si aggiunge la pausa da scalare |
+| Uscita prevista (al lavoro) | adesso + (dovute − coperte); se la pausa è obbligatoria, non è ancora fatta e l'uscita cade dopo la fascia pranzo, si aggiunge la pausa minima (a qualunque ora) |
 | Timbrature prima delle 08:30 | contano come 08:30 (in tutti i calcoli) |
 | Pausa più breve di 30 min | conta come 30 min (in tutti i calcoli) |
 | Pausa pranzo | non conta come coperta |
+| Pausa pranzo obbligatoria | con almeno 6h **dovute** (da Impostazioni, prima dei permessi: decisione del 2026-10-09, rivedibile); niente "No, l'ho saltata"; se esci dopo la fascia pranzo senza averla registrata si scala la pausa minima ("non registrata"), dalle giornate del 2026-10-12 in poi |
 | Permesso a metà giornata | conta come coperto |
-| Pausa sigaretta | entro la tolleranza (11 min) viene cancellata; oltre vale permesso a blocchi di 30 min (15 min → 30 min, 42 min → 1h), le ore coperte non cambiano e non diventa mai pausa pranzo |
+| Pausa sigaretta | entro la tolleranza (11 min) non conta e resta tra le timbrature come "non conteggiata"; oltre vale permesso a blocchi di 30 min (15 min → 30 min, 42 min → 1h), le ore coperte non cambiano e non diventa mai pausa pranzo |
 | Uscita anticipata | le ore mancanti diventano permesso, a blocchi di 30 min (saldo 0) |
 | Permessi | ogni permesso vale un multiplo di 30 min (1h23 → 1h30); i minuti in più non contano come lavorate, il saldo non cambia |
 | Permesso in uscita pianificato | anticipa l'uscita prevista; all'uscita conta il permesso che manca davvero, a blocchi di 30 min |

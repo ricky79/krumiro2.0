@@ -86,8 +86,10 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: [
         'Servono per la pausa pranzo, che non conta come ore coperte.',
         `Se la pausa dura meno di ${pausaMin}, viene comunque conteggiata come ${pausaMin}.`,
-        'Finché non hai fatto la pausa, l\'uscita prevista la include già (te lo segnala la scritta "inclusa pausa pranzo").',
-        `Se a fine fascia pranzo non hai registrato la pausa, in Oggi compare un riquadro che propone di aggiungerla (${pausaProposta}); con "No, l'ho saltata" non te lo chiede più quel giorno.`,
+        'Con almeno 6 ore dovute nella giornata (quelle in Impostazioni, anche se prendi un permesso) la pausa pranzo è obbligatoria per legge e non si può saltare.',
+        `Finché non hai fatto la pausa, l'uscita prevista include già ${pausaMin} di pausa, a qualunque ora (te lo segnala la scritta "inclusa pausa pranzo"). Non serve se esci entro la fine della fascia pranzo (${fineFascia}).`,
+        `Se a fine fascia pranzo non hai registrato la pausa, in Oggi compare un riquadro che propone di aggiungerla (${pausaProposta}). Se esci senza averla registrata, il calcolo toglie comunque ${pausaMin} di pausa dalle ore lavorate e nel riepilogo leggi "non registrata".`,
+        'Solo nelle giornate con meno di 6 ore dovute il riquadro offre anche "No, l\'ho saltata", che non te lo chiede più quel giorno.',
       ],
     },
     {
@@ -195,6 +197,17 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       testo: ['Elimina l\'ultima uscita (normale o anticipata) e riporta la giornata allo stato "Al lavoro". Utile se hai timbrato l\'uscita per sbaglio.'],
     },
     {
+      id: 'ferie',
+      sezione: 'I bottoni',
+      domanda: 'Ferie: un giorno libero o una settimana intera',
+      testo: [
+        '• Un giorno solo: apri la giornata (Oggi, o un giorno dallo Storico) e, se non hai ancora timbrato, tocca "🏖️ In ferie questo giorno".',
+        '• Più giorni, anche in anticipo: nello Storico tocca "🏖️ Ferie", scegli Dal e Al (propone la prossima settimana, da lunedì a venerdì) e tocca "Segna le ferie". I giorni senza ore dovute, come sabato e domenica, vengono saltati; quelli in cui hai già timbrato restano com\'erano.',
+        'Un giorno di ferie copre le ore dovute: il saldo resta a zero e Oggi mostra 🏖️ al posto dei bottoni. Nello Storico il giorno ha "🏖️ Ferie" e il riepilogo del mese conta i giorni e le ore di ferie. Puoi andare avanti anche nei mesi futuri in cui hai segnato delle ferie.',
+        'Per toglierle: "Togli le ferie" nella giornata, oppure lo stesso foglio dello Storico con "Togli le ferie" sulle date scelte. Se segni le ferie e poi timbri, la giornata risulta da correggere finché non togli le une o le altre.',
+      ],
+    },
+    {
       id: 'smart',
       sezione: 'I bottoni',
       domanda: 'Casa o ufficio: segnare lo smart working',
@@ -241,7 +254,7 @@ export function vociAiuto(imp: Impostazioni): VoceAiuto[] {
       domanda: 'Come viene calcolata l\'uscita prevista?',
       testo: [
         'Uscita prevista = adesso + (ore dovute − ore coperte).',
-        `Se non hai ancora fatto la pausa e l'uscita cadrebbe dopo la fascia pranzo (${pranzo}), vengono aggiunti ${scalare} di pausa.`,
+        `Se la pausa pranzo è obbligatoria (almeno 6 ore dovute), non l'hai ancora fatta e l'uscita cadrebbe dopo la fascia pranzo (${pranzo}), vengono aggiunti ${pausaMin} di pausa minima, a qualunque ora.`,
         'Quando l\'orario supera l\'uscita prevista compare "Ore completate alle…": da lì in poi è straordinario.',
         'Se hai inserito un permesso in uscita, l\'uscita prevista si anticipa di quella durata.',
       ],

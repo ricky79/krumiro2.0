@@ -1,4 +1,5 @@
-import { calcolaGiornata } from './calcolo';
+import { calcolaGiornata, minutiDovuti } from './calcolo';
+import { pausaObbligatoria } from './pausaObbligatoria';
 import { analizzaGiornata } from './statoGiornata';
 import type { Giornata, Impostazioni } from './tipi';
 
@@ -34,4 +35,9 @@ export function pausaDaProporre(
     ],
   };
   return analizzaGiornata(conPausa).idScartati.size === 0 ? { inizio, fine } : null;
+}
+
+/** "No, l'ho saltata" si offre solo se la pausa non è obbligatoria (meno di 6 ore dovute). */
+export function pausaSaltabile(giornata: Giornata, imp: Impostazioni): boolean {
+  return !pausaObbligatoria(minutiDovuti(giornata.data, imp));
 }
